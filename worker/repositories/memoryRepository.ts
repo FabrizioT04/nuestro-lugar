@@ -174,6 +174,23 @@ export function createMemoryRepository(db: D1Database) {
       };
     },
 
+    /** Recuerdos que alguno de los dos marcó como favorito (isFavorite es el de quien pregunta). */
+    async listCoupleFavorites(userId: string, relationshipId: string, limit: number): Promise<MemorySummary[]> {
+      const { results } = await db
+        .prepare(
+          `SELECT ${SUMMARY_COLUMNS} FROM memories m ${COVER_JOIN}
+           WHERE m.relationship_id = ?2 AND m.deleted_at IS NULL
+             AND EXISTS (
+               SELECT 1 FROM favorites f JOIN relationship_members rm ON rm.user_id = f.user_id AND rm.relationship_id = ?2
+               WHERE f.entity_type = 'memory' AND f.entity_id = m.id)
+           ORDER BY m.happened_on DESC, m.created_at DESC
+           LIMIT ?3`,
+        )
+        .bind(userId, relationshipId, limit)
+        .all<SummaryRow>();
+      return results.map(toSummary);
+    },
+
     async exists(relationshipId: string, memoryId: string): Promise<boolean> {
       const row = await db
         .prepare("SELECT 1 AS found FROM memories WHERE id = ?1 AND relationship_id = ?2 AND deleted_at IS NULL")

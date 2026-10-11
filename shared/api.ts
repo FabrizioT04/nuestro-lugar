@@ -196,3 +196,67 @@ export interface PlanDetail extends PlanSummary {
   author: { id: string; displayName: string };
   updatedAt: string;
 }
+
+export type ImportantDateTypeName = "anniversary" | "birthday" | "first_time" | "trip" | "custom";
+
+export interface ImportantDate {
+  id: string;
+  title: string;
+  type: ImportantDateTypeName;
+  /** Fecha original (YYYY-MM-DD). */
+  eventDate: string;
+  recursYearly: boolean;
+  emoji: string;
+  notes: string | null;
+  /** Próxima vez que toca (hoy incluido); null si no se repite y ya pasó. */
+  nextDate: string | null;
+  daysUntil: number | null;
+  /** Años que se cumplen en nextDate (solo si se repite). */
+  years: number | null;
+}
+
+export interface UsStats {
+  daysTogether: number;
+  memories: number;
+  photos: number;
+  /** Lugares distintos de recuerdos y planes realizados. */
+  places: number;
+  plansDone: number;
+  /** Cartas ya abiertas (las bloqueadas o sorpresa no cuentan). */
+  lettersOpened: number;
+  /** Recuerdos que alguno de los dos marcó como favorito. */
+  favorites: number;
+}
+
+export interface UsResponse {
+  relationship: RelationshipSummary;
+  today: string;
+  together: { days: number; years: number; months: number };
+  stats: UsStats;
+  /** El aniversario de la relación (calculado, no editable). */
+  anniversary: UpcomingMoment;
+  importantDates: ImportantDate[];
+  /** Favoritos de cualquiera de los dos, los más recientes primero. */
+  favorites: MemorySummary[];
+}
+
+export type TimelineEventKind = "start" | "anniversary" | "memory" | "plan" | "date";
+
+export interface TimelineEvent {
+  /** Estable para React: tipo + id de origen. */
+  key: string;
+  kind: TimelineEventKind;
+  date: string; // YYYY-MM-DD
+  title: string;
+  subtitle: string | null;
+  emoji: string;
+  /** Ruta de la app a la que lleva, o null. */
+  link: string | null;
+  cover: PhotoRef | null;
+}
+
+export interface TimelineResponse {
+  today: string;
+  /** Del más antiguo al más reciente. */
+  events: TimelineEvent[];
+}

@@ -224,3 +224,33 @@ export type PlanInput = z.infer<typeof planInputSchema>;
 export const planCreateSchema = z.intersection(planInputSchema, z.object({ id: uuid.optional() }));
 
 export const planStatusSchema = z.object({ status: z.enum(PLAN_STATUSES, "Estado inválido") });
+
+// ---------------------------------------------------------------------------
+// Fechas importantes
+// ---------------------------------------------------------------------------
+
+export const IMPORTANT_DATE_TYPES = ["anniversary", "birthday", "first_time", "trip", "custom"] as const;
+export type ImportantDateType = (typeof IMPORTANT_DATE_TYPES)[number];
+
+export const importantDateInputSchema = z.object({
+  title: z.string().trim().min(1, "Ponle un nombre").max(120, "Máximo 120 caracteres"),
+  type: z.enum(IMPORTANT_DATE_TYPES, "Tipo de fecha inválido"),
+  eventDate: isoDate,
+  recursYearly: z.boolean().default(true),
+  /** Un emoji opcional (si no, se usa el del tipo). */
+  emoji: z
+    .string()
+    .trim()
+    .max(16, "Usa un solo emoji")
+    .refine((value) => value === "" || /^\p{Extended_Pictographic}/u.test(value), "Usa un emoji")
+    .nullable()
+    .optional()
+    .transform((value) => (value ? value : null)),
+  notes: optionalText(500),
+});
+
+export type ImportantDateInput = z.infer<typeof importantDateInputSchema>;
+/** Lo que envía el formulario (antes de aplicar valores por defecto y transformaciones). */
+export type ImportantDatePayload = z.input<typeof importantDateInputSchema>;
+
+export const importantDateCreateSchema = importantDateInputSchema.extend({ id: uuid.optional() });

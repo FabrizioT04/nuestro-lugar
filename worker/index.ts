@@ -10,6 +10,7 @@ import { meRoutes } from "./routes/me";
 import { mediaRoutes } from "./routes/media";
 import { memoryRoutes } from "./routes/memories";
 import { planRoutes } from "./routes/plans";
+import { importantDateRoutes, usRoutes } from "./routes/us";
 import { relationshipRoutes } from "./routes/relationship";
 
 // Punto de entrada del Worker. Solo recibe /api/* (ver `run_worker_first` en wrangler.jsonc);
@@ -31,6 +32,8 @@ app.route("/home", homeRoutes);
 app.route("/memories", memoryRoutes);
 app.route("/letters", letterRoutes);
 app.route("/plans", planRoutes);
+app.route("/us", usRoutes);
+app.route("/important-dates", importantDateRoutes);
 app.route("/media", mediaRoutes);
 app.route("/relationship", relationshipRoutes);
 

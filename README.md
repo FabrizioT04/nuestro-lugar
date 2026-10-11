@@ -99,6 +99,17 @@ En local no hace falta crear nada: `npm run dev` simula R2 dentro de `.wrangler/
   fotos y queda enlazado al plan (pulsar otra vez abre el mismo recuerdo, no crea otro).
 - Los planes pendientes con fecha aparecen en "Próximo momento" del inicio.
 
+## Nosotros y línea de tiempo
+
+- Resumen con contadores reales: días juntos, recuerdos, fotos, lugares, planes realizados,
+  cartas abiertas y favoritos. No hay puntajes ni porcentajes.
+- Las cartas sorpresa o programadas solo cuentan cuando ya se abrieron, así el contador no delata nada.
+- Fechas importantes (cumpleaños, primera vez, viaje, aniversario u otra), con emoji y notas.
+  Las que se repiten cada año tienen cuenta regresiva y entran en "Próximo momento" del inicio.
+- "Nuestra historia" junta, del más antiguo al más nuevo: el día que empezaron, cada aniversario
+  cumplido, los recuerdos, los planes realizados que no se guardaron como recuerdo y las fechas
+  importantes ya pasadas (sin cumpleaños). Todo se calcula en la zona horaria de la pareja.
+
 ## Variables
 
 | Nombre | Fase | Dónde |
