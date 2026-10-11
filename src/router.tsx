@@ -12,6 +12,8 @@ import { IntroPage } from "@/pages/IntroPage";
 import { SetupPage } from "@/pages/SetupPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { LettersPage } from "@/pages/LettersPage";
+import { LetterDetailPage } from "@/pages/LetterDetailPage";
+import { LetterFormPage } from "@/pages/LetterFormPage";
 import { DiscoverPage } from "@/pages/DiscoverPage";
 import { FuturePage } from "@/pages/FuturePage";
 
@@ -36,6 +38,9 @@ export const router = createBrowserRouter([
           { path: "planes", element: <PlansPage /> },
           { path: "perfil", element: <ProfilePage /> },
           { path: "cartas", element: <LettersPage /> },
+          { path: "cartas/nueva", element: <LetterFormPage /> },
+          { path: "cartas/:id", element: <LetterDetailPage /> },
+          { path: "cartas/:id/editar", element: <LetterFormPage /> },
           { path: "descubrir", element: <DiscoverPage /> },
           { path: "futuro", element: <FuturePage /> },
           { path: "*", element: <NotFoundPage /> },

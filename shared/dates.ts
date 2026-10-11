@@ -76,3 +76,50 @@ export function elapsedParts(from: string, to: string): { years: number; months:
 
   return { years: Math.floor(totalMonths / 12), months: totalMonths % 12, days: daysBetween(anchor, to) };
 }
+
+// ---------------------------------------------------------------------------
+// Fecha y hora "de pared" en una zona horaria ↔ instante UTC
+// ---------------------------------------------------------------------------
+
+function wallClockParts(instant: number, timezone: string) {
+  const values: Record<string, string> = {};
+  for (const part of new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(new Date(instant))) {
+    values[part.type] = part.value;
+  }
+  return {
+    date: `${values.year}-${values.month}-${values.day}`,
+    time: `${values.hour}:${values.minute}`,
+  };
+}
+
+/** Diferencia (ms) entre la hora local de `timezone` y UTC en ese instante. */
+function offsetAt(instant: number, timezone: string): number {
+  const { date, time } = wallClockParts(instant, timezone);
+  const [h, min] = time.split(":").map(Number);
+  return toUtc(date) + (h ?? 0) * 3_600_000 + (min ?? 0) * 60_000 - Math.floor(instant / 60_000) * 60_000;
+}
+
+/**
+ * "2027-02-01" a las "09:00" en America/Lima → instante UTC (Date).
+ * Si la hora no existe por un cambio de horario (02:30 al adelantar el reloj), se ajusta una hora.
+ */
+export function zonedTimeToUtc(date: string, time: string, timezone: string): Date {
+  const [h, min] = time.split(":").map(Number);
+  const asIfUtc = toUtc(date) + (h ?? 0) * 3_600_000 + (min ?? 0) * 60_000;
+  const firstGuess = asIfUtc - offsetAt(asIfUtc, timezone);
+  const secondOffset = offsetAt(firstGuess, timezone);
+  return new Date(asIfUtc - secondOffset);
+}
+
+/** Instante UTC → fecha (YYYY-MM-DD) y hora (HH:MM) en la zona indicada. */
+export function utcToZoned(iso: string, timezone: string): { date: string; time: string } {
+  return wallClockParts(Date.parse(iso), timezone);
+}

@@ -34,9 +34,11 @@
   // Crear con `npx wrangler r2 bucket create nuestro-lugar-media`.
   "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "nuestro-lugar-media" }],
 
-  // Límite de subidas por usuario (protege el bucket ante un bucle o un abuso).
+  // Límites por usuario: subidas de fotos y escrituras (crear, editar, borrar).
+  // Protegen D1 y R2 ante un bucle del cliente o un abuso.
   "ratelimits": [
-    { "name": "UPLOAD_LIMITER", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } }
+    { "name": "UPLOAD_LIMITER", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } },
+    { "name": "WRITE_LIMITER", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } }
   ]
 
   // Fase 11 (IA):

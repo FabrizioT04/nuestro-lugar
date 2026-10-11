@@ -3,6 +3,7 @@ import { daysBetween, elapsedParts, nextYearlyOccurrence, todayIn } from "@share
 import type { AuthenticatedUser } from "../auth/types";
 import type { Bindings } from "../env";
 import { createHomeRepository, type ImportantDateRow } from "../repositories/homeRepository";
+import { countUnopenedLetters } from "./letterService";
 import { createRelationshipRepository } from "../repositories/relationshipRepository";
 import { notFound } from "../utils/errors";
 
@@ -32,10 +33,11 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
   if (!user.relationshipId) throw notFound("Relación no configurada");
 
   const homeRepository = createHomeRepository(env.DB);
-  const [relationship, importantDates, highlightedMemory] = await Promise.all([
+  const [relationship, importantDates, highlightedMemory, unopenedLetters] = await Promise.all([
     createRelationshipRepository(env.DB).findSummary(user.relationshipId),
     homeRepository.listImportantDates(user.relationshipId),
     homeRepository.findHighlightedMemory(user.relationshipId),
+    countUnopenedLetters(env, user),
   ]);
   if (!relationship) throw notFound("Relación no encontrada");
 
@@ -55,5 +57,6 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
     together: { days: daysBetween(relationship.startedOn, today), years, months },
     nextMoment: candidates[0] ?? null,
     highlightedMemory,
+    unopenedLetters,
   };
 }

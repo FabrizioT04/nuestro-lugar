@@ -113,3 +113,58 @@ export const memoryListQuerySchema = z.object({
 export const favoriteSchema = z.object({ favorite: z.boolean() });
 
 export const coverSchema = z.object({ mediaId: uuid.nullable() });
+
+// ---------------------------------------------------------------------------
+// Cartas
+// ---------------------------------------------------------------------------
+
+/**
+ * normal: se puede abrir ya · open_when: "Ábreme cuando…", se abre cuando la otra persona quiera
+ * scheduled: bloqueada (pero visible) hasta la fecha · surprise: invisible para la otra persona hasta la fecha
+ */
+export const LETTER_TYPES = ["normal", "open_when", "scheduled", "surprise"] as const;
+export type LetterType = (typeof LETTER_TYPES)[number];
+
+export const letterTypeNeedsDate = (type: LetterType) => type === "scheduled" || type === "surprise";
+
+export const MAX_LETTER_LENGTH = 20_000;
+
+const clockTime = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Hora inválida");
+
+export const letterInputSchema = z
+  .object({
+    type: z.enum(LETTER_TYPES, "Tipo de carta inválido"),
+    title: z.string().trim().min(1, "Ponle un título").max(200, "Máximo 200 caracteres"),
+    body: z
+      .string()
+      .trim()
+      .min(1, "La carta está vacía")
+      .max(MAX_LETTER_LENGTH, `Máximo ${MAX_LETTER_LENGTH} caracteres`),
+    /** Lo que completa "Ábreme cuando…" (solo para open_when). */
+    openWhenLabel: optionalText(80),
+    /** Fecha y hora de apertura en la zona horaria de la pareja (solo scheduled y surprise). */
+    unlockOn: isoDate.nullable().optional().transform((value) => value ?? null),
+    unlockTime: clockTime.default("00:00"),
+  })
+  .superRefine((value, ctx) => {
+    if (value.type === "open_when" && !value.openWhenLabel) {
+      ctx.addIssue({ code: "custom", path: ["openWhenLabel"], message: "Completa “Ábreme cuando…”" });
+    }
+    if (letterTypeNeedsDate(value.type) && !value.unlockOn) {
+      ctx.addIssue({ code: "custom", path: ["unlockOn"], message: "Elige cuándo se podrá abrir" });
+    }
+  })
+  // Los campos que no aplican al tipo se descartan en lugar de guardarse a medias.
+  .transform((value) => ({
+    ...value,
+    openWhenLabel: value.type === "open_when" ? value.openWhenLabel : null,
+    unlockOn: letterTypeNeedsDate(value.type) ? value.unlockOn : null,
+  }));
+
+export type LetterInput = z.infer<typeof letterInputSchema>;
+
+export const letterCreateSchema = z.intersection(letterInputSchema, z.object({ id: uuid.optional() }));
+
+export const letterListQuerySchema = z.object({
+  box: z.enum(["received", "sent"]).default("received"),
+});

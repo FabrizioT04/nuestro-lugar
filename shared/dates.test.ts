@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysBetween, elapsedParts, nextYearlyOccurrence, todayIn } from "./dates";
+import { daysBetween, elapsedParts, nextYearlyOccurrence, todayIn, utcToZoned, zonedTimeToUtc } from "./dates";
 
 describe("todayIn", () => {
   it("usa la zona horaria, no la del servidor", () => {
@@ -43,5 +43,24 @@ describe("elapsedParts", () => {
     expect(elapsedParts("2026-02-01", "2026-10-11")).toEqual({ years: 0, months: 8, days: 10 });
     expect(elapsedParts("2023-11-20", "2026-10-11")).toEqual({ years: 2, months: 10, days: 21 });
     expect(elapsedParts("2026-01-31", "2026-03-01")).toEqual({ years: 0, months: 1, days: 1 });
+  });
+});
+
+describe("zonedTimeToUtc", () => {
+  it("convierte la hora local de la pareja a UTC", () => {
+    expect(zonedTimeToUtc("2027-02-01", "00:00", "America/Lima").toISOString()).toBe("2027-02-01T05:00:00.000Z");
+    expect(zonedTimeToUtc("2027-07-01", "09:30", "Europe/Madrid").toISOString()).toBe("2027-07-01T07:30:00.000Z");
+    expect(zonedTimeToUtc("2027-01-01", "09:30", "Europe/Madrid").toISOString()).toBe("2027-01-01T08:30:00.000Z");
+  });
+  it("respeta el cambio de horario", () => {
+    // Nueva York adelanta el reloj el 14/03/2027 a las 02:00; las 02:30 no existen.
+    expect(zonedTimeToUtc("2027-03-14", "01:30", "America/New_York").toISOString()).toBe("2027-03-14T06:30:00.000Z");
+    expect(zonedTimeToUtc("2027-03-14", "03:30", "America/New_York").toISOString()).toBe("2027-03-14T07:30:00.000Z");
+    const gap = zonedTimeToUtc("2027-03-14", "02:30", "America/New_York").toISOString();
+    expect(["2027-03-14T06:30:00.000Z", "2027-03-14T07:30:00.000Z"]).toContain(gap);
+  });
+  it("ida y vuelta con utcToZoned", () => {
+    const utc = zonedTimeToUtc("2026-12-31", "23:45", "Asia/Tokyo").toISOString();
+    expect(utcToZoned(utc, "Asia/Tokyo")).toEqual({ date: "2026-12-31", time: "23:45" });
   });
 });

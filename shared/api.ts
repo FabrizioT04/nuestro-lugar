@@ -85,6 +85,8 @@ export interface HomeResponse {
   together: { days: number; years: number; months: number };
   nextMoment: UpcomingMoment | null;
   highlightedMemory: HighlightedMemory | null;
+  /** Cartas recibidas que ya se pueden abrir y todavía no se abrieron. */
+  unopenedLetters: number;
 }
 
 export interface PhotoRef {
@@ -127,4 +129,36 @@ export interface MemoryFilters {
 
 export interface UploadedMedia extends PhotoRef {
   sizeBytes: number;
+}
+
+export type LetterTypeName = "normal" | "open_when" | "scheduled" | "surprise";
+
+export interface LetterSummary {
+  id: string;
+  type: LetterTypeName;
+  title: string;
+  openWhenLabel: string | null;
+  /** Instante UTC a partir del cual se puede abrir; null = disponible ya. */
+  unlockAt: string | null;
+  /** true mientras unlockAt esté en el futuro (lo decide el Worker). */
+  isLocked: boolean;
+  /** Primera vez que el destinatario la abrió; null = sin abrir. */
+  openedAt: string | null;
+  /** true si la escribió quien la está viendo. */
+  isMine: boolean;
+  author: { id: string; displayName: string };
+  recipient: { id: string; displayName: string };
+  createdAt: string;
+}
+
+export interface LetterListResponse {
+  items: LetterSummary[];
+}
+
+export interface LetterDetail extends LetterSummary {
+  /** null si quien la ve todavía no puede leerla (bloqueada o sin abrir). */
+  body: string | null;
+  /** El autor puede editarla mientras el destinatario no la haya abierto. */
+  canEdit: boolean;
+  updatedAt: string;
 }
