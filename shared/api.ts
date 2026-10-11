@@ -57,3 +57,27 @@ export interface MeResponse {
   /** Correo del otro usuario permitido, para mostrarlo en la configuración inicial. */
   partnerEmail: string | null;
 }
+
+export interface UpcomingMoment {
+  title: string;
+  emoji: string;
+  date: string; // YYYY-MM-DD
+  daysUntil: number;
+  /** Años que se cumplen (aniversarios y fechas anuales); null si no aplica. */
+  years: number | null;
+}
+
+export interface HighlightedMemory {
+  id: string;
+  title: string;
+  happenedOn: string;
+  placeName: string | null;
+}
+
+export interface HomeResponse {
+  relationship: RelationshipSummary;
+  today: string;
+  together: { days: number; years: number; months: number };
+  nextMoment: UpcomingMoment | null;
+  highlightedMemory: HighlightedMemory | null;
+}

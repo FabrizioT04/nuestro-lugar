@@ -1,21 +1,24 @@
+import type { LucideIcon } from "lucide-react";
 import { Card } from "./ui/Card";
+import { PageHeader } from "./PageHeader";
 
 interface Props {
   title: string;
-  emoji: string;
-  phase: number;
+  icon: LucideIcon;
+  description: string;
 }
 
-/** Pantalla temporal para rutas cuyo módulo se construye en una fase posterior. */
-export function PagePlaceholder({ title, emoji, phase }: Props) {
+/** Pantalla temporal para módulos que se construyen en fases posteriores. */
+export function PagePlaceholder({ title, icon: Icon, description }: Props) {
   return (
-    <section className="space-y-4">
-      <h1 className="text-3xl text-ink">{title}</h1>
-      <Card className="text-center">
-        <p className="text-4xl" aria-hidden>
-          {emoji}
-        </p>
-        <p className="mt-3 text-ink-soft">Este rincón se construye en la Fase {phase}.</p>
+    <section>
+      <PageHeader title={title} />
+      <Card className="animate-fade-up px-6 py-10 text-center [animation-delay:80ms]">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blush-50 text-blush-500">
+          <Icon size={26} strokeWidth={1.75} aria-hidden />
+        </span>
+        <p className="mt-4 font-display text-xl">Muy pronto</p>
+        <p className="mx-auto mt-2 max-w-xs text-ink-soft">{description}</p>
       </Card>
     </section>
   );

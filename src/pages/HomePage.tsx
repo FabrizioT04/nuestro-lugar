@@ -1,37 +1,140 @@
-import { useMe } from "@/auth/AuthContext";
+import { Link } from "react-router";
+import { ChevronRight, Sparkles } from "lucide-react";
+import type { HomeResponse } from "@shared/api";
+import { CoverArt } from "@/components/CoverArt";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { useSystemStatus } from "@/hooks/useSystemStatus";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { useAsync } from "@/hooks/useAsync";
+import { MODULES, type ModuleItem } from "@/layouts/navigation";
+import { homeApi } from "@/services/api/home";
+import { formatCountdown, formatDayMonth, formatDuration, formatLongDate, formatNumber, plural } from "@/utils/format";
+
+const TONES: Record<ModuleItem["tone"], string> = {
+  blush: "bg-blush-50 text-blush-500",
+  lavender: "bg-lavender-100 text-lavender-500",
+  cream: "bg-cream text-blush-700",
+};
 
 export function HomePage() {
-  const status = useSystemStatus();
-  const me = useMe();
-  const names = me.relationship?.members.map((m) => m.displayName).join(" & ");
+  const home = useAsync(homeApi.get);
 
   return (
-    <section className="space-y-5">
-      <header>
-        <p className="text-sm font-semibold tracking-wide text-blush-500 uppercase">Fase 2</p>
-        <h1 className="text-4xl text-ink">Nuestro Lugar</h1>
-        <p className="mt-1 text-ink-soft">{names ?? me.user.displayName}</p>
+    <div className="space-y-5">
+      <header className="flex animate-fade-up items-center justify-between">
+        <p className="font-display text-lg text-ink">
+          Nuestro Lugar <span className="text-blush-300">♡</span>
+        </p>
       </header>
 
-      <Card>
-        <h2 className="text-xl">Estado del sistema</h2>
-        {status.state === "loading" && <p className="mt-2 text-ink-soft">Comprobando…</p>}
-        {status.state === "error" && (
-          <p className="mt-2 text-blush-700" role="alert">
-            No se pudo conectar: {status.message}
-          </p>
-        )}
-        {status.state === "ok" && (
-          <ul className="mt-3 space-y-1 text-sm">
-            <li>✓ React → Worker ({status.api.environment})</li>
-            <li>
-              ✓ Worker → D1 ({status.db.tables} tablas, {status.db.latencyMs} ms)
+      {home.status === "loading" && <HomeSkeleton />}
+      {home.status === "error" && (
+        <Card className="text-center">
+          <p className="text-ink-soft">{home.message}</p>
+          <Button variant="secondary" className="mt-4" onClick={home.reload}>
+            Reintentar
+          </Button>
+        </Card>
+      )}
+      {home.status === "success" && <HomeContent data={home.data} />}
+
+      <section aria-labelledby="modules-title" className="animate-fade-up [animation-delay:240ms]">
+        <h2 id="modules-title" className="mb-3 text-xl">
+          Nuestros rincones
+        </h2>
+        <ul className="grid grid-cols-3 gap-3">
+          {MODULES.map(({ to, label, icon: Icon, tone }) => (
+            <li key={to}>
+              <Link
+                to={to}
+                className="flex flex-col items-center gap-2 rounded-card bg-paper px-2 py-4 text-sm font-semibold shadow-soft transition active:scale-[0.97]"
+              >
+                <span className={`flex h-11 w-11 items-center justify-center rounded-full ${TONES[tone]}`}>
+                  <Icon size={21} strokeWidth={1.75} aria-hidden />
+                </span>
+                {label}
+              </Link>
             </li>
-          </ul>
-        )}
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+}
+
+function HomeContent({ data }: { data: HomeResponse }) {
+  const names = data.relationship.members.map((member) => member.displayName).join(" & ");
+  const duration = formatDuration(data.together);
+
+  return (
+    <>
+      <Card padded={false} className="animate-fade-up overflow-hidden [animation-delay:60ms]">
+        <div className="relative aspect-[4/3]">
+          <CoverArt className="absolute inset-0 h-full w-full" />
+          <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-paper/90 to-transparent px-5 pt-10 pb-4 font-display text-2xl text-ink">
+            {names}
+          </p>
+        </div>
+        <div className="px-5 pt-3 pb-5">
+          <p className="flex items-baseline gap-2">
+            <span className="font-display text-5xl text-blush-500">{formatNumber(data.together.days)}</span>
+            <span className="text-lg font-semibold">{data.together.days === 1 ? "día juntos" : "días juntos"}</span>
+          </p>
+          <p className="mt-1 text-sm text-ink-soft">
+            {duration ? `${duration} · ` : ""}desde el {formatLongDate(data.relationship.startedOn)}
+          </p>
+        </div>
       </Card>
-    </section>
+
+      {data.nextMoment && (
+        <Card className="flex animate-fade-up items-center gap-4 [animation-delay:120ms]">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-lavender-100 text-2xl" aria-hidden>
+            {data.nextMoment.emoji}
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold tracking-wide text-ink-soft uppercase">Próximo momento</p>
+            <p className="truncate font-display text-lg">{data.nextMoment.title}</p>
+            <p className="text-sm">
+              <span className="font-semibold text-blush-500">{formatCountdown(data.nextMoment.daysUntil)}</span>
+              <span className="text-ink-soft">
+                {" "}
+                · {formatDayMonth(data.nextMoment.date)}
+                {data.nextMoment.years ? ` · ${plural(data.nextMoment.years, "año")}` : ""}
+              </span>
+            </p>
+          </div>
+        </Card>
+      )}
+
+      <Link to="/recuerdos" className="block animate-fade-up [animation-delay:180ms]">
+        <Card className="flex items-center gap-4 transition active:scale-[0.99]">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blush-50 text-blush-500">
+            <Sparkles size={24} strokeWidth={1.75} aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold tracking-wide text-ink-soft uppercase">Recuerdo destacado</p>
+            {data.highlightedMemory ? (
+              <>
+                <p className="truncate font-display text-lg">{data.highlightedMemory.title}</p>
+                <p className="text-sm text-ink-soft">{formatLongDate(data.highlightedMemory.happenedOn)}</p>
+              </>
+            ) : (
+              <p className="text-ink-soft">Aquí aparecerá su primer recuerdo juntos.</p>
+            )}
+          </div>
+          <ChevronRight size={20} className="text-ink-soft" aria-hidden />
+        </Card>
+      </Link>
+    </>
+  );
+}
+
+function HomeSkeleton() {
+  return (
+    <div className="space-y-5" aria-label="Cargando">
+      <Skeleton className="h-80" />
+      <Skeleton className="h-24" />
+      <Skeleton className="h-24" />
+    </div>
   );
 }

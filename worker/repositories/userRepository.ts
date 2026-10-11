@@ -45,6 +45,15 @@ export function createUserRepository(db: D1Database) {
       return created;
     },
 
+    async markIntroSeen(userId: string): Promise<void> {
+      await db
+        .prepare(
+          "UPDATE users SET intro_seen_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?1 AND intro_seen_at IS NULL",
+        )
+        .bind(userId)
+        .run();
+    },
+
     async touchLastSeen(userId: string): Promise<void> {
       await db
         .prepare("UPDATE users SET last_seen_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?1")

@@ -49,6 +49,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     );
   }
 
+  if (response.status === 204) return null as T;
   return (await response.json()) as T;
 }
 
