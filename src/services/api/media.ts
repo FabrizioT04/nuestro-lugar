@@ -3,7 +3,7 @@ import type { PreparedImage } from "@/utils/image";
 import { apiFetch } from "./client";
 
 export const mediaApi = {
-  upload(image: PreparedImage, purpose: "memory" | "cover" = "memory") {
+  upload(image: PreparedImage, purpose: "memory" | "plan" | "cover" = "memory") {
     const form = new FormData();
     const ext = (blob: Blob) => (blob.type === "image/webp" ? "webp" : "jpg");
     form.append("file", image.full, `foto.${ext(image.full)}`);

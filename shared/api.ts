@@ -69,6 +69,8 @@ export interface UpcomingMoment {
   daysUntil: number;
   /** Años que se cumplen (aniversarios y fechas anuales); null si no aplica. */
   years: number | null;
+  /** Ruta de la app a la que lleva (por ejemplo, un plan); null si no aplica. */
+  link: string | null;
 }
 
 export interface HighlightedMemory {
@@ -160,5 +162,37 @@ export interface LetterDetail extends LetterSummary {
   body: string | null;
   /** El autor puede editarla mientras el destinatario no la haya abierto. */
   canEdit: boolean;
+  updatedAt: string;
+}
+
+export type PlanTypeName = "date" | "restaurant" | "trip" | "activity" | "movie" | "goal" | "place_to_visit" | "other";
+export type PlanStatusName = "pending" | "done" | "cancelled";
+
+export interface PlanSummary {
+  id: string;
+  type: PlanTypeName;
+  status: PlanStatusName;
+  title: string;
+  /** Fecha de calendario (YYYY-MM-DD) o null si no tiene fecha. */
+  plannedFor: string | null;
+  /** Presupuesto en céntimos; null si no se indicó. */
+  budget: { amountCents: number; currency: string } | null;
+  placeName: string | null;
+  completedAt: string | null;
+  cover: PhotoRef | null;
+  photoCount: number;
+  /** Recuerdo creado a partir de este plan (si sigue existiendo). */
+  resultingMemoryId: string | null;
+  createdAt: string;
+}
+
+export interface PlanListResponse {
+  items: PlanSummary[];
+}
+
+export interface PlanDetail extends PlanSummary {
+  description: string | null;
+  photos: PhotoRef[];
+  author: { id: string; displayName: string };
   updatedAt: string;
 }

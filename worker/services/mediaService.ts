@@ -13,7 +13,7 @@ import {
   type ImageMime,
 } from "../utils/media";
 
-const UPLOAD_PURPOSES = ["memory", "cover"] as const;
+const UPLOAD_PURPOSES = ["memory", "plan", "cover"] as const;
 type UploadPurpose = (typeof UPLOAD_PURPOSES)[number];
 
 async function readImage(entry: string | File | null, maxBytes: number, label: string) {

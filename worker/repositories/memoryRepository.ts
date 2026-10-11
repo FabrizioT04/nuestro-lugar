@@ -182,8 +182,11 @@ export function createMemoryRepository(db: D1Database) {
       return row !== null;
     },
 
-    /** Crea el recuerdo con sus etiquetas y fotos en una sola transacción. */
-    async create(memoryId: string, relationshipId: string, authorId: string, input: MemoryInput): Promise<void> {
+    /**
+     * Crea el recuerdo con sus etiquetas y fotos en una sola transacción.
+     * `extra` se ejecuta en el mismo batch (por ejemplo, enlazar el plan del que sale).
+     */
+    async create(memoryId: string, relationshipId: string, authorId: string, input: MemoryInput, extra: D1PreparedStatement[] = []): Promise<void> {
       await db.batch([
         db
           .prepare(
@@ -202,6 +205,7 @@ export function createMemoryRepository(db: D1Database) {
             input.isHighlighted ? 1 : 0,
           ),
         ...childStatements(memoryId, relationshipId, input),
+        ...extra,
       ]);
     },
 

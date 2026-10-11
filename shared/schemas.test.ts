@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { letterCreateSchema, letterInputSchema, memoryCreateSchema, relationshipSetupSchema } from "./schemas";
+import { letterCreateSchema, letterInputSchema, memoryCreateSchema, planCreateSchema, planInputSchema, planStatusSchema, relationshipSetupSchema } from "./schemas";
 
 const valid = { myName: "Fabrizio", partnerName: "Pareja", startedOn: "2024-02-14", timezone: "America/Lima" };
 
@@ -73,5 +73,41 @@ describe("letterInputSchema", () => {
     const id = "6f1c2a7e-4b8d-4c3e-9a1f-2d3e4f5a6b7c";
     expect(letterCreateSchema.parse({ ...base, type: "normal", id })).toMatchObject({ id, type: "normal" });
     expect(letterCreateSchema.safeParse({ ...base, type: "normal", id: "nope" }).success).toBe(false);
+  });
+});
+
+describe("planInputSchema", () => {
+  const base = { type: "restaurant", title: "Probar ramen" };
+
+  it("convierte el presupuesto a céntimos", () => {
+    const parsed = planInputSchema.parse({ ...base, budget: 120.5, currency: "PEN" });
+    expect(parsed).toMatchObject({ budgetCents: 12050, currency: "PEN", plannedFor: null, photoIds: [] });
+    expect(planInputSchema.parse({ ...base, budget: 0.1 + 0.2, currency: "USD" }).budgetCents).toBe(30);
+  });
+
+  it("sin presupuesto no guarda moneda", () => {
+    expect(planInputSchema.parse({ ...base, currency: "USD" })).toMatchObject({ budgetCents: null, currency: null });
+  });
+
+  it.each([
+    ["presupuesto sin moneda", { budget: 50 }],
+    ["presupuesto negativo", { budget: -1, currency: "PEN" }],
+    ["tres decimales", { budget: 10.555, currency: "PEN" }],
+    ["presupuesto como texto", { budget: "50", currency: "PEN" }],
+    ["moneda desconocida", { budget: 5, currency: "BTC" }],
+    ["tipo desconocido", { type: "fiesta" }],
+    ["fecha inválida", { plannedFor: "2027-13-01" }],
+  ])("rechaza %s", (_name, patch) => {
+    expect(planInputSchema.safeParse({ ...base, ...patch }).success).toBe(false);
+  });
+
+  it("acepta fechas futuras y un id opcional al crear", () => {
+    const id = "6f1c2a7e-4b8d-4c3e-9a1f-2d3e4f5a6b7c";
+    expect(planCreateSchema.parse({ ...base, plannedFor: "2030-05-01", id })).toMatchObject({ id, plannedFor: "2030-05-01" });
+  });
+
+  it("solo acepta los tres estados", () => {
+    expect(planStatusSchema.safeParse({ status: "done" }).success).toBe(true);
+    expect(planStatusSchema.safeParse({ status: "archived" }).success).toBe(false);
   });
 });

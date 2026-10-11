@@ -4,6 +4,8 @@ import type { AuthenticatedUser } from "../auth/types";
 import type { Bindings } from "../env";
 import { createHomeRepository, type ImportantDateRow } from "../repositories/homeRepository";
 import { countUnopenedLetters } from "./letterService";
+import { createPlanRepository } from "../repositories/planRepository";
+import { PLAN_TYPE_INFO } from "@shared/plans";
 import { createRelationshipRepository } from "../repositories/relationshipRepository";
 import { notFound } from "../utils/errors";
 
@@ -15,17 +17,18 @@ function anniversaryMoment(relationship: RelationshipSummary, today: string): Up
     date: next.date,
     daysUntil: daysBetween(today, next.date),
     years: next.years,
+    link: null,
   };
 }
 
 function importantDateMoment(row: ImportantDateRow, today: string): UpcomingMoment | null {
   if (row.recurs_yearly === 1) {
     const next = nextYearlyOccurrence(row.event_date, today);
-    return { title: row.title, emoji: row.emoji ?? "✨", date: next.date, daysUntil: daysBetween(today, next.date), years: next.years };
+    return { title: row.title, emoji: row.emoji ?? "✨", date: next.date, daysUntil: daysBetween(today, next.date), years: next.years, link: null };
   }
   const daysUntil = daysBetween(today, row.event_date);
   if (daysUntil < 0) return null;
-  return { title: row.title, emoji: row.emoji ?? "✨", date: row.event_date, daysUntil, years: null };
+  return { title: row.title, emoji: row.emoji ?? "✨", date: row.event_date, daysUntil, years: null, link: null };
 }
 
 export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<HomeResponse> {
@@ -45,10 +48,23 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
   const today = todayIn(relationship.timezone);
   const { years, months } = elapsedParts(relationship.startedOn, today);
 
+  const upcomingPlans = await createPlanRepository(env.DB).listUpcoming(user.relationshipId, today);
+
   const candidates = [
     anniversaryMoment(relationship, today),
     ...importantDates.map((row) => importantDateMoment(row, today)),
+    ...upcomingPlans.map(
+      (plan): UpcomingMoment => ({
+        title: plan.title,
+        emoji: PLAN_TYPE_INFO[plan.plan_type].emoji,
+        date: plan.planned_for,
+        daysUntil: daysBetween(today, plan.planned_for),
+        years: null,
+        link: `/planes/${plan.id}`,
+      }),
+    ),
   ].filter((moment): moment is UpcomingMoment => moment !== null);
+  // Estable: a igual distancia, el aniversario y las fechas importantes van antes que un plan.
   candidates.sort((a, b) => a.daysUntil - b.daysUntil);
 
   return {

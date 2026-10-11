@@ -54,3 +54,16 @@ export function formatDateTimeIn(iso: string, timezone: string): string {
 export function formatShortDateIn(iso: string, timezone: string): string {
   return new Intl.DateTimeFormat("es", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: timezone }).format(new Date(iso));
 }
+
+/** "S/ 120.50", "US$ 40.00"… según la moneda. */
+export function formatMoney(amountCents: number, currency: string): string {
+  return new Intl.NumberFormat("es-PE", { style: "currency", currency }).format(amountCents / 100);
+}
+
+/** "Hoy", "Mañana", "En 5 días", "Ayer", "Hace 3 días". */
+export function formatRelativeDays(days: number): string {
+  if (days === 0) return "Hoy";
+  if (days === 1) return "Mañana";
+  if (days === -1) return "Ayer";
+  return days > 0 ? `En ${plural(days, "día")}` : `Hace ${plural(-days, "día")}`;
+}

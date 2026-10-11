@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { ChevronRight, Mail, Sparkles } from "lucide-react";
-import type { HomeResponse } from "@shared/api";
+import type { HomeResponse, UpcomingMoment } from "@shared/api";
 import { CoverArt } from "@/components/CoverArt";
 import { MemoryPhoto } from "@/components/memories/MemoryPhoto";
 import { Button } from "@/components/ui/Button";
@@ -96,25 +96,7 @@ function HomeContent({ data }: { data: HomeResponse }) {
         </div>
       </Card>
 
-      {data.nextMoment && (
-        <Card className="flex animate-fade-up items-center gap-4 [animation-delay:120ms]">
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-lavender-100 text-2xl" aria-hidden>
-            {data.nextMoment.emoji}
-          </span>
-          <div className="min-w-0">
-            <p className="text-xs font-semibold tracking-wide text-ink-soft uppercase">Próximo momento</p>
-            <p className="truncate font-display text-lg">{data.nextMoment.title}</p>
-            <p className="text-sm">
-              <span className="font-semibold text-blush-500">{formatCountdown(data.nextMoment.daysUntil)}</span>
-              <span className="text-ink-soft">
-                {" "}
-                · {formatDayMonth(data.nextMoment.date)}
-                {data.nextMoment.years ? ` · ${plural(data.nextMoment.years, "año")}` : ""}
-              </span>
-            </p>
-          </div>
-        </Card>
-      )}
+      {data.nextMoment && <NextMomentCard moment={data.nextMoment} />}
 
       {data.unopenedLetters > 0 && (
         <Link to="/cartas" className="block animate-fade-up [animation-delay:150ms]">
@@ -160,6 +142,35 @@ function HomeContent({ data }: { data: HomeResponse }) {
         </Card>
       </Link>
     </>
+  );
+}
+
+function NextMomentCard({ moment }: { moment: UpcomingMoment }) {
+  const card = (
+    <Card className="flex items-center gap-4 transition active:scale-[0.99]">
+      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-lavender-100 text-2xl" aria-hidden>
+        {moment.emoji}
+      </span>
+      <div className="min-w-0">
+        <p className="text-xs font-semibold tracking-wide text-ink-soft uppercase">Próximo momento</p>
+        <p className="truncate font-display text-lg">{moment.title}</p>
+        <p className="text-sm">
+          <span className="font-semibold text-blush-500">{formatCountdown(moment.daysUntil)}</span>
+          <span className="text-ink-soft">
+            {" "}
+            · {formatDayMonth(moment.date)}
+            {moment.years ? ` · ${plural(moment.years, "año")}` : ""}
+          </span>
+        </p>
+      </div>
+    </Card>
+  );
+  return moment.link ? (
+    <Link to={moment.link} className="block animate-fade-up [animation-delay:120ms]">
+      {card}
+    </Link>
+  ) : (
+    <div className="animate-fade-up [animation-delay:120ms]">{card}</div>
   );
 }
 
