@@ -6,6 +6,8 @@ import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { healthRoutes } from "./routes/health";
 import { homeRoutes } from "./routes/home";
 import { meRoutes } from "./routes/me";
+import { mediaRoutes } from "./routes/media";
+import { memoryRoutes } from "./routes/memories";
 import { relationshipRoutes } from "./routes/relationship";
 
 // Punto de entrada del Worker. Solo recibe /api/* (ver `run_worker_first` en wrangler.jsonc);
@@ -24,6 +26,8 @@ app.use("*", securityHeaders);
 app.route("/health", healthRoutes);
 app.route("/me", meRoutes);
 app.route("/home", homeRoutes);
+app.route("/memories", memoryRoutes);
+app.route("/media", mediaRoutes);
 app.route("/relationship", relationshipRoutes);
 
 app.notFound(notFoundHandler);

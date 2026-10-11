@@ -2,12 +2,14 @@ import { Link } from "react-router";
 import { ChevronRight, Sparkles } from "lucide-react";
 import type { HomeResponse } from "@shared/api";
 import { CoverArt } from "@/components/CoverArt";
+import { MemoryPhoto } from "@/components/memories/MemoryPhoto";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
 import { MODULES, type ModuleItem } from "@/layouts/navigation";
 import { homeApi } from "@/services/api/home";
+import { photoUrl } from "@/services/api/media";
 import { formatCountdown, formatDayMonth, formatDuration, formatLongDate, formatNumber, plural } from "@/utils/format";
 
 const TONES: Record<ModuleItem["tone"], string> = {
@@ -70,7 +72,15 @@ function HomeContent({ data }: { data: HomeResponse }) {
     <>
       <Card padded={false} className="animate-fade-up overflow-hidden [animation-delay:60ms]">
         <div className="relative aspect-[4/3]">
-          <CoverArt className="absolute inset-0 h-full w-full" />
+          {data.relationship.coverMediaId ? (
+            <img
+              src={photoUrl(data.relationship.coverMediaId)}
+              alt={`Foto de ${names}`}
+              className="absolute inset-0 h-full w-full bg-blush-50 object-cover"
+            />
+          ) : (
+            <CoverArt className="absolute inset-0 h-full w-full" />
+          )}
           <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-paper/90 to-transparent px-5 pt-10 pb-4 font-display text-2xl text-ink">
             {names}
           </p>
@@ -106,11 +116,18 @@ function HomeContent({ data }: { data: HomeResponse }) {
         </Card>
       )}
 
-      <Link to="/recuerdos" className="block animate-fade-up [animation-delay:180ms]">
+      <Link
+        to={data.highlightedMemory ? `/recuerdos/${data.highlightedMemory.id}` : "/recuerdos/nuevo"}
+        className="block animate-fade-up [animation-delay:180ms]"
+      >
         <Card className="flex items-center gap-4 transition active:scale-[0.99]">
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blush-50 text-blush-500">
-            <Sparkles size={24} strokeWidth={1.75} aria-hidden />
-          </span>
+          {data.highlightedMemory?.cover ? (
+            <MemoryPhoto photo={data.highlightedMemory.cover} className="h-14 w-14 shrink-0 rounded-2xl" />
+          ) : (
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blush-50 text-blush-500">
+              <Sparkles size={24} strokeWidth={1.75} aria-hidden />
+            </span>
+          )}
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold tracking-wide text-ink-soft uppercase">Recuerdo destacado</p>
             {data.highlightedMemory ? (
@@ -119,7 +136,7 @@ function HomeContent({ data }: { data: HomeResponse }) {
                 <p className="text-sm text-ink-soft">{formatLongDate(data.highlightedMemory.happenedOn)}</p>
               </>
             ) : (
-              <p className="text-ink-soft">Aquí aparecerá su primer recuerdo juntos.</p>
+              <p className="text-ink-soft">Guarden su primer recuerdo juntos.</p>
             )}
           </div>
           <ChevronRight size={20} className="text-ink-soft" aria-hidden />

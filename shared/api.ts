@@ -9,6 +9,8 @@ export type ApiErrorCode =
   | "conflict"
   | "misconfigured"
   | "rate_limited"
+  | "payload_too_large"
+  | "unsupported_media_type"
   | "internal_error";
 
 export interface ApiErrorBody {
@@ -42,6 +44,8 @@ export interface RelationshipSummary {
   name: string;
   startedOn: string;
   timezone: string;
+  /** Foto principal del inicio (id de media), o null. */
+  coverMediaId: string | null;
   members: MemberSummary[];
 }
 
@@ -72,6 +76,7 @@ export interface HighlightedMemory {
   title: string;
   happenedOn: string;
   placeName: string | null;
+  cover: PhotoRef | null;
 }
 
 export interface HomeResponse {
@@ -80,4 +85,46 @@ export interface HomeResponse {
   together: { days: number; years: number; months: number };
   nextMoment: UpcomingMoment | null;
   highlightedMemory: HighlightedMemory | null;
+}
+
+export interface PhotoRef {
+  id: string;
+  width: number | null;
+  height: number | null;
+}
+
+export interface MemorySummary {
+  id: string;
+  title: string;
+  happenedOn: string;
+  placeName: string | null;
+  category: string | null;
+  tags: string[];
+  isFavorite: boolean;
+  isHighlighted: boolean;
+  cover: PhotoRef | null;
+  photoCount: number;
+}
+
+export interface MemoryListResponse {
+  items: MemorySummary[];
+  /** Pásalo como `cursor` para pedir la siguiente página; null si no hay más. */
+  nextCursor: string | null;
+}
+
+export interface MemoryDetail extends MemorySummary {
+  description: string | null;
+  photos: PhotoRef[];
+  author: { id: string; displayName: string };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MemoryFilters {
+  categories: string[];
+  tags: string[];
+}
+
+export interface UploadedMedia extends PhotoRef {
+  sizeBytes: number;
 }

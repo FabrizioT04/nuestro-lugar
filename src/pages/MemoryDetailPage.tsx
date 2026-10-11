@@ -1,0 +1,205 @@
+import { useCallback, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
+import { ArrowLeft, Heart, ImageUp, MapPin, Pencil, Trash2 } from "lucide-react";
+import type { MemoryDetail } from "@shared/api";
+import { useAuth } from "@/auth/AuthContext";
+import { MemoryPhoto } from "@/components/memories/MemoryPhoto";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { useAsync } from "@/hooks/useAsync";
+import { memoriesApi } from "@/services/api/memories";
+import { formatLongDate } from "@/utils/format";
+
+export function MemoryDetailPage() {
+  const { id = "" } = useParams();
+  const load = useCallback(() => memoriesApi.get(id), [id]);
+  const memory = useAsync(load);
+
+  return (
+    <section>
+      <header className="mb-4 flex items-center justify-between">
+        <Link to="/recuerdos" aria-label="Volver a recuerdos" className="flex h-10 w-10 items-center justify-center rounded-full bg-paper shadow-soft">
+          <ArrowLeft size={20} aria-hidden />
+        </Link>
+      </header>
+      {memory.status === "loading" && <Skeleton className="h-96" />}
+      {memory.status === "error" && (
+        <Card className="text-center">
+          <p className="text-ink-soft">{memory.message}</p>
+          <Link to="/recuerdos" className="mt-4 inline-block font-semibold text-blush-500">
+            Volver a recuerdos
+          </Link>
+        </Card>
+      )}
+      {memory.status === "success" && <MemoryContent initial={memory.data} />}
+    </section>
+  );
+}
+
+function MemoryContent({ initial }: { initial: MemoryDetail }) {
+  const navigate = useNavigate();
+  const { refresh } = useAuth();
+  const [memory, setMemory] = useState(initial);
+  const [current, setCurrent] = useState(0);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function toggleFavorite() {
+    const next = !memory.isFavorite;
+    setMemory((m) => ({ ...m, isFavorite: next })); // optimista
+    try {
+      await memoriesApi.setFavorite(memory.id, next);
+    } catch {
+      setMemory((m) => ({ ...m, isFavorite: !next }));
+      setNotice("No se pudo actualizar el favorito");
+    }
+  }
+
+  async function setAsCover() {
+    const photo = memory.photos[current];
+    if (!photo) return;
+    setBusy(true);
+    try {
+      await memoriesApi.setCover(photo.id);
+      await refresh();
+      setNotice("Ahora es la foto principal del inicio ♡");
+    } catch {
+      setNotice("No se pudo cambiar la foto principal");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove() {
+    setBusy(true);
+    try {
+      await memoriesApi.remove(memory.id);
+      navigate("/recuerdos", { replace: true });
+    } catch {
+      setNotice("No se pudo borrar el recuerdo");
+      setBusy(false);
+    }
+  }
+
+  return (
+    <article className="space-y-4">
+      <Card padded={false} className="animate-fade-up overflow-hidden">
+        {memory.photos.length > 0 ? (
+          <div className="relative">
+            <div
+              className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none]"
+              onScroll={(event) => {
+                const el = event.currentTarget;
+                setCurrent(Math.round(el.scrollLeft / el.clientWidth));
+              }}
+            >
+              {memory.photos.map((photo, index) => (
+                <MemoryPhoto
+                  key={photo.id}
+                  photo={photo}
+                  size="full"
+                  eager={index === 0}
+                  alt={`Foto ${index + 1} de ${memory.title}`}
+                  className="aspect-[4/5] w-full shrink-0 snap-center"
+                />
+              ))}
+            </div>
+            {memory.photos.length > 1 && (
+              <ol className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5" aria-label={`Foto ${current + 1} de ${memory.photos.length}`}>
+                {memory.photos.map((photo, index) => (
+                  <li key={photo.id} className={`h-1.5 rounded-full transition-all ${index === current ? "w-5 bg-paper" : "w-1.5 bg-paper/60"}`} />
+                ))}
+              </ol>
+            )}
+          </div>
+        ) : (
+          <MemoryPhoto photo={null} className="aspect-[4/3] w-full" />
+        )}
+
+        <div className="p-5">
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-2xl leading-tight">{memory.title}</h1>
+            <button
+              type="button"
+              onClick={toggleFavorite}
+              aria-pressed={memory.isFavorite}
+              aria-label={memory.isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blush-50 text-blush-500 transition active:scale-90"
+            >
+              <Heart size={20} fill={memory.isFavorite ? "currentColor" : "none"} aria-hidden />
+            </button>
+          </div>
+          <p className="mt-1 flex flex-wrap items-center gap-x-3 text-sm text-ink-soft">
+            <span>{formatLongDate(memory.happenedOn)}</span>
+            {memory.placeName && (
+              <span className="flex items-center gap-1">
+                <MapPin size={14} aria-hidden /> {memory.placeName}
+              </span>
+            )}
+          </p>
+
+          {(memory.category || memory.tags.length > 0) && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {memory.category && (
+                <Link to={`/recuerdos?categoria=${encodeURIComponent(memory.category)}`} className="rounded-full bg-lavender-100 px-3 py-1 text-xs font-semibold text-lavender-500">
+                  {memory.category}
+                </Link>
+              )}
+              {memory.tags.map((tag) => (
+                <Link key={tag} to={`/recuerdos?etiqueta=${encodeURIComponent(tag)}`} className="rounded-full bg-cream px-3 py-1 text-xs font-semibold text-ink-soft">
+                  #{tag}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {memory.description && <p className="mt-4 leading-relaxed whitespace-pre-line">{memory.description}</p>}
+
+          <p className="mt-5 text-xs text-ink-soft">
+            Guardado por {memory.author.displayName} · {formatLongDate(memory.createdAt.slice(0, 10))}
+          </p>
+        </div>
+      </Card>
+
+      {notice && (
+        <p role="status" className="rounded-2xl bg-lavender-100 px-4 py-3 text-center text-sm text-lavender-500">
+          {notice}
+        </p>
+      )}
+
+      <div className="grid grid-cols-2 gap-3">
+        <Link to={`/recuerdos/${memory.id}/editar`} className="inline-flex items-center justify-center gap-2 rounded-full border border-blush-200 bg-paper px-4 py-3 font-semibold text-blush-700">
+          <Pencil size={16} aria-hidden /> Editar
+        </Link>
+        {memory.photos.length > 0 ? (
+          <Button variant="secondary" onClick={setAsCover} disabled={busy}>
+            <ImageUp size={16} aria-hidden /> Foto del inicio
+          </Button>
+        ) : (
+          <span />
+        )}
+      </div>
+
+      {confirmDelete ? (
+        <Card className="text-center">
+          <p className="font-semibold">¿Borrar este recuerdo?</p>
+          <p className="mt-1 text-sm text-ink-soft">Dejará de verse para los dos.</p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <Button variant="secondary" onClick={() => setConfirmDelete(false)} disabled={busy}>
+              Cancelar
+            </Button>
+            <Button onClick={remove} disabled={busy} className="!bg-blush-500 !text-paper">
+              Sí, borrar
+            </Button>
+          </div>
+        </Card>
+      ) : (
+        <Button variant="ghost" className="w-full" onClick={() => setConfirmDelete(true)}>
+          <Trash2 size={16} aria-hidden /> Borrar recuerdo
+        </Button>
+      )}
+    </article>
+  );
+}

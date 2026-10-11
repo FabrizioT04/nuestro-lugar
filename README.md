@@ -60,6 +60,25 @@ curl http://localhost:5173/api/no-existe   # 404 en JSON
 Sigue la guía paso a paso: [docs/configurar-access.md](./docs/configurar-access.md)
 (base de datos, deploy, Google, Cloudflare Access y secretos).
 
+Desde la Fase 4 también hace falta el bucket privado de fotos (una sola vez):
+
+```bash
+npx wrangler r2 bucket create nuestro-lugar-media
+npm run db:migrate:remote
+```
+
+En local no hace falta crear nada: `npm run dev` simula R2 dentro de `.wrangler/`.
+
+## Fotos
+
+- El navegador comprime cada foto (máx. 1920 px, miniatura de 480 px, WebP o JPEG). Al redibujarla
+  se pierden los metadatos EXIF, incluida la ubicación GPS.
+- El Worker comprueba el tipo real por los primeros bytes (no por la extensión), limita el tamaño
+  (8 MB la foto, 1 MB la miniatura) y 60 subidas por minuto por persona.
+- El bucket es privado. Las fotos se piden a `/api/media/:id`, que comprueba que pertenecen a
+  vuestra relación. Las claves de R2 las genera el Worker.
+- D1 solo guarda metadatos; nunca la imagen.
+
 ## Variables
 
 | Nombre | Fase | Dónde |

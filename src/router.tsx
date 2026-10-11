@@ -3,6 +3,8 @@ import { INTRO_PATH, RequireAuth, SETUP_PATH } from "@/auth/RequireAuth";
 import { AppLayout } from "@/layouts/AppLayout";
 import { HomePage } from "@/pages/HomePage";
 import { MemoriesPage } from "@/pages/MemoriesPage";
+import { MemoryDetailPage } from "@/pages/MemoryDetailPage";
+import { MemoryFormPage } from "@/pages/MemoryFormPage";
 import { UsPage } from "@/pages/UsPage";
 import { PlansPage } from "@/pages/PlansPage";
 import { ProfilePage } from "@/pages/ProfilePage";
@@ -27,6 +29,9 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <HomePage /> },
           { path: "recuerdos", element: <MemoriesPage /> },
+          { path: "recuerdos/nuevo", element: <MemoryFormPage /> },
+          { path: "recuerdos/:id", element: <MemoryDetailPage /> },
+          { path: "recuerdos/:id/editar", element: <MemoryFormPage /> },
           { path: "nosotros", element: <UsPage /> },
           { path: "planes", element: <PlansPage /> },
           { path: "perfil", element: <ProfilePage /> },
