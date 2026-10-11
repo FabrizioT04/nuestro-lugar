@@ -1,0 +1,36 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Un único Worker sirve la API (/api/*) y los archivos estáticos de React.
+  // Mismo dominio = una sola aplicación en Cloudflare Access y sin CORS.
+  "name": "nuestro-lugar",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+
+  "assets": {
+    // React Router decide las rutas del frontend: cualquier ruta desconocida devuelve index.html.
+    "not_found_handling": "single-page-application",
+    // Las peticiones a /api/* siempre llegan al Worker, nunca a los assets.
+    "run_worker_first": ["/api/*"]
+  },
+
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "nuestro-lugar-db",
+      // Reemplazar con el id que devuelve `npx wrangler d1 create nuestro-lugar-db`.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ]
+
+  // Fase 4 (fotografías):
+  // "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "nuestro-lugar-media" }]
+  // Fase 11 (IA):
+  // "ai": { "binding": "AI" },
+  // "vectorize": [{ "binding": "MEMORIES_INDEX", "index_name": "nuestro-lugar-memories" }]
+}

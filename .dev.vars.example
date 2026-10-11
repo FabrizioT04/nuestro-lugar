@@ -1,0 +1,12 @@
+# Copia este archivo como .dev.vars para desarrollo local (nunca lo subas a git).
+# En producción estos valores se configuran con `npx wrangler secret put NOMBRE`.
+ENVIRONMENT=development
+
+# Fase 2 (autenticación):
+# ALLOWED_EMAILS=[MI_CORREO],[CORREO_PAREJA]
+# ACCESS_TEAM_DOMAIN=https://<tu-equipo>.cloudflareaccess.com
+# ACCESS_AUD=<audience tag de la aplicación en Cloudflare Access>
+# DEV_USER_EMAIL=[MI_CORREO]
+
+# Fase 10 (recomendaciones):
+# GOOGLE_PLACES_API_KEY=

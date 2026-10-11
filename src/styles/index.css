@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+/* Paleta de Nuestro Lugar. Base crema/blanca, rosa como acento (no como fondo de todo)
+   y pequeños detalles lavanda. Se usan como clases: bg-cream, text-ink, bg-rose-300... */
+@theme {
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+
+  --color-cream: #fbf6f1;
+  --color-paper: #fffdfb;
+  --color-ink: #3d2f35;
+  --color-ink-soft: #7a6870;
+
+  --color-blush-50: #fdf3f5;
+  --color-blush-100: #fae4e9;
+  --color-blush-200: #f4ccd5;
+  --color-blush-300: #e8a5b4; /* rosa palo: acento principal */
+  --color-blush-500: #c9667e;
+  --color-blush-700: #8f3e53;
+
+  --color-lavender-100: #efeaf8;
+  --color-lavender-300: #c9bce8;
+  --color-lavender-500: #8d7cc4;
+
+  --radius-card: 1.5rem;
+  --shadow-soft: 0 8px 30px -12px rgb(143 62 83 / 0.18);
+}
+
+@layer base {
+  html {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply min-h-dvh font-sans antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+}

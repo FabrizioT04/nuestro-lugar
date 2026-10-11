@@ -1,0 +1,36 @@
+{
+  "name": "nuestro-lugar",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "npm run build && vite preview",
+    "typecheck": "tsc -b",
+    "deploy": "npm run build && wrangler deploy",
+    "cf-typegen": "wrangler types worker/worker-configuration.d.ts",
+    "db:migrate:local": "wrangler d1 migrations apply nuestro-lugar-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply nuestro-lugar-db --remote",
+    "db:new-migration": "wrangler d1 migrations create nuestro-lugar-db"
+  },
+  "dependencies": {
+    "hono": "^4.13.13",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.63.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "wrangler": "^4.149.0"
+  }
+}
