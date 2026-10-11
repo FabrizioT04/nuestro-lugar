@@ -1,15 +1,18 @@
+import { useMe } from "@/auth/AuthContext";
 import { Card } from "@/components/ui/Card";
 import { useSystemStatus } from "@/hooks/useSystemStatus";
 
 export function HomePage() {
   const status = useSystemStatus();
+  const me = useMe();
+  const names = me.relationship?.members.map((m) => m.displayName).join(" & ");
 
   return (
     <section className="space-y-5">
       <header>
-        <p className="text-sm font-semibold tracking-wide text-blush-500 uppercase">Fase 1</p>
+        <p className="text-sm font-semibold tracking-wide text-blush-500 uppercase">Fase 2</p>
         <h1 className="text-4xl text-ink">Nuestro Lugar</h1>
-        <p className="mt-1 text-ink-soft">La base está lista. Lo bonito viene después.</p>
+        <p className="mt-1 text-ink-soft">Hola, {me.user.displayName}. {names}</p>
       </header>
 
       <Card>

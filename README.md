@@ -21,14 +21,23 @@ npm run dev                         # http://localhost:5173
 ```
 
 `npm run dev` ejecuta React y el Worker juntos, dentro del mismo runtime que usa Cloudflare en
-producción. La pantalla de inicio muestra "React → Worker" y "Worker → D1"; si ves ambos con ✓,
-la Fase 1 funciona.
+producción.
+
+En local no hay Cloudflare Access delante, así que la app actúa como si hubieras entrado con
+`DEV_USER_EMAIL` (en `.dev.vars`). Cambia ese valor y reinicia `npm run dev` para probar:
+
+- el correo de tu pareja → entra a la misma relación;
+- un correo que no esté en `ALLOWED_EMAILS` → pantalla "Este lugar es privado".
+
+Para empezar de cero (borrar la base local): borra la carpeta `.wrangler/` y vuelve a ejecutar
+`npm run db:migrate:local`.
 
 Comprobaciones rápidas:
 
 ```bash
 curl http://localhost:5173/api/health      # {"status":"ok",...}
 curl http://localhost:5173/api/health/db   # {"status":"ok","tables":18,...}
+curl http://localhost:5173/api/me          # tu usuario y la relación
 curl http://localhost:5173/api/no-existe   # 404 en JSON
 ```
 
@@ -39,6 +48,7 @@ curl http://localhost:5173/api/no-existe   # 404 en JSON
 | `npm run dev` | Servidor de desarrollo (React + Worker + D1 local) |
 | `npm run build` | Verifica tipos y genera `dist/` |
 | `npm run typecheck` | Solo verificación de tipos |
+| `npm test` | Pruebas unitarias (JWT de Access, whitelist, validaciones) |
 | `npm run preview` | Build + servidor que imita producción |
 | `npm run deploy` | Build + `wrangler deploy` |
 | `npm run cf-typegen` | Regenera los tipos de bindings tras cambiar `wrangler.jsonc` |
@@ -47,21 +57,17 @@ curl http://localhost:5173/api/no-existe   # 404 en JSON
 
 ## Desplegar en Cloudflare
 
-> Recomendación: no publiques hasta terminar la Fase 2 (Access). Antes de eso la URL sería pública.
-
-```bash
-npx wrangler login
-npx wrangler d1 create nuestro-lugar-db     # copia el database_id en wrangler.jsonc
-npm run db:migrate:remote
-npm run deploy
-```
+Sigue la guía paso a paso: [docs/configurar-access.md](./docs/configurar-access.md)
+(base de datos, deploy, Google, Cloudflare Access y secretos).
 
 ## Variables
 
 | Nombre | Fase | Dónde |
 | --- | --- | --- |
 | `ENVIRONMENT` | 1 | `wrangler.jsonc` (`production`) y `.dev.vars` (`development`) |
-| `ALLOWED_EMAILS`, `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD` | 2 | `wrangler secret put` |
+| `ALLOWED_EMAILS` | 2 | `.dev.vars` y `wrangler secret put` |
+| `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD` | 2 | `wrangler secret put` (no hacen falta en local) |
+| `DEV_USER_EMAIL` | 2 | Solo `.dev.vars` (nunca en producción) |
 | `GOOGLE_PLACES_API_KEY` | 10 | `wrangler secret put` |
 
 Ningún secreto va en el frontend ni en el repositorio.

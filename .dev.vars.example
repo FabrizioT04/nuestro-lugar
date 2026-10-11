@@ -2,11 +2,17 @@
 # En producción estos valores se configuran con `npx wrangler secret put NOMBRE`.
 ENVIRONMENT=development
 
-# Fase 2 (autenticación):
-# ALLOWED_EMAILS=[MI_CORREO],[CORREO_PAREJA]
+# Los dos únicos correos que pueden entrar, separados por coma.
+ALLOWED_EMAILS=tu-correo@gmail.com,correo-pareja@gmail.com
+
+# Solo en local: no hay Cloudflare Access delante de `npm run dev`, así que la app
+# actúa como si hubieras entrado con este correo. Cámbialo por el de tu pareja para
+# probar su vista, o por otro correo para ver la pantalla de acceso denegado.
+DEV_USER_EMAIL=tu-correo@gmail.com
+
+# En producción (no hacen falta en local):
 # ACCESS_TEAM_DOMAIN=https://<tu-equipo>.cloudflareaccess.com
-# ACCESS_AUD=<audience tag de la aplicación en Cloudflare Access>
-# DEV_USER_EMAIL=[MI_CORREO]
+# ACCESS_AUD=<Application Audience (AUD) Tag de la aplicación en Cloudflare Access>
 
 # Fase 10 (recomendaciones):
 # GOOGLE_PLACES_API_KEY=

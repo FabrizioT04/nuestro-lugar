@@ -12,10 +12,13 @@
     "cf-typegen": "wrangler types worker/worker-configuration.d.ts",
     "db:migrate:local": "wrangler d1 migrations apply nuestro-lugar-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply nuestro-lugar-db --remote",
-    "db:new-migration": "wrangler d1 migrations create nuestro-lugar-db"
+    "db:new-migration": "wrangler d1 migrations create nuestro-lugar-db",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "hono": "^4.13.13",
+    "jose": "^6.2.12",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router": "^8.4.0",
@@ -31,6 +34,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
+    "vitest": "^5.0.3",
     "wrangler": "^4.149.0"
   }
 }
