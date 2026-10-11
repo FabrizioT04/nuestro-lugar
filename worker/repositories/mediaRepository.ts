@@ -10,6 +10,7 @@ export interface NewMedia {
   thumbSizeBytes: number | null;
   width: number | null;
   height: number | null;
+  durationMs: number | null;
 }
 
 export interface MediaRow {
@@ -27,8 +28,8 @@ export function createMediaRepository(db: D1Database) {
       await db
         .prepare(
           `INSERT INTO media_objects
-             (id, relationship_id, uploaded_by, r2_key, thumb_r2_key, purpose, content_type, size_bytes, thumb_size_bytes, width, height)
-           VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)`,
+             (id, relationship_id, uploaded_by, r2_key, thumb_r2_key, purpose, content_type, size_bytes, thumb_size_bytes, width, height, duration_ms)
+           VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)`,
         )
         .bind(
           media.id,
@@ -42,6 +43,7 @@ export function createMediaRepository(db: D1Database) {
           media.thumbSizeBytes,
           media.width,
           media.height,
+          media.durationMs,
         )
         .run();
     },

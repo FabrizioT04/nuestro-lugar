@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  capsuleCreateSchema,
+  capsuleInputSchema,
   importantDateInputSchema,
   letterCreateSchema,
   letterInputSchema,
@@ -134,5 +136,46 @@ describe("importantDateInputSchema", () => {
     ["nombre vacío", { title: " " }],
   ])("rechaza %s", (_name, patch) => {
     expect(importantDateInputSchema.safeParse({ ...base, ...patch }).success).toBe(false);
+  });
+});
+
+describe("capsuleInputSchema", () => {
+  const capsule = { recipient: "partner", title: "Dentro de un año", message: "Hola, futuro", unlockOn: "2027-10-11" };
+  const photo = "8b0a2c4e-1f3d-4a5b-9c6d-7e8f9a0b1c2d";
+
+  it("acepta una cápsula con texto y aplica valores por defecto", () => {
+    const parsed = capsuleInputSchema.parse(capsule);
+    expect(parsed.unlockTime).toBe("00:00");
+    expect(parsed.photoIds).toEqual([]);
+    expect(parsed.audioId).toBeNull();
+    expect(parsed.letter).toBeNull();
+  });
+
+  it("acepta una cápsula solo con una foto o solo con un audio", () => {
+    expect(capsuleInputSchema.safeParse({ ...capsule, message: "", photoIds: [photo] }).success).toBe(true);
+    expect(capsuleInputSchema.safeParse({ ...capsule, message: null, audioId: photo }).success).toBe(true);
+  });
+
+  it("exige guardar algo dentro", () => {
+    const result = capsuleInputSchema.safeParse({ ...capsule, message: "   " });
+    expect(result.success).toBe(false);
+  });
+
+  it.each([
+    ["sin fecha", { unlockOn: undefined }],
+    ["fecha imposible", { unlockOn: "2027-02-30" }],
+    ["destinatario raro", { recipient: "someone-else" }],
+    ["hora inválida", { unlockTime: "25:00" }],
+    ["demasiadas fotos", { photoIds: Array.from({ length: 7 }, (_, i) => photo.replace(/.$/, String(i))) }],
+    ["fotos repetidas", { photoIds: [photo, photo] }],
+    ["el audio repetido como foto", { photoIds: [photo], audioId: photo }],
+    ["id que no es uuid", { photoIds: ["../../otra-cosa"] }],
+  ])("rechaza %s", (_, patch) => {
+    expect(capsuleInputSchema.safeParse({ ...capsule, ...patch }).success).toBe(false);
+  });
+
+  it("la creación admite un id propuesto por el cliente", () => {
+    expect(capsuleCreateSchema.safeParse({ ...capsule, id: photo }).success).toBe(true);
+    expect(capsuleCreateSchema.safeParse({ ...capsule, id: "nope" }).success).toBe(false);
   });
 });

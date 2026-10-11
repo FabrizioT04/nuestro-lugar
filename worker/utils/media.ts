@@ -48,3 +48,45 @@ export function parseDimension(value: string | File | null): number | null {
   const n = Number(value);
   return n > 0 && n <= 20_000 ? n : null;
 }
+
+// ---------------------------------------------------------------------------
+// Audios (cápsulas del futuro)
+// ---------------------------------------------------------------------------
+
+export type AudioMime = "audio/webm" | "audio/ogg" | "audio/mp4" | "audio/mpeg" | "audio/wav";
+
+export const AUDIO_EXTENSIONS: Record<AudioMime, string> = {
+  "audio/webm": "webm",
+  "audio/ogg": "ogg",
+  "audio/mp4": "m4a",
+  "audio/mpeg": "mp3",
+  "audio/wav": "wav",
+};
+
+export const MAX_AUDIO_BYTES = 10 * 1024 * 1024;
+export const MAX_AUDIO_REQUEST_BYTES = MAX_AUDIO_BYTES + 64 * 1024;
+/** Duración máxima aceptada (la informa el navegador; solo se usa para mostrarla). */
+export const MAX_AUDIO_DURATION_MS = 10 * 60 * 1000;
+
+/**
+ * Tipo de audio por sus primeros bytes. Cubre lo que graban los navegadores
+ * (WebM/Opus en Chrome y Android, MP4/AAC en Safari e iOS) y los archivos más comunes.
+ */
+export function sniffAudioType(bytes: Uint8Array): AudioMime | null {
+  const ascii = (start: number, end: number) => String.fromCharCode(...bytes.subarray(start, end));
+  if (bytes.length >= 4 && bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3) return "audio/webm";
+  if (bytes.length >= 4 && ascii(0, 4) === "OggS") return "audio/ogg";
+  if (bytes.length >= 12 && ascii(4, 8) === "ftyp") return "audio/mp4";
+  if (bytes.length >= 12 && ascii(0, 4) === "RIFF" && ascii(8, 12) === "WAVE") return "audio/wav";
+  if (bytes.length >= 3 && ascii(0, 3) === "ID3") return "audio/mpeg";
+  // Cabecera de trama MPEG sin etiqueta ID3 (11 bits de sincronización + capa III).
+  if (bytes.length >= 2 && bytes[0] === 0xff && (bytes[1]! & 0xe6) === 0xe2) return "audio/mpeg";
+  return null;
+}
+
+/** Duración en milisegundos dentro de un rango razonable, o null. */
+export function parseDurationMs(value: string | File | null): number | null {
+  if (typeof value !== "string" || !/^\d{1,9}$/.test(value)) return null;
+  const n = Number(value);
+  return n > 0 && n <= MAX_AUDIO_DURATION_MS ? n : null;
+}

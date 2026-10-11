@@ -1,9 +1,11 @@
-import type { PhotoRef, UploadedMedia } from "@shared/api";
+import type { PhotoRef, UploadedAudio, UploadedMedia } from "@shared/api";
 import type { PreparedImage } from "@/utils/image";
 import { apiFetch } from "./client";
 
+export type PhotoPurpose = "memory" | "plan" | "cover" | "capsule";
+
 export const mediaApi = {
-  upload(image: PreparedImage, purpose: "memory" | "plan" | "cover" = "memory") {
+  upload(image: PreparedImage, purpose: PhotoPurpose = "memory") {
     const form = new FormData();
     const ext = (blob: Blob) => (blob.type === "image/webp" ? "webp" : "jpg");
     form.append("file", image.full, `foto.${ext(image.full)}`);
@@ -12,6 +14,14 @@ export const mediaApi = {
     form.append("height", String(image.height));
     form.append("purpose", purpose);
     return apiFetch<UploadedMedia>("/media", { method: "POST", body: form });
+  },
+
+  /** Audio para una cápsula del futuro (grabado en el navegador o elegido de los archivos). */
+  uploadAudio(audio: Blob, durationMs: number | null) {
+    const form = new FormData();
+    form.append("file", audio, "audio");
+    if (durationMs) form.append("durationMs", String(Math.round(durationMs)));
+    return apiFetch<UploadedAudio>("/media/audio", { method: "POST", body: form });
   },
 };
 

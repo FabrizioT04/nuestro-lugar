@@ -254,3 +254,48 @@ export type ImportantDateInput = z.infer<typeof importantDateInputSchema>;
 export type ImportantDatePayload = z.input<typeof importantDateInputSchema>;
 
 export const importantDateCreateSchema = importantDateInputSchema.extend({ id: uuid.optional() });
+
+// ---------------------------------------------------------------------------
+// Caja del futuro
+// ---------------------------------------------------------------------------
+
+export const CAPSULE_RECIPIENTS = ["partner", "both"] as const;
+export type CapsuleRecipient = (typeof CAPSULE_RECIPIENTS)[number];
+
+export const MAX_PHOTOS_PER_CAPSULE = 6;
+export const MAX_CAPSULE_MESSAGE_LENGTH = 5_000;
+export const MAX_CAPSULE_LETTER_LENGTH = 10_000;
+
+export const capsuleInputSchema = z
+  .object({
+    recipient: z.enum(CAPSULE_RECIPIENTS, "Elige para quién es"),
+    title: z.string().trim().min(1, "Ponle un título").max(200, "Máximo 200 caracteres"),
+    message: optionalText(MAX_CAPSULE_MESSAGE_LENGTH),
+    /** La "pequeña carta" que va dentro. */
+    letter: optionalText(MAX_CAPSULE_LETTER_LENGTH),
+    /** Fecha y hora de apertura en la zona horaria de la pareja. */
+    unlockOn: isoDate,
+    unlockTime: clockTime.default("00:00"),
+    /** Fotos subidas con purpose=capsule, en orden. */
+    photoIds: z
+      .array(uuid)
+      .max(MAX_PHOTOS_PER_CAPSULE, `Máximo ${MAX_PHOTOS_PER_CAPSULE} fotos`)
+      .default([])
+      .refine((ids) => new Set(ids).size === ids.length, "Hay fotos repetidas"),
+    /** Audio subido con /media/audio. */
+    audioId: uuid.nullable().optional().transform((value) => value ?? null),
+  })
+  .superRefine((value, ctx) => {
+    if (!value.message && !value.letter && value.photoIds.length === 0 && !value.audioId) {
+      ctx.addIssue({ code: "custom", path: ["message"], message: "Guarda algo dentro: un texto, una carta, una foto o un audio" });
+    }
+    if (value.audioId && value.photoIds.includes(value.audioId)) {
+      ctx.addIssue({ code: "custom", path: ["audioId"], message: "Archivo repetido" });
+    }
+  });
+
+export type CapsuleInput = z.infer<typeof capsuleInputSchema>;
+/** Lo que envía el formulario (antes de aplicar valores por defecto). */
+export type CapsulePayload = z.input<typeof capsuleInputSchema>;
+
+export const capsuleCreateSchema = z.intersection(capsuleInputSchema, z.object({ id: uuid.optional() }));
