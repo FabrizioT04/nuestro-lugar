@@ -2,13 +2,12 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import { MEMORY_CATEGORIES, memoryInputSchema } from "@shared/schemas";
-import { PhotoUploader, type PhotoItem } from "@/components/memories/PhotoUploader";
+import { PhotoUploader } from "@/components/memories/PhotoUploader";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { mediaApi } from "@/services/api/media";
+import { usePhotoUploads } from "@/hooks/usePhotoUploads";
 import { memoriesApi } from "@/services/api/memories";
-import { prepareImage } from "@/utils/image";
 
 const inputClass =
   "mt-1 w-full rounded-2xl border border-blush-100 bg-cream px-4 py-3 text-ink outline-none focus:border-blush-300 focus:ring-2 focus:ring-blush-100";
@@ -32,7 +31,8 @@ export function MemoryFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(EMPTY);
-  const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const uploads = usePhotoUploads("memory");
+  const { setSaved } = uploads;
   const [loading, setLoading] = useState(Boolean(id));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,39 +51,13 @@ export function MemoryFormPage() {
           description: memory.description ?? "",
           isHighlighted: memory.isHighlighted,
         });
-        setPhotos(memory.photos.map((p) => ({ key: p.id, status: "done", mediaId: p.id })));
+        setSaved(memory.photos.map((p) => p.id));
       })
       .catch((err: unknown) => setError(err instanceof Error ? err.message : "No se pudo cargar"))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, setSaved]);
 
   const set = <K extends keyof FormState>(name: K, value: FormState[K]) => setForm((f) => ({ ...f, [name]: value }));
-  const patchPhoto = (key: string, patch: Partial<PhotoItem>) =>
-    setPhotos((list) => list.map((p) => (p.key === key ? { ...p, ...patch } : p)));
-
-  function addPhotos(files: File[]) {
-    const items: PhotoItem[] = files.map((file) => ({
-      key: crypto.randomUUID(),
-      status: "processing",
-      previewUrl: URL.createObjectURL(file),
-    }));
-    setPhotos((list) => [...list, ...items]);
-
-    // Una a la vez: menos memoria en el móvil y no se dispara el límite de subidas.
-    void (async () => {
-      for (const [index, item] of items.entries()) {
-        try {
-          const prepared = await prepareImage(files[index]!);
-          patchPhoto(item.key, { status: "uploading" });
-          const uploaded = await mediaApi.upload(prepared);
-          patchPhoto(item.key, { status: "done", mediaId: uploaded.id });
-        } catch (err) {
-          patchPhoto(item.key, { status: "error", error: err instanceof Error ? err.message : "No se pudo subir" });
-        }
-      }
-    })();
-  }
-
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     const parsed = memoryInputSchema.safeParse({
@@ -92,7 +66,7 @@ export function MemoryFormPage() {
         .split(",")
         .map((t) => t.replace(/^#/, "").trim())
         .filter(Boolean),
-      photoIds: photos.filter((p) => p.status === "done" && p.mediaId).map((p) => p.mediaId),
+      photoIds: uploads.uploadedIds,
     });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Revisa los datos");
@@ -110,7 +84,7 @@ export function MemoryFormPage() {
     }
   }
 
-  const busy = photos.some((p) => p.status === "processing" || p.status === "uploading");
+  const busy = uploads.busy;
 
   if (loading) return <Skeleton className="h-96" />;
 
@@ -125,17 +99,7 @@ export function MemoryFormPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <Card>
-          <PhotoUploader
-            photos={photos}
-            onAdd={addPhotos}
-            onRemove={(key) => setPhotos((list) => list.filter((p) => p.key !== key))}
-            onMakeCover={(key) =>
-              setPhotos((list) => {
-                const chosen = list.find((p) => p.key === key);
-                return chosen ? [chosen, ...list.filter((p) => p.key !== key)] : list;
-              })
-            }
-          />
+          <PhotoUploader photos={uploads.photos} onAdd={uploads.addPhotos} onRemove={uploads.remove} onMakeCover={uploads.makeCover} />
         </Card>
 
         <Card className="space-y-4">

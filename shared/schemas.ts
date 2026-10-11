@@ -168,3 +168,59 @@ export const letterCreateSchema = z.intersection(letterInputSchema, z.object({ i
 export const letterListQuerySchema = z.object({
   box: z.enum(["received", "sent"]).default("received"),
 });
+
+// ---------------------------------------------------------------------------
+// Planes
+// ---------------------------------------------------------------------------
+
+export const PLAN_TYPES = ["date", "restaurant", "trip", "activity", "movie", "goal", "place_to_visit", "other"] as const;
+export type PlanType = (typeof PLAN_TYPES)[number];
+
+export const PLAN_STATUSES = ["pending", "done", "cancelled"] as const;
+export type PlanStatus = (typeof PLAN_STATUSES)[number];
+
+export const CURRENCIES = ["PEN", "USD", "EUR"] as const;
+
+/** Presupuesto máximo aceptado (en la unidad de la moneda). */
+const MAX_BUDGET = 10_000_000;
+
+export const planInputSchema = z
+  .object({
+    type: z.enum(PLAN_TYPES, "Tipo de plan inválido"),
+    title: z.string().trim().min(1, "Ponle un título").max(200, "Máximo 200 caracteres"),
+    description: optionalText(5000),
+    plannedFor: isoDate.nullable().optional().transform((value) => value ?? null),
+    /** En la unidad de la moneda (120.50), con hasta dos decimales. */
+    budget: z
+      .number("El presupuesto debe ser un número")
+      .min(0, "El presupuesto no puede ser negativo")
+      .max(MAX_BUDGET, "Presupuesto demasiado alto")
+      .refine((value) => Math.abs(Math.round(value * 100) - value * 100) < 1e-6, "Máximo dos decimales")
+      .nullable()
+      .optional()
+      .transform((value) => value ?? null),
+    currency: z.enum(CURRENCIES, "Moneda inválida").nullable().optional().transform((value) => value ?? null),
+    placeName: optionalText(200),
+    /** Fotos de cómo fue (se suben con purpose=plan). */
+    photoIds: z
+      .array(uuid)
+      .max(MAX_PHOTOS_PER_MEMORY, `Máximo ${MAX_PHOTOS_PER_MEMORY} fotos`)
+      .default([])
+      .refine((ids) => new Set(ids).size === ids.length, "Hay fotos repetidas"),
+  })
+  .superRefine((value, ctx) => {
+    if (value.budget !== null && !value.currency) {
+      ctx.addIssue({ code: "custom", path: ["currency"], message: "Elige la moneda del presupuesto" });
+    }
+  })
+  .transform(({ budget, currency, ...rest }) => ({
+    ...rest,
+    budgetCents: budget === null ? null : Math.round(budget * 100),
+    currency: budget === null ? null : currency,
+  }));
+
+export type PlanInput = z.infer<typeof planInputSchema>;
+
+export const planCreateSchema = z.intersection(planInputSchema, z.object({ id: uuid.optional() }));
+
+export const planStatusSchema = z.object({ status: z.enum(PLAN_STATUSES, "Estado inválido") });

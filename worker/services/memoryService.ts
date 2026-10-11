@@ -32,10 +32,10 @@ export function decodeCursor(raw: string): MemoryCursor {
 
 const relationshipOf = (user: AuthenticatedUser) => user.relationshipId!;
 
-/** Las fotos deben existir, ser de esta relación y haberse subido para un recuerdo. */
+/** Las fotos deben existir, ser de esta relación y haberse subido para un recuerdo (o un plan convertido en recuerdo). */
 async function assertPhotosOwned(env: Bindings, user: AuthenticatedUser, photoIds: string[]) {
   if (photoIds.length === 0) return;
-  const owned = await createMediaRepository(env.DB).countOwned(photoIds, relationshipOf(user), ["memory"]);
+  const owned = await createMediaRepository(env.DB).countOwned(photoIds, relationshipOf(user), ["memory", "plan"]);
   if (owned !== photoIds.length) throw badRequest("Alguna foto no existe o no es de este lugar");
 }
 

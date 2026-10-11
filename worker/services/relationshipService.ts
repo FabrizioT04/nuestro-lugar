@@ -47,7 +47,7 @@ export async function setupRelationship(
 export async function setCoverPhoto(env: Bindings, user: AuthenticatedUser, mediaId: string | null): Promise<void> {
   const relationshipId = user.relationshipId!;
   if (mediaId) {
-    const owned = await createMediaRepository(env.DB).countOwned([mediaId], relationshipId, ["memory", "cover"]);
+    const owned = await createMediaRepository(env.DB).countOwned([mediaId], relationshipId, ["memory", "plan", "cover"]);
     if (owned !== 1) throw badRequest("Esa foto no es de este lugar");
   }
   await createRelationshipRepository(env.DB).setCover(relationshipId, mediaId);

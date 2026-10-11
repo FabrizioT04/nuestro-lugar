@@ -89,6 +89,16 @@ En local no hace falta crear nada: `npm run dev` simula R2 dentro de `.wrangler/
 - Abrir una carta queda registrado (`opened_at`). Desde ese momento el autor ya no puede editarla.
 - Crear, editar y borrar tiene un límite de 60 escrituras por minuto por persona (`WRITE_LIMITER`).
 
+## Planes
+
+- Tipos: cita, restaurante, viaje, actividad, película, meta, lugar por conocer y otro.
+- Estados: pendiente, realizado (guarda cuándo) y cancelado. Se puede volver a pendiente.
+- Fecha, lugar y presupuesto opcionales. El presupuesto se guarda en céntimos con su moneda (PEN, USD, EUR).
+- Los dos pueden crear y editar cualquier plan de la pareja.
+- Al realizarlo se pueden subir fotos de cómo fue y guardarlo como recuerdo: el recuerdo comparte las
+  fotos y queda enlazado al plan (pulsar otra vez abre el mismo recuerdo, no crea otro).
+- Los planes pendientes con fecha aparecen en "Próximo momento" del inicio.
+
 ## Variables
 
 | Nombre | Fase | Dónde |
