@@ -1,25 +1,7 @@
 import type { HighlightedMemory } from "@shared/api";
 
-export interface ImportantDateRow {
-  title: string;
-  emoji: string | null;
-  event_date: string;
-  recurs_yearly: number;
-}
-
 export function createHomeRepository(db: D1Database) {
   return {
-    async listImportantDates(relationshipId: string): Promise<ImportantDateRow[]> {
-      const { results } = await db
-        .prepare(
-          `SELECT title, emoji, event_date, recurs_yearly FROM important_dates
-           WHERE relationship_id = ?1 AND deleted_at IS NULL`,
-        )
-        .bind(relationshipId)
-        .all<ImportantDateRow>();
-      return results;
-    },
-
     /** El recuerdo marcado como destacado más reciente; si no hay, el último recuerdo. */
     async findHighlightedMemory(relationshipId: string): Promise<HighlightedMemory | null> {
       const row = await db

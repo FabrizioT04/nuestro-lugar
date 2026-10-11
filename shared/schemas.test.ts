@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { letterCreateSchema, letterInputSchema, memoryCreateSchema, planCreateSchema, planInputSchema, planStatusSchema, relationshipSetupSchema } from "./schemas";
+import {
+  importantDateInputSchema,
+  letterCreateSchema,
+  letterInputSchema,
+  memoryCreateSchema,
+  planCreateSchema,
+  planInputSchema,
+  planStatusSchema,
+  relationshipSetupSchema,
+} from "./schemas";
 
 const valid = { myName: "Fabrizio", partnerName: "Pareja", startedOn: "2024-02-14", timezone: "America/Lima" };
 
@@ -109,5 +118,21 @@ describe("planInputSchema", () => {
   it("solo acepta los tres estados", () => {
     expect(planStatusSchema.safeParse({ status: "done" }).success).toBe(true);
     expect(planStatusSchema.safeParse({ status: "archived" }).success).toBe(false);
+  });
+});
+
+describe("importantDateInputSchema", () => {
+  const base = { title: "Primer beso", type: "first_time", eventDate: "2025-12-24" };
+  it("acepta un emoji o ninguno", () => {
+    expect(importantDateInputSchema.parse({ ...base, emoji: "💋" })).toMatchObject({ emoji: "💋", recursYearly: true, notes: null });
+    expect(importantDateInputSchema.parse({ ...base, emoji: "" }).emoji).toBeNull();
+  });
+  it.each([
+    ["texto en lugar de emoji", { emoji: "hola" }],
+    ["tipo desconocido", { type: "boda" }],
+    ["fecha inválida", { eventDate: "2025-02-30" }],
+    ["nombre vacío", { title: " " }],
+  ])("rechaza %s", (_name, patch) => {
+    expect(importantDateInputSchema.safeParse({ ...base, ...patch }).success).toBe(false);
   });
 });

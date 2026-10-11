@@ -2,14 +2,16 @@ import type { HomeResponse, RelationshipSummary, UpcomingMoment } from "@shared/
 import { daysBetween, elapsedParts, nextYearlyOccurrence, todayIn } from "@shared/dates";
 import type { AuthenticatedUser } from "../auth/types";
 import type { Bindings } from "../env";
-import { createHomeRepository, type ImportantDateRow } from "../repositories/homeRepository";
+import { createHomeRepository } from "../repositories/homeRepository";
+import { createImportantDateRepository } from "../repositories/importantDateRepository";
+import { toImportantDate } from "./importantDateService";
 import { countUnopenedLetters } from "./letterService";
 import { createPlanRepository } from "../repositories/planRepository";
 import { PLAN_TYPE_INFO } from "@shared/plans";
 import { createRelationshipRepository } from "../repositories/relationshipRepository";
 import { notFound } from "../utils/errors";
 
-function anniversaryMoment(relationship: RelationshipSummary, today: string): UpcomingMoment {
+export function anniversaryMoment(relationship: RelationshipSummary, today: string): UpcomingMoment {
   const next = nextYearlyOccurrence(relationship.startedOn, today);
   return {
     title: next.years === 1 ? "Nuestro primer aniversario" : "Nuestro aniversario",
@@ -17,18 +19,8 @@ function anniversaryMoment(relationship: RelationshipSummary, today: string): Up
     date: next.date,
     daysUntil: daysBetween(today, next.date),
     years: next.years,
-    link: null,
+    link: "/nosotros",
   };
-}
-
-function importantDateMoment(row: ImportantDateRow, today: string): UpcomingMoment | null {
-  if (row.recurs_yearly === 1) {
-    const next = nextYearlyOccurrence(row.event_date, today);
-    return { title: row.title, emoji: row.emoji ?? "✨", date: next.date, daysUntil: daysBetween(today, next.date), years: next.years, link: null };
-  }
-  const daysUntil = daysBetween(today, row.event_date);
-  if (daysUntil < 0) return null;
-  return { title: row.title, emoji: row.emoji ?? "✨", date: row.event_date, daysUntil, years: null, link: null };
 }
 
 export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<HomeResponse> {
@@ -38,7 +30,7 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
   const homeRepository = createHomeRepository(env.DB);
   const [relationship, importantDates, highlightedMemory, unopenedLetters] = await Promise.all([
     createRelationshipRepository(env.DB).findSummary(user.relationshipId),
-    homeRepository.listImportantDates(user.relationshipId),
+    createImportantDateRepository(env.DB).list(user.relationshipId),
     homeRepository.findHighlightedMemory(user.relationshipId),
     countUnopenedLetters(env, user),
   ]);
@@ -50,9 +42,21 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
 
   const upcomingPlans = await createPlanRepository(env.DB).listUpcoming(user.relationshipId, today);
 
-  const candidates = [
+  const candidates: UpcomingMoment[] = [
     anniversaryMoment(relationship, today),
-    ...importantDates.map((row) => importantDateMoment(row, today)),
+    ...importantDates
+      .map((row) => toImportantDate(row, today))
+      .filter((date) => date.nextDate !== null && date.daysUntil !== null)
+      .map(
+        (date): UpcomingMoment => ({
+          title: date.title,
+          emoji: date.emoji,
+          date: date.nextDate!,
+          daysUntil: date.daysUntil!,
+          years: date.years,
+          link: "/nosotros",
+        }),
+      ),
     ...upcomingPlans.map(
       (plan): UpcomingMoment => ({
         title: plan.title,
@@ -63,7 +67,7 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
         link: `/planes/${plan.id}`,
       }),
     ),
-  ].filter((moment): moment is UpcomingMoment => moment !== null);
+  ];
   // Estable: a igual distancia, el aniversario y las fechas importantes van antes que un plan.
   candidates.sort((a, b) => a.daysUntil - b.daysUntil);
 

@@ -6,6 +6,8 @@ import { MemoriesPage } from "@/pages/MemoriesPage";
 import { MemoryDetailPage } from "@/pages/MemoryDetailPage";
 import { MemoryFormPage } from "@/pages/MemoryFormPage";
 import { UsPage } from "@/pages/UsPage";
+import { ImportantDateFormPage } from "@/pages/ImportantDateFormPage";
+import { TimelinePage } from "@/pages/TimelinePage";
 import { PlansPage } from "@/pages/PlansPage";
 import { PlanDetailPage } from "@/pages/PlanDetailPage";
 import { PlanFormPage } from "@/pages/PlanFormPage";
@@ -37,6 +39,9 @@ export const router = createBrowserRouter([
           { path: "recuerdos/:id", element: <MemoryDetailPage /> },
           { path: "recuerdos/:id/editar", element: <MemoryFormPage /> },
           { path: "nosotros", element: <UsPage /> },
+          { path: "nosotros/historia", element: <TimelinePage /> },
+          { path: "nosotros/fechas/nueva", element: <ImportantDateFormPage /> },
+          { path: "nosotros/fechas/:id", element: <ImportantDateFormPage /> },
           { path: "planes", element: <PlansPage /> },
           { path: "planes/nuevo", element: <PlanFormPage /> },
           { path: "planes/:id", element: <PlanDetailPage /> },
