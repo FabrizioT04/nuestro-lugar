@@ -260,3 +260,52 @@ export interface TimelineResponse {
   /** Del más antiguo al más reciente. */
   events: TimelineEvent[];
 }
+
+/** partner: para la otra persona · both: para los dos. */
+export type CapsuleRecipientName = "partner" | "both";
+
+export interface CapsuleSummary {
+  id: string;
+  title: string;
+  recipient: CapsuleRecipientName;
+  /** Instante UTC a partir del cual se puede abrir. */
+  unlockAt: string;
+  /** true mientras unlockAt esté en el futuro (lo decide el Worker). */
+  isLocked: boolean;
+  /** Primera vez que la abrió la otra persona; null = sin abrir. */
+  openedAt: string | null;
+  /** true si la guardó quien la está viendo. */
+  isMine: boolean;
+  author: { id: string; displayName: string };
+  createdAt: string;
+}
+
+export interface CapsuleListResponse {
+  items: CapsuleSummary[];
+}
+
+export interface CapsuleAudio {
+  id: string;
+  durationMs: number | null;
+}
+
+export interface CapsuleContents {
+  message: string | null;
+  letter: string | null;
+  photos: PhotoRef[];
+  audio: CapsuleAudio | null;
+}
+
+export interface CapsuleDetail extends CapsuleSummary {
+  /** null mientras quien la ve no pueda abrirla (bloqueada o sin abrir). */
+  contents: CapsuleContents | null;
+  /** Quien la guardó puede editarla mientras siga cerrada. */
+  canEdit: boolean;
+  updatedAt: string;
+}
+
+export interface UploadedAudio {
+  id: string;
+  durationMs: number | null;
+  sizeBytes: number;
+}

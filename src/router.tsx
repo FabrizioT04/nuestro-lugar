@@ -20,6 +20,8 @@ import { LetterDetailPage } from "@/pages/LetterDetailPage";
 import { LetterFormPage } from "@/pages/LetterFormPage";
 import { DiscoverPage } from "@/pages/DiscoverPage";
 import { FuturePage } from "@/pages/FuturePage";
+import { CapsuleDetailPage } from "@/pages/CapsuleDetailPage";
+import { CapsuleFormPage } from "@/pages/CapsuleFormPage";
 
 // Las rutas viven en español porque son las que ve la pareja en la barra de direcciones.
 // Todas pasan por RequireAuth: no hay ninguna pantalla pública.
@@ -53,6 +55,9 @@ export const router = createBrowserRouter([
           { path: "cartas/:id/editar", element: <LetterFormPage /> },
           { path: "descubrir", element: <DiscoverPage /> },
           { path: "futuro", element: <FuturePage /> },
+          { path: "futuro/nueva", element: <CapsuleFormPage /> },
+          { path: "futuro/:id", element: <CapsuleDetailPage /> },
+          { path: "futuro/:id/editar", element: <CapsuleFormPage /> },
           { path: "*", element: <NotFoundPage /> },
         ],
       },

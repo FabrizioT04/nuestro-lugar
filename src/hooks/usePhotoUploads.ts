@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
 import type { PhotoItem } from "@/components/memories/PhotoUploader";
-import { mediaApi } from "@/services/api/media";
+import { mediaApi, type PhotoPurpose } from "@/services/api/media";
 import { prepareImage } from "@/utils/image";
 
 /** Lista de fotos de un formulario: comprime y sube cada foto nueva (una a la vez). */
-export function usePhotoUploads(purpose: "memory" | "plan") {
+export function usePhotoUploads(purpose: Exclude<PhotoPurpose, "cover">) {
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
 
   const patchPhoto = (key: string, patch: Partial<PhotoItem>) =>
