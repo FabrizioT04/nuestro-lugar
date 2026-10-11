@@ -22,3 +22,6 @@ export const conflict = (message: string) => new AppError(409, "conflict", messa
 /** Falta configuración en el servidor. Se responde 500 sin revelar qué falta. */
 export const misconfigured = () =>
   new AppError(500, "misconfigured", "El servidor no está configurado correctamente");
+export const payloadTooLarge = (message: string) => new AppError(413, "payload_too_large", message);
+export const unsupportedMediaType = (message: string) => new AppError(415, "unsupported_media_type", message);
+export const rateLimited = (message = "Vas muy rápido. Espera un momento.") => new AppError(429, "rate_limited", message);

@@ -5,6 +5,7 @@ interface RelationshipRow {
   name: string;
   started_on: string;
   timezone: string;
+  cover_media_id: string | null;
 }
 
 interface MemberRow {
@@ -26,7 +27,7 @@ export function createRelationshipRepository(db: D1Database) {
     async findSummary(relationshipId: string): Promise<RelationshipSummary | null> {
       const [relationship, members] = await db.batch([
         db
-          .prepare("SELECT id, name, started_on, timezone FROM relationships WHERE id = ?1")
+          .prepare("SELECT id, name, started_on, timezone, cover_media_id FROM relationships WHERE id = ?1")
           .bind(relationshipId),
         db
           .prepare(
@@ -44,12 +45,22 @@ export function createRelationshipRepository(db: D1Database) {
         name: row.name,
         startedOn: row.started_on,
         timezone: row.timezone,
+        coverMediaId: row.cover_media_id,
         members: ((members?.results ?? []) as MemberRow[]).map((m) => ({
           id: m.id,
           displayName: m.display_name,
           email: m.email,
         })),
       };
+    },
+
+    async setCover(relationshipId: string, mediaId: string | null): Promise<void> {
+      await db
+        .prepare(
+          "UPDATE relationships SET cover_media_id = ?1, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?2",
+        )
+        .bind(mediaId, relationshipId)
+        .run();
     },
 
     /**

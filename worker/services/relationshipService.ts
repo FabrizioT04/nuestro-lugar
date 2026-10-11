@@ -4,7 +4,8 @@ import type { AuthenticatedUser } from "../auth/types";
 import type { Bindings } from "../env";
 import { parseAllowedEmails, partnerEmailOf } from "../auth/allowedEmails";
 import { createRelationshipRepository } from "../repositories/relationshipRepository";
-import { conflict, misconfigured } from "../utils/errors";
+import { createMediaRepository } from "../repositories/mediaRepository";
+import { badRequest, conflict, misconfigured } from "../utils/errors";
 
 /** Configuración inicial: la hace quien entre primero, una sola vez, para los dos. */
 export async function setupRelationship(
@@ -41,4 +42,13 @@ export async function setupRelationship(
   const summary = await repository.findSummary(relationshipId);
   if (!summary) throw new Error("La relación recién creada no se encontró");
   return summary;
+}
+
+export async function setCoverPhoto(env: Bindings, user: AuthenticatedUser, mediaId: string | null): Promise<void> {
+  const relationshipId = user.relationshipId!;
+  if (mediaId) {
+    const owned = await createMediaRepository(env.DB).countOwned([mediaId], relationshipId, ["memory", "cover"]);
+    if (owned !== 1) throw badRequest("Esa foto no es de este lugar");
+  }
+  await createRelationshipRepository(env.DB).setCover(relationshipId, mediaId);
 }

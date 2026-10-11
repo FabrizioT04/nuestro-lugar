@@ -9,7 +9,7 @@
     "preview": "npm run build && vite preview",
     "typecheck": "tsc -b",
     "deploy": "npm run build && wrangler deploy",
-    "cf-typegen": "wrangler types worker/worker-configuration.d.ts",
+    "cf-typegen": "wrangler types worker/worker-configuration.d.ts --strict-vars=false",
     "db:migrate:local": "wrangler d1 migrations apply nuestro-lugar-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply nuestro-lugar-db --remote",
     "db:new-migration": "wrangler d1 migrations create nuestro-lugar-db",
