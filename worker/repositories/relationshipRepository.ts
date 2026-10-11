@@ -54,6 +54,15 @@ export function createRelationshipRepository(db: D1Database) {
       };
     },
 
+    /** El otro miembro de la relación (el destinatario de las cartas). */
+    async findPartnerId(relationshipId: string, userId: string): Promise<string | null> {
+      const row = await db
+        .prepare("SELECT user_id FROM relationship_members WHERE relationship_id = ?1 AND user_id <> ?2 LIMIT 1")
+        .bind(relationshipId, userId)
+        .first<{ user_id: string }>();
+      return row?.user_id ?? null;
+    },
+
     async setCover(relationshipId: string, mediaId: string | null): Promise<void> {
       await db
         .prepare(

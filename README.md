@@ -79,6 +79,16 @@ En local no hace falta crear nada: `npm run dev` simula R2 dentro de `.wrangler/
   vuestra relación. Las claves de R2 las genera el Worker.
 - D1 solo guarda metadatos; nunca la imagen.
 
+## Cartas
+
+- Cuatro tipos: **carta** (se abre ya), **Ábreme cuando…** (se abre cuando la otra persona lo necesite),
+  **programada** (se ve el sobre cerrado con la fecha) y **sorpresa** (no aparece hasta su fecha).
+- El destinatario siempre es la otra persona; el Worker lo decide, no el navegador.
+- La fecha y hora de apertura se interpretan en la zona horaria de la pareja y se guardan en UTC.
+- Antes de esa fecha el Worker no envía el contenido al destinatario, y una sorpresa responde 404.
+- Abrir una carta queda registrado (`opened_at`). Desde ese momento el autor ya no puede editarla.
+- Crear, editar y borrar tiene un límite de 60 escrituras por minuto por persona (`WRITE_LIMITER`).
+
 ## Variables
 
 | Nombre | Fase | Dónde |

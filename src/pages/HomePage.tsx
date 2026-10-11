@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ChevronRight, Sparkles } from "lucide-react";
+import { ChevronRight, Mail, Sparkles } from "lucide-react";
 import type { HomeResponse } from "@shared/api";
 import { CoverArt } from "@/components/CoverArt";
 import { MemoryPhoto } from "@/components/memories/MemoryPhoto";
@@ -114,6 +114,23 @@ function HomeContent({ data }: { data: HomeResponse }) {
             </p>
           </div>
         </Card>
+      )}
+
+      {data.unopenedLetters > 0 && (
+        <Link to="/cartas" className="block animate-fade-up [animation-delay:150ms]">
+          <Card className="flex items-center gap-4 !bg-lavender-100 transition active:scale-[0.99]">
+            <span className="flex h-14 w-14 shrink-0 animate-float items-center justify-center rounded-full bg-paper text-lavender-500">
+              <Mail size={24} strokeWidth={1.75} aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-lg">
+                {data.unopenedLetters === 1 ? "Tienes una carta sin abrir" : `Tienes ${plural(data.unopenedLetters, "carta")} sin abrir`}
+              </p>
+              <p className="text-sm text-ink-soft">{data.unopenedLetters === 1 ? "Te está esperando ♡" : "Te están esperando ♡"}</p>
+            </div>
+            <ChevronRight size={20} className="text-ink-soft" aria-hidden />
+          </Card>
+        </Link>
       )}
 
       <Link

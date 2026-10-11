@@ -36,3 +36,21 @@ export function formatDuration({ years, months }: { years: number; months: numbe
   ].filter((unit): unit is string => unit !== null);
   return units.length > 0 ? units.join(" y ") : null;
 }
+
+/** "14 de febrero de 2027, 09:30" en la zona horaria de la pareja (instantes UTC, no fechas de calendario). */
+export function formatDateTimeIn(iso: string, timezone: string): string {
+  return new Intl.DateTimeFormat("es", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: timezone,
+  }).format(new Date(iso));
+}
+
+/** "14/02/2027" en la zona horaria de la pareja. */
+export function formatShortDateIn(iso: string, timezone: string): string {
+  return new Intl.DateTimeFormat("es", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: timezone }).format(new Date(iso));
+}
