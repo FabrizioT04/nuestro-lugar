@@ -12,7 +12,7 @@ export function HomePage() {
       <header>
         <p className="text-sm font-semibold tracking-wide text-blush-500 uppercase">Fase 2</p>
         <h1 className="text-4xl text-ink">Nuestro Lugar</h1>
-        <p className="mt-1 text-ink-soft">Hola, {me.user.displayName}. {names}</p>
+        <p className="mt-1 text-ink-soft">{names ?? me.user.displayName}</p>
       </header>
 
       <Card>
