@@ -4,6 +4,7 @@ import { requestId } from "./middleware/requestId";
 import { securityHeaders } from "./middleware/securityHeaders";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { healthRoutes } from "./routes/health";
+import { homeRoutes } from "./routes/home";
 import { meRoutes } from "./routes/me";
 import { relationshipRoutes } from "./routes/relationship";
 
@@ -22,6 +23,7 @@ app.use("*", securityHeaders);
 
 app.route("/health", healthRoutes);
 app.route("/me", meRoutes);
+app.route("/home", homeRoutes);
 app.route("/relationship", relationshipRoutes);
 
 app.notFound(notFoundHandler);

@@ -4,9 +4,16 @@ import { requireUser } from "../middleware/auth";
 import { createUserRepository } from "../repositories/userRepository";
 import { getMe } from "../services/meService";
 
-export const meRoutes = new Hono<AppEnv>().use(requireUser).get("/", async (c) => {
-  const user = c.get("user");
-  // No bloquea la respuesta.
-  c.executionCtx.waitUntil(createUserRepository(c.env.DB).touchLastSeen(user.id));
-  return c.json(await getMe(c.env, user));
-});
+export const meRoutes = new Hono<AppEnv>()
+  .use(requireUser)
+  .get("/", async (c) => {
+    const user = c.get("user");
+    // No bloquea la respuesta.
+    c.executionCtx.waitUntil(createUserRepository(c.env.DB).touchLastSeen(user.id));
+    return c.json(await getMe(c.env, user));
+  })
+  // La introducción se muestra una sola vez por usuario.
+  .post("/intro-seen", async (c) => {
+    await createUserRepository(c.env.DB).markIntroSeen(c.get("user").id);
+    return c.body(null, 204);
+  });

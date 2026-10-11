@@ -1,21 +1,62 @@
+import { Link } from "react-router";
+import { ChevronRight, LogOut, Sparkles } from "lucide-react";
 import { useMe } from "@/auth/AuthContext";
 import { LOGOUT_URL } from "@/auth/session";
+import { PageHeader } from "@/components/PageHeader";
+import { buttonClass } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { formatLongDate } from "@/utils/format";
 
 export function ProfilePage() {
   const me = useMe();
+  const partner = me.relationship?.members.find((member) => member.id !== me.user.id);
 
   return (
     <section className="space-y-4">
-      <h1 className="text-3xl">Perfil</h1>
-      <Card>
-        <p className="text-xl font-semibold">{me.user.displayName}</p>
-        <p className="text-ink-soft">{me.user.email}</p>
+      <PageHeader title="Perfil" />
+
+      <Card className="flex animate-fade-up items-center gap-4">
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blush-100 font-display text-2xl text-blush-700">
+          {me.user.displayName.charAt(0).toUpperCase()}
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-lg font-semibold">{me.user.displayName}</p>
+          <p className="truncate text-sm text-ink-soft">{me.user.email}</p>
+        </div>
       </Card>
-      <a
-        href={LOGOUT_URL}
-        className="block rounded-full border border-blush-200 px-6 py-3 text-center font-semibold text-blush-700 transition hover:bg-blush-50"
-      >
+
+      {me.relationship && (
+        <Card className="animate-fade-up text-sm [animation-delay:60ms]">
+          <p className="text-xs font-semibold tracking-wide text-ink-soft uppercase">Nuestro lugar</p>
+          <dl className="mt-2 space-y-1">
+            {partner && (
+              <div className="flex justify-between gap-4">
+                <dt className="text-ink-soft">Con</dt>
+                <dd className="font-semibold">{partner.displayName}</dd>
+              </div>
+            )}
+            <div className="flex justify-between gap-4">
+              <dt className="text-ink-soft">Juntos desde</dt>
+              <dd className="font-semibold">{formatLongDate(me.relationship.startedOn)}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-ink-soft">Zona horaria</dt>
+              <dd className="font-semibold">{me.relationship.timezone}</dd>
+            </div>
+          </dl>
+        </Card>
+      )}
+
+      <Link to="/bienvenida" className="block animate-fade-up [animation-delay:120ms]">
+        <Card className="flex items-center gap-3">
+          <Sparkles size={20} className="text-lavender-500" aria-hidden />
+          <span className="flex-1 font-semibold">Ver la introducción otra vez</span>
+          <ChevronRight size={20} className="text-ink-soft" aria-hidden />
+        </Card>
+      </Link>
+
+      <a href={LOGOUT_URL} className={buttonClass("secondary", "w-full")}>
+        <LogOut size={18} aria-hidden />
         Cerrar sesión
       </a>
     </section>

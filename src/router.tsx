@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router";
-import { RequireAuth, SETUP_PATH } from "@/auth/RequireAuth";
+import { INTRO_PATH, RequireAuth, SETUP_PATH } from "@/auth/RequireAuth";
 import { AppLayout } from "@/layouts/AppLayout";
 import { HomePage } from "@/pages/HomePage";
 import { MemoriesPage } from "@/pages/MemoriesPage";
@@ -9,6 +9,9 @@ import { ProfilePage } from "@/pages/ProfilePage";
 import { IntroPage } from "@/pages/IntroPage";
 import { SetupPage } from "@/pages/SetupPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
+import { LettersPage } from "@/pages/LettersPage";
+import { DiscoverPage } from "@/pages/DiscoverPage";
+import { FuturePage } from "@/pages/FuturePage";
 
 // Las rutas viven en español porque son las que ve la pareja en la barra de direcciones.
 // Todas pasan por RequireAuth: no hay ninguna pantalla pública.
@@ -17,7 +20,7 @@ export const router = createBrowserRouter([
     element: <RequireAuth />,
     children: [
       { path: SETUP_PATH, element: <SetupPage /> },
-      { path: "/bienvenida", element: <IntroPage /> },
+      { path: INTRO_PATH, element: <IntroPage /> },
       {
         path: "/",
         element: <AppLayout />,
@@ -27,6 +30,9 @@ export const router = createBrowserRouter([
           { path: "nosotros", element: <UsPage /> },
           { path: "planes", element: <PlansPage /> },
           { path: "perfil", element: <ProfilePage /> },
+          { path: "cartas", element: <LettersPage /> },
+          { path: "descubrir", element: <DiscoverPage /> },
+          { path: "futuro", element: <FuturePage /> },
           { path: "*", element: <NotFoundPage /> },
         ],
       },

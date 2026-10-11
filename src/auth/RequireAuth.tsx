@@ -4,6 +4,7 @@ import { AuthStatusPage } from "@/pages/AuthStatusPage";
 import { useAuth } from "./AuthContext";
 
 export const SETUP_PATH = "/configuracion";
+export const INTRO_PATH = "/bienvenida";
 
 /**
  * Protege todas las rutas hijas. La seguridad real está en el Worker (cada /api comprueba
@@ -38,6 +39,10 @@ export function RequireAuth() {
       const onSetup = location.pathname === SETUP_PATH;
       if (needsSetup && !onSetup) return <Navigate to={SETUP_PATH} replace />;
       if (!needsSetup && onSetup) return <Navigate to="/" replace />;
+      // La introducción se ve una vez, justo después de la configuración o del primer ingreso.
+      if (!needsSetup && state.me.user.introSeenAt === null && location.pathname !== INTRO_PATH) {
+        return <Navigate to={INTRO_PATH} replace />;
+      }
       return <Outlet />;
     }
   }
