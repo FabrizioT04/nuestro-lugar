@@ -4,10 +4,12 @@ import type { ApiErrorBody, ApiErrorCode } from "@shared/api";
 // todo pasa por el Worker en /api, en el mismo dominio (las cookies de Cloudflare
 // Access viajan solas y no hace falta CORS).
 
+export type ClientErrorCode = ApiErrorCode | "network_error" | "session_expired";
+
 export class ApiError extends Error {
   constructor(
     readonly status: number,
-    readonly code: ApiErrorCode | "network_error",
+    readonly code: ClientErrorCode,
     message: string,
     readonly requestId?: string,
   ) {
@@ -24,10 +26,17 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     response = await fetch(`${API_BASE}${path}`, {
       ...init,
       credentials: "same-origin",
+      // Cuando la sesión de Access expira, Access responde con una redirección a su página de
+      // login (otro dominio). Seguirla desde fetch falla por CORS; así la detectamos limpiamente.
+      redirect: "manual",
       headers: { accept: "application/json", ...init.headers },
     });
   } catch {
     throw new ApiError(0, "network_error", "Sin conexión con el servidor");
+  }
+
+  if (response.type === "opaqueredirect" || (response.status >= 300 && response.status < 400)) {
+    throw new ApiError(401, "session_expired", "Tu sesión expiró");
   }
 
   if (!response.ok) {
@@ -41,4 +50,12 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   }
 
   return (await response.json()) as T;
+}
+
+export function apiPost<T>(path: string, body: unknown): Promise<T> {
+  return apiFetch<T>(path, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
 }

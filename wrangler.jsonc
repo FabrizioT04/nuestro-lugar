@@ -6,6 +6,8 @@
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "observability": { "enabled": true },
+  // Las URLs de vista previa por versión no pasarían por la aplicación de Access.
+  "preview_urls": false,
 
   "assets": {
     // React Router decide las rutas del frontend: cualquier ruta desconocida devuelve index.html.
