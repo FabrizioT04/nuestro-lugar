@@ -25,3 +25,7 @@ export const misconfigured = () =>
 export const payloadTooLarge = (message: string) => new AppError(413, "payload_too_large", message);
 export const unsupportedMediaType = (message: string) => new AppError(415, "unsupported_media_type", message);
 export const rateLimited = (message = "Vas muy rápido. Espera un momento.") => new AppError(429, "rate_limited", message);
+/** Un servicio externo (Google Places) respondió mal o no respondió. */
+export const upstreamError = (message: string) => new AppError(502, "upstream_error", message);
+/** Una función que todavía no está activada en este servidor. */
+export const serviceUnavailable = (message: string) => new AppError(503, "service_unavailable", message);

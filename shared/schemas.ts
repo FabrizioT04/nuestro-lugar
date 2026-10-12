@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AMBIENCES, PLACE_CATEGORIES, PLACE_INTERACTIONS } from "./places";
 
 // Esquemas de entrada compartidos. React los usa para validar formularios y el Worker
 // los vuelve a aplicar siempre: el frontend nunca es la última palabra.
@@ -299,3 +300,62 @@ export type CapsuleInput = z.infer<typeof capsuleInputSchema>;
 export type CapsulePayload = z.input<typeof capsuleInputSchema>;
 
 export const capsuleCreateSchema = z.intersection(capsuleInputSchema, z.object({ id: uuid.optional() }));
+
+// ---------------------------------------------------------------------------
+// Lugares: "¿Qué hacemos hoy?"
+// ---------------------------------------------------------------------------
+
+export const DIETARY_OPTIONS = ["vegetariano", "vegano", "sin gluten"] as const;
+
+const placeCategory = z.enum(PLACE_CATEGORIES, "Categoría inválida");
+const ambience = z.enum(AMBIENCES, "Ambiente inválido");
+const budgetLevel = z.number().int().min(1, "Presupuesto inválido").max(4, "Presupuesto inválido");
+const distanceKm = z.number().min(0.5, "Mínimo 0,5 km").max(50, "Máximo 50 km");
+
+export const geoPointSchema = z.object({
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+});
+
+/** Lo que se pide al recomendador. El texto libre se interpreta en el Worker; los filtros mandan sobre el texto. */
+export const placeSearchSchema = z.object({
+  text: z.string().trim().max(300, "Máximo 300 caracteres").optional(),
+  categories: z.array(placeCategory).max(4, "Elige hasta 4 tipos").optional(),
+  budget: budgetLevel.nullable().optional(),
+  maxDistanceKm: distanceKm.optional(),
+  openNow: z.boolean().optional(),
+  ambience: z.array(ambience).max(4).optional(),
+  food: z.string().trim().max(60, "Máximo 60 caracteres").optional(),
+  location: geoPointSchema,
+});
+export type PlaceSearchInput = z.infer<typeof placeSearchSchema>;
+
+export const placeInteractionSchema = z.object({
+  type: z.enum(PLACE_INTERACTIONS, "Interacción inválida"),
+  /** true marca, false desmarca. Así repetir la misma acción (reintento) no cambia el resultado. */
+  active: z.boolean(),
+  /** Categoría propia del lugar (no es contenido de Google): sirve para aprender gustos. */
+  category: placeCategory.nullable().optional(),
+});
+export type PlaceInteractionInput = z.infer<typeof placeInteractionSchema>;
+
+export const placePreferencesSchema = z.object({
+  maxDistanceKm: distanceKm.nullable(),
+  budgetMax: budgetLevel.nullable(),
+  likedCategories: z.array(placeCategory).max(PLACE_CATEGORIES.length),
+  dislikedCategories: z.array(placeCategory).max(PLACE_CATEGORIES.length),
+  ambience: z.array(ambience).max(AMBIENCES.length),
+  dietary: z.array(z.enum(DIETARY_OPTIONS)).max(DIETARY_OPTIONS.length),
+});
+export type PlacePreferencesInput = z.infer<typeof placePreferencesSchema>;
+
+/** Ubicación opcional para calcular distancias en "Guardados". */
+export const originQuerySchema = z.object({
+  lat: z.coerce.number().min(-90).max(90).optional(),
+  lng: z.coerce.number().min(-180).max(180).optional(),
+});
+
+export const geocodeQuerySchema = z.object({ q: z.string().trim().min(2, "Escribe una zona").max(120) });
+
+/** Place ID de Google: letras, números, "_" y "-". */
+export const GOOGLE_PLACE_ID = /^[A-Za-z0-9_-]{10,300}$/;
