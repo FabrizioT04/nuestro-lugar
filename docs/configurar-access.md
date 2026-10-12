@@ -18,14 +18,14 @@ npx wrangler login
 npx wrangler d1 create nuestro-lugar-db
 ```
 
-Copia el `database_id` que aparece en `wrangler.jsonc` (reemplaza los ceros) y luego:
+El `database_id` ya está en `wrangler.jsonc` (si creas otra base, reemplázalo por el que devuelve este comando) y luego:
 
 ```bash
 npm run db:migrate:remote
 npm run deploy
 ```
 
-Al terminar verás la URL, por ejemplo `https://nuestro-lugar.<tu-subdominio>.workers.dev`.
+Al terminar verás la URL: `https://app.nuestro-lugar.workers.dev` (Worker `app` en el subdominio de cuenta `nuestro-lugar`).
 En este momento la API ya responde 401/500 a cualquiera (aún no hay secretos), así que no se
 filtra ningún dato, pero la pantalla vacía es visible hasta completar el paso 4.
 
@@ -57,7 +57,8 @@ pega el Client ID y el secret, guarda y pulsa **Test** para comprobarlo.
 **Zero Trust → Access → Applications → Add an application → Self-hosted**:
 
 - Nombre: `Nuestro Lugar`.
-- Dominio: el de tu Worker (`nuestro-lugar.<tu-subdominio>.workers.dev`) o tu dominio propio.
+- Dominio: `app.nuestro-lugar.workers.dev` (o tu dominio propio). Protege todo el dominio, sin rutas
+  excluidas: el manifest y el service worker de la app instalable también viajan con la cookie de Access.
 - Session duration: la que prefieras (p. ej. 1 mes, para no iniciar sesión a cada rato).
 - Identity providers: solo **Google**, y activa *Instant Auth* para saltar la pantalla de elección.
 - Policy: acción **Allow**, regla *Include → Emails* con los dos correos.

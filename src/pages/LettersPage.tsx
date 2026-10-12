@@ -4,10 +4,12 @@ import { Mail, PenLine } from "lucide-react";
 import type { LetterSummary } from "@shared/api";
 import { useMe } from "@/auth/AuthContext";
 import { LetterListItem } from "@/components/letters/LetterListItem";
+import { PendingList } from "@/components/sync/PendingList";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
+import { useOutbox } from "@/hooks/useOutbox";
 import { lettersApi, type LetterBox } from "@/services/api/letters";
 
 const tabClass = (active: boolean) =>
@@ -18,7 +20,8 @@ export function LettersPage() {
   const [params, setParams] = useSearchParams();
   const box: LetterBox = params.get("bandeja") === "enviadas" ? "sent" : "received";
   const load = useCallback(() => lettersApi.list(box), [box]);
-  const letters = useAsync(load);
+  const letters = useAsync(load, { cacheKey: `letters:${box}` });
+  const pending = useOutbox("letter.create");
 
   const timezone = me.relationship?.timezone ?? "UTC";
   const partner = me.relationship?.members.find((member) => member.id !== me.user.id)?.displayName ?? "tu pareja";
@@ -41,6 +44,8 @@ export function LettersPage() {
         </button>
       </div>
 
+      {box === "sent" && <PendingList type="letter.create" />}
+
       {letters.status === "loading" && (
         <div className="space-y-3">
           <Skeleton className="h-24" />
@@ -57,7 +62,9 @@ export function LettersPage() {
       )}
       {letters.status === "success" &&
         (letters.data.items.length === 0 ? (
+          box === "sent" && pending.length > 0 ? null : (
           <EmptyBox box={box} partner={partner} />
+          )
         ) : box === "received" ? (
           <ReceivedLetters items={letters.data.items} timezone={timezone} />
         ) : (

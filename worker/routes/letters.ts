@@ -2,12 +2,13 @@ import { Hono } from "hono";
 import { letterCreateSchema, letterInputSchema, letterListQuerySchema } from "@shared/schemas";
 import type { AppEnv } from "../env";
 import { requireRelationship, requireUser } from "../middleware/auth";
+import { idempotent } from "../middleware/idempotency";
 import { limitWrites } from "../middleware/rateLimit";
 import { createLetter, deleteLetter, getLetter, listLetters, openLetter, updateLetter } from "../services/letterService";
 import { parseIdParam, parseJsonBody, parseQuery } from "../utils/validation";
 
 export const letterRoutes = new Hono<AppEnv>()
-  .use(requireUser, requireRelationship, limitWrites)
+  .use(requireUser, requireRelationship, limitWrites, idempotent)
   .get("/", async (c) => {
     const { box } = parseQuery(c, letterListQuerySchema);
     return c.json(await listLetters(c.env, c.get("user"), box));

@@ -2,7 +2,8 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   // Un único Worker sirve la API (/api/*) y los archivos estáticos de React.
   // Mismo dominio = una sola aplicación en Cloudflare Access y sin CORS.
-  "name": "nuestro-lugar",
+  // Publicado en https://app.nuestro-lugar.workers.dev (subdominio de la cuenta: nuestro-lugar).
+  "name": "app",
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "observability": { "enabled": true },
@@ -24,8 +25,7 @@
     {
       "binding": "DB",
       "database_name": "nuestro-lugar-db",
-      // Reemplazar con el id que devuelve `npx wrangler d1 create nuestro-lugar-db`.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "5aded9d2-32a4-4c79-88b7-4917ea5924b3",
       "migrations_dir": "migrations"
     }
   ],

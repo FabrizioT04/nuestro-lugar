@@ -4,11 +4,14 @@ import { Camera, GitCommitVertical, Heart, LayoutGrid, Plus, Search, X } from "l
 import type { MemoryFilters } from "@shared/api";
 import { MemoryCard } from "@/components/memories/MemoryCard";
 import { MemoryTimeline } from "@/components/memories/MemoryTimeline";
+import { PendingList } from "@/components/sync/PendingList";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useMemoryList } from "@/hooks/useMemoryList";
+import { useOutbox } from "@/hooks/useOutbox";
+import { formatLongDate } from "@/utils/format";
 import { memoriesApi } from "@/services/api/memories";
 
 type View = "tarjetas" | "linea";
@@ -30,6 +33,7 @@ export function MemoriesPage() {
   const debouncedQuery = useDebouncedValue(query.trim());
   const [filters, setFilters] = useState<MemoryFilters>({ categories: [], tags: [] });
 
+  const pending = useOutbox("memory.create");
   const list = useMemoryList({ q: debouncedQuery || undefined, category, tag, favorites, limit: 30 });
 
   useEffect(() => {
@@ -114,6 +118,13 @@ export function MemoriesPage() {
         </button>
       )}
 
+      {!anyFilter && (
+        <PendingList
+          type="memory.create"
+          describe={(action) => formatLongDate(action.payload.input.happenedOn)}
+        />
+      )}
+
       {list.status === "loading" && (
         <div className="space-y-4">
           <Skeleton className="h-72" />
@@ -130,7 +141,7 @@ export function MemoriesPage() {
         </Card>
       )}
 
-      {(list.status === "ready" || list.status === "loading-more") && list.items.length === 0 && (
+      {(list.status === "ready" || list.status === "loading-more") && list.items.length === 0 && (anyFilter || pending.length === 0) && (
         <Card className="animate-fade-up px-6 py-10 text-center">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blush-50 text-blush-500">
             <Camera size={26} strokeWidth={1.75} aria-hidden />

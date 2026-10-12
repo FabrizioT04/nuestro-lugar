@@ -1,10 +1,18 @@
-import { useCallback, useEffect, useState } from "react";
-import type { MemorySummary } from "@shared/api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { MemoryListResponse, MemorySummary } from "@shared/api";
+import { readCache, writeCache } from "@/offline/cache";
+import { onSynced } from "@/offline/sync";
+import { ApiError } from "@/services/api/client";
 import { memoriesApi, type MemoryListParams } from "@/services/api/memories";
+
+const OFFLINE_NO_COPY = "Sin conexión, y todavía no hay una copia guardada en este dispositivo.";
 
 type Status = "loading" | "ready" | "loading-more" | "error";
 
-/** Lista paginada de recuerdos que se recarga cuando cambian los filtros. */
+/**
+ * Lista paginada de recuerdos que se recarga cuando cambian los filtros.
+ * La primera página (sin búsqueda de texto) se guarda en el dispositivo para verla sin conexión.
+ */
 export function useMemoryList(params: Omit<MemoryListParams, "cursor">) {
   const [items, setItems] = useState<MemorySummary[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -12,27 +20,62 @@ export function useMemoryList(params: Omit<MemoryListParams, "cursor">) {
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const key = JSON.stringify(params);
+  const silent = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
-    setStatus("loading");
+    let fresh = false;
+    const params = JSON.parse(key) as MemoryListParams;
+    const cacheKey = params.q ? null : `memories:${key}`;
+    if (silent.current) silent.current = false;
+    else setStatus("loading");
+
+    const show = (page: MemoryListResponse) => {
+      setItems(page.items);
+      setNextCursor(page.nextCursor);
+      setStatus("ready");
+    };
+
+    if (cacheKey) {
+      void readCache<MemoryListResponse>(cacheKey).then((entry) => {
+        if (!cancelled && !fresh && entry) show(entry.value);
+      });
+    }
+
     memoriesApi
-      .list(JSON.parse(key) as MemoryListParams)
+      .list(params)
       .then((page) => {
+        fresh = true;
         if (cancelled) return;
-        setItems(page.items);
-        setNextCursor(page.nextCursor);
-        setStatus("ready");
+        show(page);
+        if (cacheKey) void writeCache(cacheKey, page);
       })
-      .catch((err: unknown) => {
+      .catch(async (err: unknown) => {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : "No se pudieron cargar los recuerdos");
+        const offline = err instanceof ApiError && err.code === "network_error";
+        const cached = offline && cacheKey ? await readCache<MemoryListResponse>(cacheKey) : undefined;
+        if (cancelled) return;
+        if (cached) {
+          show(cached.value);
+          return;
+        }
+        setError(offline ? OFFLINE_NO_COPY : err instanceof Error ? err.message : "No se pudieron cargar los recuerdos");
         setStatus("error");
       });
     return () => {
       cancelled = true;
     };
   }, [key, attempt]);
+
+  // Al sincronizar la cola, los recuerdos creados sin conexión ya existen en el Worker.
+  useEffect(
+    () =>
+      onSynced(() => {
+        silent.current = true; // recargar sin volver a mostrar el esqueleto
+        setAttempt((n) => n + 1);
+      }),
+    [],
+  );
 
   const loadMore = useCallback(async () => {
     if (!nextCursor) return;

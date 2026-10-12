@@ -1,11 +1,12 @@
 import type { PhotoRef, UploadedAudio, UploadedMedia } from "@shared/api";
 import type { PreparedImage } from "@/utils/image";
-import { apiFetch } from "./client";
+import { actionHeader, apiFetch } from "./client";
 
 export type PhotoPurpose = "memory" | "plan" | "cover" | "capsule";
 
 export const mediaApi = {
-  upload(image: PreparedImage, purpose: PhotoPurpose = "memory") {
+  /** `clientActionId` hace que reintentar la misma subida no cree una foto repetida. */
+  upload(image: PreparedImage, purpose: PhotoPurpose = "memory", clientActionId?: string) {
     const form = new FormData();
     const ext = (blob: Blob) => (blob.type === "image/webp" ? "webp" : "jpg");
     form.append("file", image.full, `foto.${ext(image.full)}`);
@@ -13,7 +14,7 @@ export const mediaApi = {
     form.append("width", String(image.width));
     form.append("height", String(image.height));
     form.append("purpose", purpose);
-    return apiFetch<UploadedMedia>("/media", { method: "POST", body: form });
+    return apiFetch<UploadedMedia>("/media", { method: "POST", body: form, headers: actionHeader(clientActionId) });
   },
 
   /** Audio para una cápsula del futuro (grabado en el navegador o elegido de los archivos). */

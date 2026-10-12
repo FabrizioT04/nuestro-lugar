@@ -2,6 +2,7 @@ import { Hono, type Context } from "hono";
 import { z } from "zod";
 import type { AppEnv } from "../env";
 import { requireRelationship, requireUser } from "../middleware/auth";
+import { idempotent } from "../middleware/idempotency";
 import { serveMedia, uploadAudio, uploadPhoto } from "../services/mediaService";
 import { badRequest, notFound, payloadTooLarge } from "../utils/errors";
 import { MAX_AUDIO_REQUEST_BYTES, MAX_UPLOAD_REQUEST_BYTES } from "../utils/media";
@@ -21,7 +22,7 @@ async function readUploadForm(c: Context<AppEnv>, maxBytes: number): Promise<For
 }
 
 export const mediaRoutes = new Hono<AppEnv>()
-  .use(requireUser, requireRelationship)
+  .use(requireUser, requireRelationship, idempotent)
   .post("/", async (c) => {
     const form = await readUploadForm(c, MAX_UPLOAD_REQUEST_BYTES);
     return c.json(await uploadPhoto(c.env, c.get("user"), form), 201);

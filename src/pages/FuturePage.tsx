@@ -14,7 +14,7 @@ const loadCapsules = () => capsulesApi.list();
 
 export function FuturePage() {
   const me = useMe();
-  const capsules = useAsync(loadCapsules);
+  const capsules = useAsync(loadCapsules, { cacheKey: "capsules" });
   const timezone = me.relationship?.timezone ?? "UTC";
   const partner = me.relationship?.members.find((member) => member.id !== me.user.id)?.displayName ?? "tu pareja";
 

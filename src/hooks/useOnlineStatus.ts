@@ -9,7 +9,7 @@ function subscribe(callback: () => void) {
   };
 }
 
-/** true si el dispositivo cree tener conexión. Base para el indicador offline de la Fase 9. */
+/** true si el dispositivo cree tener conexión. Lo usa el aviso de "sin conexión". */
 export function useOnlineStatus(): boolean {
   return useSyncExternalStore(subscribe, () => navigator.onLine, () => true);
 }
