@@ -8,7 +8,9 @@ import { useMe } from "@/auth/AuthContext";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { submitAction } from "@/offline/sync";
 import { lettersApi } from "@/services/api/letters";
+import type { LetterDetail } from "@shared/api";
 import { formatDayMonth, formatNumber } from "@/utils/format";
 
 const inputClass =
@@ -105,8 +107,17 @@ export function LetterFormPage() {
     setSaving(true);
     setError(null);
     try {
-      const saved = id ? await lettersApi.update(id, parsed.data) : await lettersApi.create(parsed.data);
-      navigate(`/cartas/${saved.id}`, { replace: true });
+      if (id) {
+        const saved = await lettersApi.update(id, parsed.data);
+        navigate(`/cartas/${saved.id}`, { replace: true });
+        return;
+      }
+      const result = await submitAction<"letter.create", LetterDetail>(
+        "letter.create",
+        { input: { ...parsed.data, id: crypto.randomUUID() } },
+        parsed.data.title,
+      );
+      navigate(result.status === "saved" ? `/cartas/${result.result.id}` : "/cartas?bandeja=enviadas", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo guardar");
       setSaving(false);

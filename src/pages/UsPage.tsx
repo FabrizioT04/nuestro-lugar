@@ -10,7 +10,7 @@ import { usApi } from "@/services/api/us";
 import { formatCountdown, formatDayMonth, formatDuration, formatLongDate, formatNumber, plural } from "@/utils/format";
 
 export function UsPage() {
-  const us = useAsync(usApi.get);
+  const us = useAsync(usApi.get, { cacheKey: "us" });
 
   return (
     <section className="space-y-5">

@@ -6,7 +6,8 @@ import { photoUrl } from "@/services/api/media";
 export interface PhotoItem {
   /** Clave local estable para React. */
   key: string;
-  status: "processing" | "uploading" | "done" | "error";
+  /** local: sin conexión, guardada en el dispositivo hasta sincronizar. */
+  status: "processing" | "uploading" | "done" | "local" | "error";
   mediaId?: string;
   /** URL local (blob:) mientras se sube; luego se usa la del servidor. */
   previewUrl?: string;
@@ -40,7 +41,7 @@ export function PhotoUploader({ photos, onAdd, onRemove, onMakeCover, max = MAX_
               <img
                 src={photo.previewUrl ?? thumbUrl(photo.mediaId!)}
                 alt=""
-                className={`h-full w-full object-cover ${photo.status === "done" ? "" : "opacity-60"}`}
+                className={`h-full w-full object-cover ${photo.status === "done" || photo.status === "local" ? "" : "opacity-60"}`}
               />
             )}
             {(photo.status === "processing" || photo.status === "uploading") && (
@@ -54,11 +55,16 @@ export function PhotoUploader({ photos, onAdd, onRemove, onMakeCover, max = MAX_
                 {photo.error ?? "Error"}
               </span>
             )}
-            {index === 0 && photo.status === "done" && (
+            {photo.status === "local" && (
+              <span className="absolute top-1.5 left-1.5 rounded-full bg-lavender-100/95 px-2 py-0.5 text-[10px] font-bold text-lavender-500" title="Se subirá al volver la conexión">
+                ⏳ Pendiente
+              </span>
+            )}
+            {index === 0 && (photo.status === "done" || photo.status === "local") && (
               <span className="absolute bottom-1.5 left-1.5 rounded-full bg-paper/90 px-2 py-0.5 text-[10px] font-bold text-blush-700">Portada</span>
             )}
             <div className="absolute top-1.5 right-1.5 flex gap-1">
-              {index > 0 && photo.status === "done" && (
+              {index > 0 && (photo.status === "done" || photo.status === "local") && (
                 <button
                   type="button"
                   onClick={() => onMakeCover(photo.key)}

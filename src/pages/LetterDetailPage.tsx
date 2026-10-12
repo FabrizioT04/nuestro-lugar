@@ -17,7 +17,8 @@ import { formatCountdown, formatDateTimeIn, formatLongDate } from "@/utils/forma
 export function LetterDetailPage() {
   const { id = "" } = useParams();
   const load = useCallback(() => lettersApi.get(id), [id]);
-  const letter = useAsync(load);
+  // Solo se guardan en el dispositivo las cartas ya desbloqueadas (spec 15); las bloqueadas no traen texto.
+  const letter = useAsync(load, { cacheKey: `letter:${id}`, cacheIf: (data) => !data.isLocked });
   const back = letter.status === "success" && letter.data.isMine ? "/cartas?bandeja=enviadas" : "/cartas";
 
   return (
@@ -36,7 +37,7 @@ export function LetterDetailPage() {
           </Link>
         </Card>
       )}
-      {letter.status === "success" && <LetterContent initial={letter.data} />}
+      {letter.status === "success" && <LetterContent key={`${letter.data.updatedAt}:${letter.data.openedAt}`} initial={letter.data} />}
     </section>
   );
 }

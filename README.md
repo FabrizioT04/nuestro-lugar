@@ -110,6 +110,21 @@ En local no hace falta crear nada: `npm run dev` simula R2 dentro de `.wrangler/
   cumplido, los recuerdos, los planes realizados que no se guardaron como recuerdo y las fechas
   importantes ya pasadas (sin cumpleaños). Todo se calcula en la zona horaria de la pareja.
 
+## App instalable y sin conexión
+
+- Se instala en la pantalla de inicio (Android: Perfil → Instalar; iPhone: Safari → Compartir →
+  Añadir a pantalla de inicio) y se abre a pantalla completa.
+- `public/sw.js` guarda la app, las fotos ya vistas y las tipografías. Solo funciona con
+  `npm run build` / `npm run preview` / producción, no con `npm run dev`.
+- IndexedDB (`src/offline/`) guarda una copia de lo último visto (inicio, recuerdos, planes,
+  cartas ya desbloqueadas…) y la cola de cambios hechos sin conexión.
+- Sin conexión se puede crear recuerdos (con fotos), planes y cartas, marcar favoritos y cambiar
+  el estado de un plan. Se ven como ⏳ pendiente y se envían solos al volver Internet
+  (✓ sincronizado, o ⚠ error con Reintentar/Descartar en Perfil). Editar y borrar necesitan conexión.
+- Cada cambio lleva un `X-Client-Action-Id` único: si se reintenta, el Worker devuelve la misma
+  respuesta (tabla `sync_actions`) y no se duplica nada.
+- Las cápsulas del futuro nunca se guardan en el dispositivo. Al cerrar sesión se borra todo.
+
 ## Variables
 
 | Nombre | Fase | Dónde |

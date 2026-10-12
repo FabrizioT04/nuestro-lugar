@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
+import { writeCache } from "@/offline/cache";
+import { submitAction } from "@/offline/sync";
 import { plansApi } from "@/services/api/plans";
 import { formatLongDate, formatMoney, formatRelativeDays } from "@/utils/format";
 
@@ -22,7 +24,7 @@ const STATUS_STYLES: Record<PlanStatusName, string> = {
 export function PlanDetailPage() {
   const { id = "" } = useParams();
   const load = useCallback(() => plansApi.get(id), [id]);
-  const plan = useAsync(load);
+  const plan = useAsync(load, { cacheKey: `plan:${id}` });
 
   return (
     <section>
@@ -40,7 +42,7 @@ export function PlanDetailPage() {
           </Link>
         </Card>
       )}
-      {plan.status === "success" && <PlanContent initial={plan.data} />}
+      {plan.status === "success" && <PlanContent key={`${plan.data.updatedAt}:${plan.data.status}`} initial={plan.data} />}
     </section>
   );
 }
@@ -70,7 +72,18 @@ function PlanContent({ initial }: { initial: PlanDetail }) {
   }
 
   const changeStatus = (status: PlanStatusName) =>
-    run(async () => setPlan(await plansApi.setStatus(plan.id, status)), "No se pudo cambiar el estado");
+    run(async () => {
+      const result = await submitAction<"plan.status", PlanDetail>("plan.status", { planId: plan.id, status }, `Plan: ${plan.title}`);
+      if (result.status === "saved") {
+        setPlan(result.result);
+        return;
+      }
+      // Sin conexión: se ve el cambio ya y queda ⏳ pendiente hasta sincronizar.
+      const optimistic: PlanDetail = { ...plan, status, completedAt: status === "done" ? new Date().toISOString() : null };
+      setPlan(optimistic);
+      void writeCache(`plan:${plan.id}`, optimistic);
+      setNotice("⏳ Se guardará cuando vuelva la conexión");
+    }, "No se pudo cambiar el estado");
 
   const toMemory = () =>
     run(async () => {

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { favoriteSchema, memoryCreateSchema, memoryInputSchema, memoryListQuerySchema } from "@shared/schemas";
 import type { AppEnv } from "../env";
 import { requireRelationship, requireUser } from "../middleware/auth";
+import { idempotent } from "../middleware/idempotency";
 import { limitWrites } from "../middleware/rateLimit";
 import {
   createMemory,
@@ -15,7 +16,7 @@ import {
 import { parseIdParam, parseJsonBody, parseQuery } from "../utils/validation";
 
 export const memoryRoutes = new Hono<AppEnv>()
-  .use(requireUser, requireRelationship, limitWrites)
+  .use(requireUser, requireRelationship, limitWrites, idempotent)
   .get("/", async (c) => c.json(await listMemories(c.env, c.get("user"), parseQuery(c, memoryListQuerySchema))))
   .get("/filters", async (c) => c.json(await getMemoryFilters(c.env, c.get("user"))))
   .post("/", async (c) => {

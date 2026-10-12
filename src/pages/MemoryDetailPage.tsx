@@ -8,13 +8,15 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
+import { writeCache } from "@/offline/cache";
+import { submitAction } from "@/offline/sync";
 import { memoriesApi } from "@/services/api/memories";
 import { formatLongDate } from "@/utils/format";
 
 export function MemoryDetailPage() {
   const { id = "" } = useParams();
   const load = useCallback(() => memoriesApi.get(id), [id]);
-  const memory = useAsync(load);
+  const memory = useAsync(load, { cacheKey: `memory:${id}` });
 
   return (
     <section>
@@ -32,7 +34,10 @@ export function MemoryDetailPage() {
           </Link>
         </Card>
       )}
-      {memory.status === "success" && <MemoryContent initial={memory.data} />}
+      {memory.status === "success" && (
+        // Primero puede llegar la copia guardada y luego la del Worker: la key fuerza a mostrar la nueva.
+        <MemoryContent key={`${memory.data.updatedAt}:${memory.data.isFavorite}`} initial={memory.data} />
+      )}
     </section>
   );
 }
@@ -50,7 +55,12 @@ function MemoryContent({ initial }: { initial: MemoryDetail }) {
     const next = !memory.isFavorite;
     setMemory((m) => ({ ...m, isFavorite: next })); // optimista
     try {
-      await memoriesApi.setFavorite(memory.id, next);
+      // Sin conexión queda ⏳ pendiente; se guarda también en la copia local para que no "vuelva atrás".
+      const result = await submitAction("memory.favorite", { memoryId: memory.id, favorite: next }, `Favorito: ${memory.title}`);
+      if (result.status === "queued") {
+        void writeCache(`memory:${memory.id}`, { ...memory, isFavorite: next });
+        setNotice("⏳ Se guardará cuando vuelva la conexión");
+      }
     } catch {
       setMemory((m) => ({ ...m, isFavorite: !next }));
       setNotice("No se pudo actualizar el favorito");

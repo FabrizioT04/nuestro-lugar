@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { usePhotoUploads } from "@/hooks/usePhotoUploads";
+import { submitAction } from "@/offline/sync";
 import { memoriesApi } from "@/services/api/memories";
+import type { MemoryDetail } from "@shared/api";
 
 const inputClass =
   "mt-1 w-full rounded-2xl border border-blush-100 bg-cream px-4 py-3 text-ink outline-none focus:border-blush-300 focus:ring-2 focus:ring-blush-100";
@@ -73,11 +75,27 @@ export function MemoryFormPage() {
       return;
     }
 
+    if (id && uploads.hasLocal) {
+      setError("Necesitas conexión para añadir fotos a un recuerdo que ya existe.");
+      return;
+    }
+
     setSaving(true);
     setError(null);
     try {
-      const saved = id ? await memoriesApi.update(id, parsed.data) : await memoriesApi.create(parsed.data);
-      navigate(`/recuerdos/${saved.id}`, { replace: true });
+      if (id) {
+        const saved = await memoriesApi.update(id, parsed.data);
+        navigate(`/recuerdos/${saved.id}`, { replace: true });
+        return;
+      }
+      // Crear funciona también sin conexión: queda ⏳ pendiente y se envía al volver Internet.
+      const { photoIds: _photoIds, ...input } = parsed.data;
+      const result = await submitAction<"memory.create", MemoryDetail>(
+        "memory.create",
+        { input: { ...input, id: crypto.randomUUID() }, photos: await uploads.toSlots() },
+        input.title,
+      );
+      navigate(result.status === "saved" ? `/recuerdos/${result.result.id}` : "/recuerdos", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo guardar");
       setSaving(false);

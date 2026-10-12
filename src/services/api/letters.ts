@@ -7,7 +7,7 @@ export type LetterBox = "received" | "sent";
 export const lettersApi = {
   list: (box: LetterBox) => apiFetch<LetterListResponse>(`/letters?box=${box}`),
   get: (id: string) => apiFetch<LetterDetail>(`/letters/${id}`),
-  create: (input: LetterInput & { id?: string }) => apiPost<LetterDetail>("/letters", input),
+  create: (input: LetterInput & { id?: string }, clientActionId?: string) => apiPost<LetterDetail>("/letters", input, clientActionId),
   update: (id: string, input: LetterInput) =>
     apiFetch<LetterDetail>(`/letters/${id}`, {
       method: "PUT",

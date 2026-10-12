@@ -1,15 +1,32 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { ChevronRight, LogOut, Sparkles } from "lucide-react";
 import { useMe } from "@/auth/AuthContext";
 import { LOGOUT_URL } from "@/auth/session";
+import { InstallCard } from "@/components/InstallCard";
 import { PageHeader } from "@/components/PageHeader";
-import { buttonClass } from "@/components/ui/Button";
+import { SyncSection } from "@/components/sync/SyncSection";
+import { useOutbox } from "@/hooks/useOutbox";
+import { clearOfflineData } from "@/offline/cache";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatLongDate } from "@/utils/format";
 
 export function ProfilePage() {
   const me = useMe();
   const partner = me.relationship?.members.find((member) => member.id !== me.user.id);
+  const pending = useOutbox().length;
+  const [confirmLogout, setConfirmLogout] = useState(false);
+
+  // Al salir se borra todo lo guardado en el dispositivo (copias, cola y fotos sin subir).
+  async function logout() {
+    if (pending > 0 && !confirmLogout) {
+      setConfirmLogout(true);
+      return;
+    }
+    await clearOfflineData().catch(() => undefined);
+    window.location.href = LOGOUT_URL;
+  }
 
   return (
     <section className="space-y-4">
@@ -55,10 +72,20 @@ export function ProfilePage() {
         </Card>
       </Link>
 
-      <a href={LOGOUT_URL} className={buttonClass("secondary", "w-full")}>
+      <SyncSection />
+
+      <InstallCard />
+
+      {confirmLogout && (
+        <p role="alert" className="rounded-2xl bg-blush-50 px-4 py-3 text-sm text-blush-700">
+          {pending === 1 ? "Hay 1 cambio" : `Hay ${pending} cambios`} sin sincronizar. Si cierras sesión ahora se perderán. Toca otra vez para salir igualmente.
+        </p>
+      )}
+
+      <Button variant="secondary" className="w-full" onClick={() => void logout()}>
         <LogOut size={18} aria-hidden />
-        Cerrar sesión
-      </a>
+        {confirmLogout ? "Cerrar sesión igualmente" : "Cerrar sesión"}
+      </Button>
     </section>
   );
 }

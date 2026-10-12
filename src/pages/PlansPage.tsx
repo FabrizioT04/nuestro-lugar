@@ -5,10 +5,12 @@ import { todayIn } from "@shared/dates";
 import { PLAN_TYPE_INFO } from "@shared/plans";
 import { useMe } from "@/auth/AuthContext";
 import { PlanCard } from "@/components/plans/PlanCard";
+import { PendingList } from "@/components/sync/PendingList";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
+import { useOutbox } from "@/hooks/useOutbox";
 import { plansApi } from "@/services/api/plans";
 
 const TABS: { status: PlanStatusName; label: string; param: string | null }[] = [
@@ -28,7 +30,8 @@ const chipClass = (active: boolean) =>
 export function PlansPage() {
   const me = useMe();
   const today = todayIn(me.relationship?.timezone ?? "UTC");
-  const plans = useAsync(plansApi.list);
+  const plans = useAsync(plansApi.list, { cacheKey: "plans" });
+  const pending = useOutbox("plan.create");
   const [params, setParams] = useSearchParams();
   const tab = TABS.find((t) => t.param === params.get("estado")) ?? TABS[0]!;
   const type = params.get("tipo") as PlanTypeName | null;
@@ -60,6 +63,10 @@ export function PlansPage() {
         ))}
       </div>
 
+      {tab.status === "pending" && (
+        <PendingList type="plan.create" describe={(action) => PLAN_TYPE_INFO[action.payload.input.type].label} />
+      )}
+
       {plans.status === "loading" && (
         <div className="space-y-3">
           <Skeleton className="h-24" />
@@ -75,7 +82,7 @@ export function PlansPage() {
         </Card>
       )}
       {plans.status === "success" && (
-        <PlanList items={plans.data.items} status={tab.status} type={type} today={today} onType={(value) => update({ tipo: value })} />
+        <PlanList items={plans.data.items} status={tab.status} type={type} today={today} hasPending={pending.length > 0} onType={(value) => update({ tipo: value })} />
       )}
     </section>
   );
@@ -86,10 +93,12 @@ interface ListProps {
   status: PlanStatusName;
   type: PlanTypeName | null;
   today: string;
+  /** Hay planes creados sin conexión esperando a sincronizar (no mostrar "vacío"). */
+  hasPending: boolean;
   onType: (type: PlanTypeName | null) => void;
 }
 
-function PlanList({ items, status, type, today, onType }: ListProps) {
+function PlanList({ items, status, type, today, hasPending, onType }: ListProps) {
   const inTab = items.filter((plan) => plan.status === status);
   const types = [...new Set(inTab.map((plan) => plan.type))];
   const visible = type ? inTab.filter((plan) => plan.type === type) : inTab;
@@ -109,7 +118,7 @@ function PlanList({ items, status, type, today, onType }: ListProps) {
         </div>
       )}
 
-      {visible.length === 0 ? (
+      {visible.length === 0 && hasPending && status === "pending" && !type ? null : visible.length === 0 ? (
         <Card className="animate-fade-up px-6 py-10 text-center">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-lavender-100 text-lavender-500">
             <CalendarHeart size={26} strokeWidth={1.75} aria-hidden />

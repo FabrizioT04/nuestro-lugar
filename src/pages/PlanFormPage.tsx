@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { usePhotoUploads } from "@/hooks/usePhotoUploads";
+import { submitAction } from "@/offline/sync";
 import { plansApi, type PlanPayload } from "@/services/api/plans";
+import type { PlanDetail } from "@shared/api";
 
 const inputClass =
   "mt-1 w-full rounded-2xl border border-blush-100 bg-cream px-4 py-3 text-ink outline-none focus:border-blush-300 focus:ring-2 focus:ring-blush-100";
@@ -98,11 +100,26 @@ export function PlanFormPage() {
       return;
     }
 
+    if (id && uploads.hasLocal) {
+      setError("Necesitas conexión para añadir fotos a un plan que ya existe.");
+      return;
+    }
+
     setSaving(true);
     setError(null);
     try {
-      const saved = id ? await plansApi.update(id, payload) : await plansApi.create(payload);
-      navigate(`/planes/${saved.id}`, { replace: true });
+      if (id) {
+        const saved = await plansApi.update(id, payload);
+        navigate(`/planes/${saved.id}`, { replace: true });
+        return;
+      }
+      const { photoIds: _photoIds, ...input } = payload;
+      const result = await submitAction<"plan.create", PlanDetail>(
+        "plan.create",
+        { input: { ...input, id: crypto.randomUUID() }, photos: await uploads.toSlots() },
+        input.title,
+      );
+      navigate(result.status === "saved" ? `/planes/${result.result.id}` : "/planes", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo guardar");
       setSaving(false);

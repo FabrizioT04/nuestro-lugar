@@ -19,7 +19,7 @@ const TONES: Record<ModuleItem["tone"], string> = {
 };
 
 export function HomePage() {
-  const home = useAsync(homeApi.get);
+  const home = useAsync(homeApi.get, { cacheKey: "home" });
 
   return (
     <div className="space-y-5">

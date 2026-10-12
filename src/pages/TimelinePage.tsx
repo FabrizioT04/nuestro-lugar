@@ -31,7 +31,7 @@ function groupByYear(events: TimelineEvent[]): YearGroup[] {
 
 /** Nuestra historia: del primer día hasta hoy, en orden. */
 export function TimelinePage() {
-  const timeline = useAsync(usApi.timeline);
+  const timeline = useAsync(usApi.timeline, { cacheKey: "timeline" });
 
   return (
     <section>

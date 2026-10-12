@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { planCreateSchema, planInputSchema, planStatusSchema } from "@shared/schemas";
 import type { AppEnv } from "../env";
 import { requireRelationship, requireUser } from "../middleware/auth";
+import { idempotent } from "../middleware/idempotency";
 import { limitWrites } from "../middleware/rateLimit";
 import {
   convertPlanToMemory,
@@ -15,7 +16,7 @@ import {
 import { parseIdParam, parseJsonBody } from "../utils/validation";
 
 export const planRoutes = new Hono<AppEnv>()
-  .use(requireUser, requireRelationship, limitWrites)
+  .use(requireUser, requireRelationship, limitWrites, idempotent)
   .get("/", async (c) => c.json(await listPlans(c.env, c.get("user"))))
   .post("/", async (c) => {
     const input = await parseJsonBody(c, planCreateSchema);

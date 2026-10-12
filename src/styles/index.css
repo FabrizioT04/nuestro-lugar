@@ -22,6 +22,9 @@
   --color-lavender-300: #c9bce8;
   --color-lavender-500: #8d7cc4;
 
+  --color-sage-100: #e5f1e8; /* ✓ sincronizado */
+  --color-sage-700: #3d7151;
+
   --radius-card: 1.5rem;
   --shadow-soft: 0 8px 30px -12px rgb(143 62 83 / 0.18);
 }

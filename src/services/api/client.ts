@@ -53,10 +53,18 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   return (await response.json()) as T;
 }
 
-export function apiPost<T>(path: string, body: unknown): Promise<T> {
+export function apiPost<T>(path: string, body: unknown, clientActionId?: string): Promise<T> {
   return apiFetch<T>(path, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...actionHeader(clientActionId) },
     body: JSON.stringify(body),
   });
+}
+
+/**
+ * Cabecera de idempotencia de la cola offline: el Worker no aplica dos veces una acción
+ * con el mismo id (ver worker/middleware/idempotency.ts).
+ */
+export function actionHeader(clientActionId?: string): Record<string, string> {
+  return clientActionId ? { "x-client-action-id": clientActionId } : {};
 }
