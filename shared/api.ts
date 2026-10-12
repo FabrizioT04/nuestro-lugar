@@ -1,5 +1,6 @@
 // Tipos compartidos entre React (src/) y el Worker (worker/).
 // Solo tipos y esquemas: nada de código que dependa del navegador o de Cloudflare.
+import type { Ambience, PlaceCategory, PlaceInteractionType } from "./places";
 
 export type ApiErrorCode =
   | "bad_request"
@@ -11,6 +12,8 @@ export type ApiErrorCode =
   | "rate_limited"
   | "payload_too_large"
   | "unsupported_media_type"
+  | "upstream_error"
+  | "service_unavailable"
   | "internal_error";
 
 export interface ApiErrorBody {
@@ -308,4 +311,95 @@ export interface UploadedAudio {
   id: string;
   durationMs: number | null;
   sizeBytes: number;
+}
+
+// ---------------------------------------------------------------------------
+// Lugares: "¿Qué hacemos hoy?"
+// ---------------------------------------------------------------------------
+
+export interface GeoPoint {
+  lat: number;
+  lng: number;
+}
+
+/**
+ * Un lugar tal como lo devuelve Google en esta búsqueda. No se guarda en D1:
+ * de Google solo se guarda el Place ID (políticas de Google Maps Platform).
+ */
+export interface PlaceSummary {
+  id: string;
+  name: string;
+  category: PlaceCategory | null;
+  address: string | null;
+  location: GeoPoint;
+  /** Metros desde donde están (null si no hay ubicación de referencia). */
+  distanceM: number | null;
+  rating: number | null;
+  ratingCount: number | null;
+  /** 0 gratis · 1 $ · 2 $$ · 3 $$$ · 4 $$$$ */
+  priceLevel: number | null;
+  openNow: boolean | null;
+  mapsUrl: string | null;
+}
+
+/** Lo que el Worker entendió del pedido (texto + filtros), para mostrarlo y poder corregirlo. */
+export interface PlaceIntent {
+  categories: PlaceCategory[];
+  budget: number | null;
+  maxDistanceKm: number;
+  openNow: boolean;
+  ambience: Ambience[];
+  food: string | null;
+  dietary: string[];
+}
+
+export interface PlaceStatus {
+  mine: PlaceInteractionType[];
+  partner: PlaceInteractionType[];
+}
+
+export interface PlaceRecommendation {
+  place: PlaceSummary;
+  /** Por qué se recomienda, en frases cortas ("A 800 m", "Les encantan los cafés"). */
+  reasons: string[];
+  status: PlaceStatus;
+}
+
+export interface PlaceRecommendationsResponse {
+  understood: PlaceIntent;
+  items: PlaceRecommendation[];
+  /** Cuántos candidatos devolvió Google antes de filtrar y ordenar. */
+  candidates: number;
+}
+
+export interface SavedPlace {
+  placeId: string;
+  /** null si Google ya no lo encuentra (cerró, cambió de id). */
+  place: PlaceSummary | null;
+  category: PlaceCategory | null;
+  status: PlaceStatus;
+  lastInteractionAt: string;
+}
+
+export interface SavedPlacesResponse {
+  items: SavedPlace[];
+}
+
+export interface PlacePreferences {
+  maxDistanceKm: number | null;
+  budgetMax: number | null;
+  likedCategories: PlaceCategory[];
+  dislikedCategories: PlaceCategory[];
+  ambience: Ambience[];
+  dietary: string[];
+}
+
+export interface PlacePreferencesResponse {
+  mine: PlacePreferences;
+  partner: { displayName: string; preferences: PlacePreferences } | null;
+}
+
+export interface GeocodeResponse {
+  location: GeoPoint;
+  label: string;
 }

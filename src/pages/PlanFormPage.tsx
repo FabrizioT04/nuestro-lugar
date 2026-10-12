@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { ArrowLeft, X } from "lucide-react";
 import type { PlanStatusName, PlanTypeName } from "@shared/api";
 import { PLAN_TYPE_INFO } from "@shared/plans";
@@ -41,11 +41,23 @@ interface FormState {
 
 const EMPTY: FormState = { type: "date", title: "", description: "", plannedFor: "", placeName: "", budget: "", currency: "PEN" };
 
+/** Un plan nuevo puede llegar con datos de "Descubrir": /planes/nuevo?tipo=restaurant&titulo=...&lugar=... */
+function initialForm(params: URLSearchParams): FormState {
+  const type = params.get("tipo");
+  return {
+    ...EMPTY,
+    type: PLAN_TYPES.includes(type as PlanTypeName) ? (type as PlanTypeName) : EMPTY.type,
+    title: (params.get("titulo") ?? "").slice(0, 200),
+    placeName: (params.get("lugar") ?? "").slice(0, 200),
+  };
+}
+
 /** Crear (sin :id) o editar (con :id) un plan. Las fotos solo se piden cuando ya se realizó. */
 export function PlanFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState<FormState>(EMPTY);
+  const [params] = useSearchParams();
+  const [form, setForm] = useState<FormState>(() => (id ? EMPTY : initialForm(params)));
   const [status, setStatus] = useState<PlanStatusName>("pending");
   const uploads = usePhotoUploads("plan");
   const { setSaved } = uploads;

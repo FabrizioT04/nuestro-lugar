@@ -125,6 +125,25 @@ En local no hace falta crear nada: `npm run dev` simula R2 dentro de `.wrangler/
   respuesta (tabla `sync_actions`) y no se duplica nada.
 - Las cápsulas del futuro nunca se guardan en el dispositivo. Al cerrar sesión se borra todo.
 
+## ¿Qué hacemos hoy? (Descubrir)
+
+- Escriben lo que quieren ("un lugar tranquilo para comer algo dulce y conversar") y/o usan filtros
+  (tipo, presupuesto, distancia, ambiente, abierto ahora). Los filtros mandan sobre el texto.
+- El Worker entiende el texto con reglas en español (`worker/services/places/intent.ts`), busca en
+  Google Places API (New) y ordena con un recomendador por reglas (`recommender.ts`): cercanía,
+  rating ponderado, precio, gustos de los dos, historial y lo que ya marcaron. Muestra los 5 mejores con el porqué.
+- Me interesa / Favorito / Fuimos aquí / Nos encantó / No me interesa se guardan por persona en D1.
+  De Google solo se guarda el Place ID (y una categoría propia); nombres y ratings se piden en el momento.
+- La clave de Google vive solo en el Worker. Sin ella, Descubrir avisa "Falta activar Google Maps".
+
+**Para no gastar dinero (Google Cloud, proyecto "Nuestro Lugar"):**
+1. Habilita **Places API (New)** y vincula la facturación.
+2. En Places API (New) → Cuotas, pon **100 por día** en Search Nearby, Search Text y Place Details.
+3. Crea un presupuesto con alerta de **1 USD**.
+4. Crea una clave de API restringida solo a Places API (New) y súbela:
+   `npx wrangler secret put GOOGLE_PLACES_API_KEY --name app`
+5. Además, el Worker limita a 20 búsquedas por minuto por persona (`PLACES_LIMITER`).
+
 ## Variables
 
 | Nombre | Fase | Dónde |

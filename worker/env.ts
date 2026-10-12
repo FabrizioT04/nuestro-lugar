@@ -9,6 +9,8 @@ export interface AppSecrets {
   ACCESS_TEAM_DOMAIN?: string;
   /** Audience (AUD) tag de la aplicación de Access. */
   ACCESS_AUD?: string;
+  /** Clave de Google Places API (New), restringida a esa API y con cuotas diarias. Sin ella, Descubrir avisa que no está activado. */
+  GOOGLE_PLACES_API_KEY?: string;
   /** Solo desarrollo local: correo con el que se simula la sesión. */
   DEV_USER_EMAIL?: string;
 }
