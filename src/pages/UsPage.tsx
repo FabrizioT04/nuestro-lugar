@@ -51,12 +51,12 @@ function UsContent({ data }: { data: UsResponse }) {
 
   return (
     <>
-      <header className="animate-fade-up text-center">
+      <header className="animate-fade-up">
         <h1 className="text-3xl">Nosotros</h1>
-        <p className="mt-1 font-display text-xl text-blush-700">{names}</p>
+        <p className="mt-2 text-sm text-ink-soft">{names}</p>
       </header>
 
-      <Card className="animate-fade-up text-center [animation-delay:60ms]">
+      <Card className="animate-fade-up !border-transparent !bg-blush-100 py-7 text-center [animation-delay:60ms]">
         <p className="font-display text-6xl text-blush-500">{formatNumber(stats.daysTogether)}</p>
         <p className="text-lg font-semibold">{stats.daysTogether === 1 ? "día juntos" : "días juntos"}</p>
         <p className="mt-1 text-sm text-ink-soft">
@@ -73,7 +73,7 @@ function UsContent({ data }: { data: UsResponse }) {
               <span className="text-xs leading-tight text-ink-soft">{label}</span>
             </>
           );
-          const className = "flex h-full flex-col items-center gap-1 rounded-card bg-paper px-2 py-4 text-center shadow-soft";
+          const className = "flex h-full flex-col items-center gap-2 rounded-card border border-blush-200 bg-paper px-2 py-4 text-center";
           return (
             <li key={label}>
               {to ? (

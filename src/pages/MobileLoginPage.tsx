@@ -40,7 +40,7 @@ export function MobileLoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center bg-gradient-to-b from-cream via-blush-50 to-lavender-100 px-6 pt-safe pb-[max(2rem,env(safe-area-inset-bottom))]">
+    <main className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center bg-cream px-6 pt-safe pb-[max(2rem,env(safe-area-inset-bottom))]">
       <div className="animate-fade-up text-center">
         <p className="text-4xl" aria-hidden>
           ♡

@@ -14,8 +14,7 @@ import { usePhotoUploads } from "@/hooks/usePhotoUploads";
 import { capsuleMediaUrl, capsulesApi } from "@/services/api/capsules";
 import { formatDayMonth, formatLongDate, formatNumber } from "@/utils/format";
 
-const inputClass =
-  "mt-1 w-full rounded-2xl border border-blush-100 bg-cream px-4 py-3 text-ink outline-none focus:border-blush-300 focus:ring-2 focus:ring-blush-100";
+const inputClass = "nl-input";
 
 interface FormState {
   recipient: CapsuleRecipientName;

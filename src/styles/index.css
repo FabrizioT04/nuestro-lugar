@@ -1,32 +1,31 @@
 @import "tailwindcss";
 
-/* Paleta de Nuestro Lugar: todo en pastel. Fondo rosado muy claro, tarjetas blancas,
-   rosa como acento y detalles lavanda y menta. Se usan como clases: bg-cream, text-ink, bg-blush-300... */
+/* Rosa minimal: superficies claras, rosa empolvado y estados con contraste. */
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Playfair Display", ui-serif, Georgia, serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 
-  --color-cream: #fff7f9;
+  --color-cream: #fffdfc;
   --color-paper: #ffffff;
-  --color-ink: #4a3640;
-  --color-ink-soft: #8a6f7b;
+  --color-ink: #382931;
+  --color-ink-soft: #786670;
 
-  --color-blush-50: #fff0f4;
-  --color-blush-100: #ffe3ec;
-  --color-blush-200: #ffd0de;
-  --color-blush-300: #f6a8c0; /* rosa pastel: acento principal */
-  --color-blush-500: #d46a8c;
-  --color-blush-700: #b23c63;
+  --color-blush-50: #fcf4f6;
+  --color-blush-100: #f9e7ed;
+  --color-blush-200: #eddee4;
+  --color-blush-300: #dfaec0;
+  --color-blush-500: #a84464;
+  --color-blush-700: #8e3654;
 
-  --color-lavender-100: #ece6ff;
-  --color-lavender-300: #c9b4f2;
-  --color-lavender-500: #7a5fc0;
+  --color-lavender-100: #f1edf4;
+  --color-lavender-300: #d8cadf;
+  --color-lavender-500: #796583;
 
   --color-sage-100: #e6f4ee; /* menta: ✓ sincronizado */
   --color-sage-700: #3d7151;
 
-  --radius-card: 1.5rem;
-  --shadow-soft: 0 10px 28px -14px rgb(212 106 140 / 0.3);
+  --radius-card: 1.25rem;
+  --shadow-soft: 0 2px 8px rgb(56 41 49 / 0.035);
 }
 
 @layer base {
@@ -34,8 +33,8 @@
     background-color: var(--color-cream);
     color: var(--color-ink);
     -webkit-tap-highlight-color: transparent;
-    /* Playfair trae números "antiguos" (1336 con el 3 hacia abajo): se usan los normales. */
     font-variant-numeric: lining-nums;
+    color-scheme: light;
   }
   body {
     @apply min-h-dvh font-sans antialiased;
@@ -43,8 +42,43 @@
   h1,
   h2,
   h3 {
-    @apply font-display font-semibold;
+    @apply font-display font-medium tracking-tight;
+    overflow-wrap: anywhere;
   }
+  :focus-visible {
+    outline: 2px solid var(--color-blush-500);
+    outline-offset: 3px;
+  }
+  input, select, textarea {
+    min-width: 0;
+    accent-color: var(--color-blush-500);
+  }
+  button:not(:disabled), summary {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* Controles compartidos: las pantallas conservan sus acciones y validaciones. */
+@utility nl-action {
+  @apply inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-blush-100 px-4 py-2.5 text-sm font-medium text-blush-700 transition hover:bg-blush-200 active:scale-[0.98];
+}
+@utility nl-tabs {
+  @apply flex gap-1 rounded-2xl bg-blush-50 p-1;
+}
+@utility nl-tab {
+  @apply min-h-11 min-w-0 flex-1 rounded-xl px-2 py-2 text-sm font-medium text-ink-soft transition;
+  &[aria-selected="true"], &[aria-pressed="true"] {
+    @apply bg-paper text-blush-700 shadow-soft;
+  }
+}
+@utility nl-chip {
+  @apply flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition;
+}
+@utility nl-input {
+  @apply mt-1 w-full rounded-xl border border-blush-200 bg-paper px-4 py-3 text-base text-ink placeholder:text-ink-soft focus:border-blush-500 focus:ring-2 focus:ring-blush-100;
 }
 
 /* Animaciones sutiles. Se desactivan si el sistema pide reducir movimiento. */
@@ -145,6 +179,7 @@
   *,
   *::before,
   *::after {
+    animation-delay: 0ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -155,7 +190,7 @@
   padding-top: max(1.5rem, env(safe-area-inset-top));
 }
 
-/* Botón principal y "+" flotante: degradado rosa → lavanda. */
+/* Compatibilidad con las acciones existentes: ya no utiliza degradados. */
 @utility bg-pastel {
-  background-image: linear-gradient(135deg, var(--color-blush-300), var(--color-lavender-300));
+  background-color: var(--color-blush-100);
 }

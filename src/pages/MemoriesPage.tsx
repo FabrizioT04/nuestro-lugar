@@ -17,8 +17,8 @@ import { memoriesApi } from "@/services/api/memories";
 type View = "tarjetas" | "linea";
 
 const chipClass = (active: boolean) =>
-  `flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition ${
-    active ? "border-blush-200 bg-blush-200 text-blush-700" : "border-blush-100 bg-paper text-ink-soft hover:text-ink"
+  `nl-chip ${
+    active ? "border-blush-200 bg-blush-100 text-blush-700" : "border-blush-200 bg-paper text-ink-soft hover:text-ink"
   }`;
 
 export function MemoriesPage() {
@@ -55,7 +55,12 @@ export function MemoriesPage() {
     <section>
       <header className="mb-4 flex animate-fade-up items-center justify-between gap-3">
         <h1 className="text-3xl">Recuerdos</h1>
-        <div className="flex rounded-full border border-blush-100 bg-paper p-1" role="group" aria-label="Vista">
+        <Link to="/recuerdos/nuevo" className="nl-action"><Plus size={16} aria-hidden /> Nuevo</Link>
+      </header>
+      <p className="mb-5 text-sm text-ink-soft">Lo bonito de nuestra historia.</p>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <span className="text-xs text-ink-soft">Nuestros momentos</span>
+        <div className="nl-tabs" role="group" aria-label="Vista">
           {(
             [
               ["tarjetas", LayoutGrid, "Tarjetas"],
@@ -68,15 +73,13 @@ export function MemoriesPage() {
               aria-pressed={view === value}
               aria-label={label}
               onClick={() => update({ vista: value === "tarjetas" ? null : value })}
-              className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
-                view === value ? "bg-blush-50 text-blush-500" : "text-ink-soft"
-              }`}
+              className="nl-tab flex min-w-11 items-center justify-center"
             >
               <Icon size={18} aria-hidden />
             </button>
           ))}
         </div>
-      </header>
+      </div>
 
       <label className="relative mb-3 block animate-fade-up [animation-delay:40ms]">
         <span className="sr-only">Buscar recuerdos</span>
@@ -89,13 +92,13 @@ export function MemoriesPage() {
             update({ q: event.target.value.trim() || null });
           }}
           placeholder="Buscar por título, lugar o etiqueta"
-          className="w-full rounded-2xl border border-transparent bg-blush-50 py-3 pr-4 pl-11 text-ink outline-none placeholder:text-ink-soft/70 focus:border-blush-200 focus:bg-paper"
+          className="w-full rounded-xl border border-blush-200 bg-paper py-3 pr-4 pl-11 text-base text-ink placeholder:text-ink-soft focus:border-blush-500"
         />
       </label>
 
       <Link
         to={`/recuerdos/preguntar${debouncedQuery ? `?p=${encodeURIComponent(debouncedQuery)}` : ""}`}
-        className="mb-3 flex animate-fade-up items-center gap-2 rounded-full bg-gradient-to-r from-blush-100 to-lavender-100 px-4 py-2.5 text-sm font-bold text-lavender-500 [animation-delay:60ms]"
+        className="mb-3 flex min-h-11 animate-fade-up items-center gap-2 rounded-xl bg-blush-50 px-4 py-3 text-sm font-medium text-blush-700 [animation-delay:60ms]"
       >
         <Sparkles size={16} className="text-lavender-500" aria-hidden />
         <span className="flex-1 truncate">
@@ -180,9 +183,9 @@ export function MemoriesPage() {
       {list.items.length > 0 && list.status !== "loading" && (
         <>
           {view === "tarjetas" ? (
-            <ul className="columns-2 gap-3">
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {list.items.map((memory) => (
-                <li key={memory.id} className="mb-3 animate-fade-up break-inside-avoid">
+                <li key={memory.id} className="min-w-0 animate-fade-up">
                   <MemoryCard memory={memory} />
                 </li>
               ))}
@@ -200,13 +203,6 @@ export function MemoriesPage() {
         </>
       )}
 
-      <Link
-        to="/recuerdos/nuevo"
-        aria-label="Nuevo recuerdo"
-        className="fixed right-5 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-10 flex h-14 w-14 items-center justify-center rounded-[1.15rem] bg-pastel text-white shadow-[0_12px_24px_-10px_rgb(208_85_122/0.8)] transition hover:brightness-105 active:scale-95 lg:right-[calc(50%-15rem)]"
-      >
-        <Plus size={26} aria-hidden />
-      </Link>
     </section>
   );
 }

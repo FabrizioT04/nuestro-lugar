@@ -216,5 +216,5 @@ async function staleWhileRevalidate(request, cacheName) {
 }
 
 const OFFLINE_PAGE = `<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nuestro Lugar</title><body style="font-family:system-ui;background:#fff7f9;color:#4a3640;display:grid;place-items:center;min-height:100vh;margin:0;text-align:center;padding:24px">
+<title>Nuestro Lugar</title><body style="font-family:system-ui;background:#fffdfc;color:#382931;display:grid;place-items:center;min-height:100vh;margin:0;text-align:center;padding:24px">
 <div><p style="font-size:48px;margin:0">♡</p><h1 style="font-size:22px">Sin conexión</h1><p>Abre Nuestro Lugar con Internet una vez para poder usarlo sin conexión.</p></div></body></html>`;

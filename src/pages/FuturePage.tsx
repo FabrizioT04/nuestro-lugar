@@ -1,5 +1,6 @@
 import { Link } from "react-router";
-import { Gift, Lock } from "lucide-react";
+import { ArrowRight, Gift, Lock } from "lucide-react";
+import { daysBetween, todayIn, utcToZoned } from "@shared/dates";
 import type { CapsuleSummary } from "@shared/api";
 import { useMe } from "@/auth/AuthContext";
 import { CapsuleBox } from "@/components/capsules/CapsuleBox";
@@ -9,6 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
 import { capsulesApi } from "@/services/api/capsules";
+import { formatLongDate, formatNumber } from "@/utils/format";
 
 const loadCapsules = () => capsulesApi.list();
 
@@ -21,12 +23,12 @@ export function FuturePage() {
   return (
     <section>
       <header className="mb-2 flex animate-fade-up items-center justify-between gap-3">
-        <h1 className="text-3xl">Caja del futuro</h1>
-        <Link to="/futuro/nueva" className="inline-flex items-center gap-2 rounded-full bg-pastel px-4 py-2.5 text-sm font-bold text-ink shadow-soft transition hover:brightness-105 active:scale-95">
-          <Gift size={16} aria-hidden /> Guardar
+        <h1 className="text-3xl">Futuro</h1>
+        <Link to="/futuro/nueva" className="nl-action">
+          <Gift size={16} aria-hidden /> Cápsula
         </Link>
       </header>
-      <p className="mb-5 animate-fade-up text-ink-soft [animation-delay:40ms]">Cosas que guardamos hoy para abrirlas más adelante.</p>
+      <p className="mb-5 animate-fade-up text-sm text-ink-soft [animation-delay:40ms]">Un pedacito de hoy para después.</p>
 
       {capsules.status === "loading" && (
         <div className="space-y-3">
@@ -57,13 +59,33 @@ function CapsuleGroups({ items, timezone, partner }: { items: CapsuleSummary[]; 
   const ready = items.filter((c) => !c.isLocked && !c.openedAt);
   const waiting = items.filter((c) => c.isLocked);
   const opened = items.filter((c) => !c.isLocked && c.openedAt).reverse();
+  const next = waiting[0];
 
   return (
     <div className="space-y-6">
+      {next && <NextCapsule capsule={next} timezone={timezone} partner={partner} />}
       <Group title="Listas para abrir" items={ready} timezone={timezone} partner={partner} />
-      <Group title="Esperando su fecha" items={waiting} timezone={timezone} partner={partner} />
+      <Group title="Esperando su fecha" items={waiting.slice(1)} timezone={timezone} partner={partner} />
       <Group title="Ya abiertas" items={opened} timezone={timezone} partner={partner} />
     </div>
+  );
+}
+
+function NextCapsule({ capsule, timezone, partner }: { capsule: CapsuleSummary; timezone: string; partner: string }) {
+  const unlockDate = utcToZoned(capsule.unlockAt, timezone).date;
+  const days = Math.max(0, daysBetween(todayIn(timezone), unlockDate));
+  return (
+    <Link to={`/futuro/${capsule.id}`} className="block rounded-card bg-blush-100 px-5 py-7 text-center transition hover:bg-blush-50">
+      <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-paper text-blush-500"><Gift size={30} strokeWidth={1.4} aria-hidden /></span>
+      <p className="text-[11px] tracking-[0.14em] text-ink-soft uppercase">La próxima en abrirse</p>
+      <h2 className="mt-2 text-xl">{capsule.title}</h2>
+      <p className="mt-2 text-xs text-ink-soft">{capsulePeople(capsule, partner)}</p>
+      <p className="mt-5 text-4xl font-medium tracking-tight text-blush-500">
+        {days === 0 ? "Hoy" : <>{formatNumber(days)} <span className="text-sm font-normal tracking-normal text-ink-soft">{days === 1 ? "día" : "días"}</span></>}
+      </p>
+      <p className="mt-2 text-xs text-ink-soft">{formatLongDate(unlockDate)}</p>
+      <p className="mt-5 flex items-center justify-center gap-2 border-t border-blush-200 pt-4 text-xs text-ink-soft"><Lock size={14} className="shrink-0" aria-hidden /> Su contenido espera hasta la fecha de apertura</p>
+    </Link>
   );
 }
 
@@ -87,11 +109,11 @@ function CapsuleListItem({ capsule, timezone, partner }: { capsule: CapsuleSumma
   const status = capsuleStatus(capsule, timezone);
   const ready = !capsule.isMine && !capsule.isLocked && !capsule.openedAt;
   return (
-    <Link to={`/futuro/${capsule.id}`} className="flex items-center gap-4 rounded-card bg-paper p-4 shadow-soft transition active:scale-[0.99]">
-      <CapsuleBox state={status.box} className={`h-16 w-16 shrink-0 ${ready ? "animate-float" : ""}`} />
+    <Link to={`/futuro/${capsule.id}`} className="flex items-center gap-3 rounded-card border border-blush-200 bg-paper p-4 transition active:scale-[0.99]">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blush-50 text-blush-500">{capsule.isLocked ? <Lock size={21} strokeWidth={1.6} aria-hidden /> : <Gift size={23} strokeWidth={1.6} aria-hidden />}</span>
       <div className="min-w-0 flex-1">
         <p className="text-xs font-semibold tracking-wide text-ink-soft uppercase">{capsulePeople(capsule, partner)}</p>
-        <p className={`truncate font-display text-lg ${ready ? "text-blush-700" : ""}`}>{capsule.title}</p>
+        <p className={`mt-1 font-display text-base font-medium break-words ${ready ? "text-blush-700" : ""}`}>{capsule.title}</p>
         <p className={`text-sm ${ready ? "font-semibold text-blush-500" : "text-ink-soft"}`}>{status.label}</p>
         {status.countdown && (
           <p className="mt-0.5 flex items-center gap-1 text-xs text-ink-soft">
@@ -99,7 +121,7 @@ function CapsuleListItem({ capsule, timezone, partner }: { capsule: CapsuleSumma
           </p>
         )}
       </div>
-      {ready && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-blush-500" aria-label="Sin abrir" />}
+      <ArrowRight size={17} className="shrink-0 text-blush-500" aria-label={ready ? "Sin abrir" : "Ver cápsula"} />
     </Link>
   );
 }

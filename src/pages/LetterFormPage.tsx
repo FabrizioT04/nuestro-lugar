@@ -13,8 +13,7 @@ import { lettersApi } from "@/services/api/letters";
 import type { LetterDetail } from "@shared/api";
 import { formatDayMonth, formatNumber } from "@/utils/format";
 
-const inputClass =
-  "mt-1 w-full rounded-2xl border border-blush-100 bg-cream px-4 py-3 text-ink outline-none focus:border-blush-300 focus:ring-2 focus:ring-blush-100";
+const inputClass = "nl-input";
 
 const TYPES: { value: LetterTypeName; label: string; hint: string; icon: LucideIcon }[] = [
   { value: "normal", label: "Carta", hint: "Se puede abrir desde ya", icon: Mail },

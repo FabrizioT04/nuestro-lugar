@@ -70,7 +70,7 @@ export function IntroPage() {
 
   return (
     <main
-      className="relative mx-auto flex min-h-dvh max-w-lg flex-col overflow-hidden bg-gradient-to-b from-cream via-blush-50 to-lavender-100 px-6 pt-safe pb-[max(2rem,env(safe-area-inset-bottom))] select-none"
+      className="relative mx-auto flex min-h-dvh max-w-lg flex-col overflow-hidden bg-cream px-6 pt-safe pb-[max(2rem,env(safe-area-inset-bottom))] select-none"
       onPointerDown={(event) => (swipeStart.current = event.clientX)}
       onPointerUp={(event) => {
         if (swipeStart.current === null) return;

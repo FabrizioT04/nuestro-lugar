@@ -34,7 +34,7 @@ export function ProfilePage() {
 
   return (
     <section className="space-y-4">
-      <PageHeader title="Perfil" />
+      <PageHeader title="Perfil" subtitle="Tu espacio dentro de nuestro lugar." />
 
       <Card className="flex animate-fade-up items-center gap-4">
         <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blush-100 font-display text-2xl text-blush-700">
@@ -53,16 +53,16 @@ export function ProfilePage() {
             {partner && (
               <div className="flex justify-between gap-4">
                 <dt className="text-ink-soft">Con</dt>
-                <dd className="font-semibold">{partner.displayName}</dd>
+                <dd className="min-w-0 text-right font-medium break-words">{partner.displayName}</dd>
               </div>
             )}
             <div className="flex justify-between gap-4">
               <dt className="text-ink-soft">Juntos desde</dt>
-              <dd className="font-semibold">{formatLongDate(me.relationship.startedOn)}</dd>
+              <dd className="min-w-0 text-right font-medium">{formatLongDate(me.relationship.startedOn)}</dd>
             </div>
             <div className="flex justify-between gap-4">
               <dt className="text-ink-soft">Zona horaria</dt>
-              <dd className="font-semibold">{me.relationship.timezone}</dd>
+              <dd className="min-w-0 text-right font-medium break-all">{me.relationship.timezone}</dd>
             </div>
           </dl>
         </Card>

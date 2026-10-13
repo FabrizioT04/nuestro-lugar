@@ -15,17 +15,14 @@ import { plansApi } from "@/services/api/plans";
 import { InlineIcon } from "@/components/icons/EmojiIcon";
 
 const TABS: { status: PlanStatusName; label: string; param: string | null }[] = [
-  { status: "pending", label: "Pendientes", param: null },
-  { status: "done", label: "Realizados", param: "realizados" },
+  { status: "pending", label: "Por hacer", param: null },
+  { status: "done", label: "Hechos", param: "realizados" },
   { status: "cancelled", label: "Cancelados", param: "cancelados" },
 ];
 
-const tabClass = (active: boolean) =>
-  `flex-1 rounded-full px-3 py-2 text-sm font-semibold transition ${active ? "bg-blush-100 text-blush-700" : "text-ink-soft hover:text-ink"}`;
-
 const chipClass = (active: boolean) =>
-  `flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition ${
-    active ? "border-blush-200 bg-blush-200 text-blush-700" : "border-blush-100 bg-paper text-ink-soft hover:text-ink"
+  `nl-chip ${
+    active ? "border-blush-200 bg-blush-100 text-blush-700" : "border-blush-200 bg-paper text-ink-soft hover:text-ink"
   }`;
 
 export function PlansPage() {
@@ -50,14 +47,15 @@ export function PlansPage() {
     <section>
       <header className="mb-4 flex animate-fade-up items-center justify-between gap-3">
         <h1 className="text-3xl">Planes</h1>
-        <Link to="/planes/nuevo" className="inline-flex items-center gap-2 rounded-full bg-pastel px-4 py-2.5 text-sm font-bold text-ink shadow-soft transition hover:brightness-105 active:scale-95">
+        <Link to="/planes/nuevo" className="nl-action">
           <Plus size={16} aria-hidden /> Nuevo
         </Link>
       </header>
+      <p className="mb-5 text-sm text-ink-soft">Siempre hay algo bonito por hacer.</p>
 
-      <div className="mb-3 flex animate-fade-up rounded-full bg-paper p-1 shadow-soft [animation-delay:40ms]" role="tablist" aria-label="Estado">
+      <div className="nl-tabs mb-4 animate-fade-up [animation-delay:40ms]" role="tablist" aria-label="Estado">
         {TABS.map((t) => (
-          <button key={t.status} type="button" role="tab" aria-selected={tab === t} className={tabClass(tab === t)} onClick={() => update({ estado: t.param })}>
+          <button key={t.status} type="button" role="tab" aria-selected={tab === t} className="nl-tab" onClick={() => update({ estado: t.param })}>
             {t.label}
             {plans.status === "success" && <span className="ml-1 font-normal opacity-70">{plans.data.items.filter((p) => p.status === t.status).length}</span>}
           </button>

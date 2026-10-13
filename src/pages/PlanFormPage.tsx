@@ -14,8 +14,7 @@ import { plansApi, type PlanPayload } from "@/services/api/plans";
 import type { PlanDetail } from "@shared/api";
 import { IconTile } from "@/components/icons/EmojiIcon";
 
-const inputClass =
-  "mt-1 w-full rounded-2xl border border-blush-100 bg-cream px-4 py-3 text-ink outline-none focus:border-blush-300 focus:ring-2 focus:ring-blush-100";
+const inputClass = "nl-input";
 
 const CURRENCY_LABELS: Record<(typeof CURRENCIES)[number], string> = { PEN: "S/ (soles)", USD: "US$ (dólares)", EUR: "€ (euros)" };
 

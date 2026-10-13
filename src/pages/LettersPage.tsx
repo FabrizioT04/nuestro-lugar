@@ -12,9 +12,6 @@ import { useAsync } from "@/hooks/useAsync";
 import { useOutbox } from "@/hooks/useOutbox";
 import { lettersApi, type LetterBox } from "@/services/api/letters";
 
-const tabClass = (active: boolean) =>
-  `flex-1 rounded-full px-4 py-2 text-sm font-semibold transition ${active ? "bg-blush-100 text-blush-700" : "text-ink-soft hover:text-ink"}`;
-
 export function LettersPage() {
   const me = useMe();
   const [params, setParams] = useSearchParams();
@@ -30,17 +27,18 @@ export function LettersPage() {
     <section>
       <header className="mb-4 flex animate-fade-up items-center justify-between gap-3">
         <h1 className="text-3xl">Cartas</h1>
-        <Link to="/cartas/nueva" className="inline-flex items-center gap-2 rounded-full bg-pastel px-4 py-2.5 text-sm font-bold text-ink shadow-soft transition hover:brightness-105 active:scale-95">
+        <Link to="/cartas/nueva" className="nl-action">
           <PenLine size={16} aria-hidden /> Escribir
         </Link>
       </header>
+      <p className="mb-5 text-sm text-ink-soft">Palabras que merecen quedarse.</p>
 
-      <div className="mb-5 flex animate-fade-up rounded-full bg-paper p-1 shadow-soft [animation-delay:40ms]" role="tablist" aria-label="Bandeja">
-        <button type="button" role="tab" aria-selected={box === "received"} className={tabClass(box === "received")} onClick={() => setParams({}, { replace: true })}>
-          Para mí
+      <div className="nl-tabs mb-5 animate-fade-up [animation-delay:40ms]" role="tablist" aria-label="Bandeja">
+        <button type="button" role="tab" aria-selected={box === "received"} className="nl-tab" onClick={() => setParams({}, { replace: true })}>
+          Recibidas
         </button>
-        <button type="button" role="tab" aria-selected={box === "sent"} className={tabClass(box === "sent")} onClick={() => setParams({ bandeja: "enviadas" }, { replace: true })}>
-          Para {partner}
+        <button type="button" role="tab" aria-selected={box === "sent"} className="nl-tab" onClick={() => setParams({ bandeja: "enviadas" }, { replace: true })}>
+          Enviadas
         </button>
       </div>
 

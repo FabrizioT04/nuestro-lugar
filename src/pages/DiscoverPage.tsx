@@ -31,11 +31,7 @@ const TABS = [
   { param: "gustos", label: "Gustos" },
 ] as const;
 
-const tabClass = (active: boolean) =>
-  `flex-1 rounded-full px-3 py-2 text-sm font-semibold transition ${active ? "bg-blush-100 text-blush-700" : "text-ink-soft hover:text-ink"}`;
-
-const inputClass =
-  "w-full rounded-2xl border border-blush-100 bg-cream px-4 py-3 text-ink outline-none focus:border-blush-300 focus:ring-2 focus:ring-blush-100";
+const inputClass = "nl-input mt-0";
 
 const EXAMPLES = ["Un lugar tranquilo para comer algo dulce y conversar", "Algo barato al aire libre cerca", "Sushi abierto ahorita"];
 
@@ -68,12 +64,12 @@ export function DiscoverPage() {
     <section>
       <header className="mb-4 animate-fade-up">
         <h1 className="text-3xl">¿Qué hacemos hoy?</h1>
-        <p className="mt-1 text-ink-soft">Ideas cerca de ustedes, pensadas para los dos.</p>
+        <p className="mt-2 text-sm text-ink-soft">Ideas cerca de ustedes, pensadas para los dos.</p>
       </header>
 
-      <div className="mb-4 flex animate-fade-up rounded-full bg-paper p-1 shadow-soft [animation-delay:40ms]" role="tablist" aria-label="Sección">
+      <div className="nl-tabs mb-4 animate-fade-up [animation-delay:40ms]" role="tablist" aria-label="Sección">
         {TABS.map((t) => (
-          <button key={t.label} type="button" role="tab" aria-selected={tab === t} className={tabClass(tab === t)} onClick={() => select(t.param)}>
+          <button key={t.label} type="button" role="tab" aria-selected={tab === t} className="nl-tab" onClick={() => select(t.param)}>
             {t.label}
           </button>
         ))}
