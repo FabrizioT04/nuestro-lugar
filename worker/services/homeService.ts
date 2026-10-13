@@ -1,7 +1,9 @@
 import type { CapsuleSummary, HomeResponse, LetterSummary, PendingItem, RelationshipSummary, UpcomingMoment } from "@shared/api";
+import type { SeenSection } from "@shared/schemas";
 import { daysBetween, elapsedParts, nextYearlyOccurrence, todayIn } from "@shared/dates";
 import type { AuthenticatedUser } from "../auth/types";
 import type { Bindings } from "../env";
+import { createBadgeRepository } from "../repositories/badgeRepository";
 import { createHomeRepository } from "../repositories/homeRepository";
 import { createImportantDateRepository } from "../repositories/importantDateRepository";
 import { toImportantDate } from "./importantDateService";
@@ -62,13 +64,14 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
   if (!user.relationshipId) throw notFound("Relación no configurada");
 
   const homeRepository = createHomeRepository(env.DB);
-  const [relationship, importantDates, highlightedMemory, unopenedLetters, received, capsules] = await Promise.all([
+  const [relationship, importantDates, highlightedMemory, unopenedLetters, received, capsules, counts] = await Promise.all([
     createRelationshipRepository(env.DB).findSummary(user.relationshipId),
     createImportantDateRepository(env.DB).list(user.relationshipId),
     homeRepository.findHighlightedMemory(user.relationshipId),
     countUnopenedLetters(env, user),
     listPendingLetters(env, user, PENDING_LIMIT),
     listPendingCapsules(env, user, PENDING_LIMIT),
+    createBadgeRepository(env.DB).counts(user.relationshipId, user.id, new Date().toISOString()),
   ]);
   if (!relationship) throw notFound("Relación no encontrada");
 
@@ -115,5 +118,11 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
     highlightedMemory,
     unopenedLetters,
     pending: pendingItems(received, capsules),
+    badges: { memories: counts.memories, letters: unopenedLetters, plans: counts.plans, future: counts.capsules, us: counts.us },
   };
+}
+
+/** Marca una sección como vista: sus globitos vuelven a cero. */
+export async function markSectionSeen(env: Bindings, user: AuthenticatedUser, section: SeenSection): Promise<void> {
+  await createBadgeRepository(env.DB).markSeen(user.id, section, new Date().toISOString());
 }

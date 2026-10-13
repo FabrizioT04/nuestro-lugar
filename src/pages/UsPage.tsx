@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
+import { useMarkSeen } from "@/hooks/useMarkSeen";
 import { usApi } from "@/services/api/us";
 import { formatCountdown, formatDayMonth, formatDuration, formatLongDate, formatNumber, plural } from "@/utils/format";
 import { IconTile } from "@/components/icons/EmojiIcon";
 
 export function UsPage() {
+  useMarkSeen("us");
   const us = useAsync(usApi.get, { cacheKey: "us" });
 
   return (

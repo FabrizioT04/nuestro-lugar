@@ -1,3 +1,4 @@
+import type { HomeBadges } from "@shared/api";
 import { CalendarHeart, Camera, Compass, Gift, Heart, House, Mail, UserRound, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
@@ -17,14 +18,16 @@ export const BOTTOM_NAV: NavItem[] = [
 
 export interface ModuleItem extends NavItem {
   tone: "blush" | "lavender" | "mint";
+  /** Qué globito de novedades lleva en el inicio. */
+  badge?: keyof HomeBadges;
 }
 
 /** Accesos rápidos del Home. */
 export const MODULES: ModuleItem[] = [
-  { to: "/recuerdos", label: "Recuerdos", icon: Camera, tone: "blush" },
-  { to: "/cartas", label: "Cartas", icon: Mail, tone: "lavender" },
-  { to: "/planes", label: "Planes", icon: CalendarHeart, tone: "mint" },
+  { to: "/recuerdos", label: "Recuerdos", icon: Camera, tone: "blush", badge: "memories" },
+  { to: "/cartas", label: "Cartas", icon: Mail, tone: "lavender", badge: "letters" },
+  { to: "/planes", label: "Planes", icon: CalendarHeart, tone: "mint", badge: "plans" },
   { to: "/descubrir", label: "Descubrir", icon: Compass, tone: "mint" },
-  { to: "/futuro", label: "Futuro", icon: Gift, tone: "lavender" },
-  { to: "/nosotros", label: "Nosotros", icon: Heart, tone: "blush" },
+  { to: "/futuro", label: "Futuro", icon: Gift, tone: "lavender", badge: "future" },
+  { to: "/nosotros", label: "Nosotros", icon: Heart, tone: "blush", badge: "us" },
 ];
