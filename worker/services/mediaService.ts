@@ -21,7 +21,7 @@ import {
 const UPLOAD_PURPOSES = ["memory", "plan", "cover", "capsule"] as const;
 type UploadPurpose = (typeof UPLOAD_PURPOSES)[number];
 
-async function readImage(entry: string | File | null, maxBytes: number, label: string) {
+export async function readImage(entry: string | File | null, maxBytes: number, label: string) {
   if (!(entry instanceof File)) throw badRequest(`Falta ${label}`);
   if (entry.size === 0) throw badRequest(`${label} está vacía`);
   if (entry.size > maxBytes) throw payloadTooLarge(`${label} supera ${Math.round(maxBytes / 1024 / 1024)} MB`);

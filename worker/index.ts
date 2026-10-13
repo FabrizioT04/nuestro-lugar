@@ -11,6 +11,7 @@ import { homeRoutes } from "./routes/home";
 import { letterRoutes } from "./routes/letters";
 import { meRoutes } from "./routes/me";
 import { mediaRoutes } from "./routes/media";
+import { drawingRoutes } from "./routes/drawings";
 import { memoryRoutes } from "./routes/memories";
 import { mobileAuthRoutes } from "./routes/mobileAuth";
 import { placeRoutes } from "./routes/places";
@@ -56,6 +57,7 @@ app.route("/capsules", capsuleRoutes);
 app.route("/us", usRoutes);
 app.route("/important-dates", importantDateRoutes);
 app.route("/media", mediaRoutes);
+app.route("/drawings", drawingRoutes);
 app.route("/relationship", relationshipRoutes);
 app.route("/push", pushRoutes);
 

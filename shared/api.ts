@@ -110,6 +110,22 @@ export interface HomeBadges {
   future: number;
   /** Fechas importantes que agregó la otra persona desde la última visita. */
   us: number;
+  /** Dibujos que dejó la otra persona desde la última visita. */
+  drawings: number;
+}
+
+export interface Drawing {
+  id: string;
+  caption: string | null;
+  width: number | null;
+  height: number | null;
+  author: { id: string; displayName: string };
+  isMine: boolean;
+  createdAt: string;
+}
+
+export interface DrawingListResponse {
+  items: Drawing[];
 }
 
 export interface PendingItem {
@@ -482,6 +498,8 @@ export interface PushPreferences {
   dates: boolean;
   /** Planes con fecha de hoy. */
   plans: boolean;
+  /** La otra persona dejó un dibujo. */
+  drawings: boolean;
 }
 
 export interface PushConfigResponse {

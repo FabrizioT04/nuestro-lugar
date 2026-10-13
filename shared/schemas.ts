@@ -405,9 +405,18 @@ export const pushPreferencesSchema = z.object({
   capsules: z.boolean(),
   dates: z.boolean(),
   plans: z.boolean(),
+  // Las versiones anteriores de la app no lo envían.
+  drawings: z.boolean().default(true),
 });
 
 /** Secciones que guardan "visto por última vez" para los globitos del inicio. */
-export const SEEN_SECTIONS = ["memories", "plans", "us"] as const;
+export const SEEN_SECTIONS = ["memories", "plans", "us", "drawings"] as const;
 export const sectionSeenSchema = z.object({ section: z.enum(SEEN_SECTIONS) });
 export type SeenSection = (typeof SEEN_SECTIONS)[number];
+
+/** Texto opcional que acompaña a un dibujo (llega como campo del formulario multipart). */
+export const drawingCaptionSchema = z
+  .string()
+  .trim()
+  .max(140, "Como mucho 140 caracteres")
+  .transform((value) => (value === "" ? null : value));

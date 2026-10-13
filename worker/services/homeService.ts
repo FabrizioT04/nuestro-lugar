@@ -118,7 +118,7 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
     highlightedMemory,
     unopenedLetters,
     pending: pendingItems(received, capsules),
-    badges: { memories: counts.memories, letters: unopenedLetters, plans: counts.plans, future: counts.capsules, us: counts.us },
+    badges: { memories: counts.memories, letters: unopenedLetters, plans: counts.plans, future: counts.capsules, us: counts.us, drawings: counts.drawings },
   };
 }
 

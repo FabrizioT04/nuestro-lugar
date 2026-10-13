@@ -205,14 +205,14 @@ describe("globitos de novedades del inicio", () => {
 
   it("cuenta solo lo nuevo de la otra persona en esta relación", async () => {
     const home = await getHome(env, user);
-    expect(home.badges).toEqual({ memories: 2, letters: 1, plans: 1, future: 1, us: 1 });
+    expect(home.badges).toEqual({ memories: 2, letters: 1, plans: 1, future: 1, us: 1, drawings: 0 });
   });
 
   it("apaga el globito de una sección al visitarla, sin tocar las demás", async () => {
     await markSectionSeen(env, user, "memories");
     await markSectionSeen(env, user, "memories");
     const home = await getHome(env, user);
-    expect(home.badges).toEqual({ memories: 0, letters: 1, plans: 1, future: 1, us: 1 });
+    expect(home.badges).toEqual({ memories: 0, letters: 1, plans: 1, future: 1, us: 1, drawings: 0 });
   });
 
   it("sin visita guardada, todo lo de la otra persona cuenta como nuevo", async () => {
