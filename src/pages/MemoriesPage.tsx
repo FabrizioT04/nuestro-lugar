@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
-import { Camera, GitCommitVertical, Heart, LayoutGrid, Plus, Search, X } from "lucide-react";
+import { Camera, GitCommitVertical, Heart, LayoutGrid, Plus, Search, Sparkles, X } from "lucide-react";
 import type { MemoryFilters } from "@shared/api";
 import { MemoryCard } from "@/components/memories/MemoryCard";
 import { MemoryTimeline } from "@/components/memories/MemoryTimeline";
@@ -92,6 +92,16 @@ export function MemoriesPage() {
           className="w-full rounded-full border border-blush-100 bg-paper py-3 pr-4 pl-11 text-ink shadow-soft outline-none placeholder:text-ink-soft/70 focus:border-blush-300"
         />
       </label>
+
+      <Link
+        to={`/recuerdos/preguntar${debouncedQuery ? `?p=${encodeURIComponent(debouncedQuery)}` : ""}`}
+        className="mb-3 flex animate-fade-up items-center gap-2 rounded-full bg-lavender-100 px-4 py-2.5 text-sm font-semibold text-ink [animation-delay:60ms]"
+      >
+        <Sparkles size={16} className="text-lavender-500" aria-hidden />
+        <span className="flex-1 truncate">
+          Pregúntale a sus recuerdos <span className="font-normal text-ink-soft">· con IA</span>
+        </span>
+      </Link>
 
       <div className="-mx-5 mb-5 flex animate-fade-up gap-2 overflow-x-auto px-5 pb-1 [animation-delay:80ms] [scrollbar-width:none]">
         <button type="button" className={chipClass(!category && !favorites)} onClick={() => update({ categoria: null, favoritos: null })}>

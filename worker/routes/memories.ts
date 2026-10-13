@@ -1,9 +1,9 @@
 import { Hono } from "hono";
-import { favoriteSchema, memoryCreateSchema, memoryInputSchema, memoryListQuerySchema } from "@shared/schemas";
+import { favoriteSchema, memoryCreateSchema, memoryInputSchema, memoryListQuerySchema, memorySearchSchema } from "@shared/schemas";
 import type { AppEnv } from "../env";
 import { requireRelationship, requireUser } from "../middleware/auth";
 import { idempotent } from "../middleware/idempotency";
-import { limitWrites } from "../middleware/rateLimit";
+import { limitAi, limitWrites } from "../middleware/rateLimit";
 import {
   createMemory,
   deleteMemory,
@@ -13,11 +13,17 @@ import {
   setMemoryFavorite,
   updateMemory,
 } from "../services/memoryService";
+import { searchMemories } from "../services/memorySearchService";
 import { parseIdParam, parseJsonBody, parseQuery } from "../utils/validation";
 
 export const memoryRoutes = new Hono<AppEnv>()
   .use(requireUser, requireRelationship, limitWrites, idempotent)
   .get("/", async (c) => c.json(await listMemories(c.env, c.get("user"), parseQuery(c, memoryListQuerySchema))))
+  // Búsqueda con IA. POST para que la pregunta no quede en URLs ni en logs de acceso.
+  .post("/search", limitAi, async (c) => {
+    const { question } = await parseJsonBody(c, memorySearchSchema);
+    return c.json(await searchMemories(c.env, c.get("user"), question));
+  })
   .get("/filters", async (c) => c.json(await getMemoryFilters(c.env, c.get("user"))))
   .post("/", async (c) => {
     const input = await parseJsonBody(c, memoryCreateSchema);

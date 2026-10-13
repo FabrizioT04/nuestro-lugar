@@ -4,6 +4,7 @@ import { AppLayout } from "@/layouts/AppLayout";
 import { HomePage } from "@/pages/HomePage";
 import { MemoriesPage } from "@/pages/MemoriesPage";
 import { MemoryDetailPage } from "@/pages/MemoryDetailPage";
+import { MemoryAskPage } from "@/pages/MemoryAskPage";
 import { MemoryFormPage } from "@/pages/MemoryFormPage";
 import { UsPage } from "@/pages/UsPage";
 import { ImportantDateFormPage } from "@/pages/ImportantDateFormPage";
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
           { index: true, element: <HomePage /> },
           { path: "recuerdos", element: <MemoriesPage /> },
           { path: "recuerdos/nuevo", element: <MemoryFormPage /> },
+          { path: "recuerdos/preguntar", element: <MemoryAskPage /> },
           { path: "recuerdos/:id", element: <MemoryDetailPage /> },
           { path: "recuerdos/:id/editar", element: <MemoryFormPage /> },
           { path: "nosotros", element: <UsPage /> },

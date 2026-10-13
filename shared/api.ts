@@ -403,3 +403,17 @@ export interface GeocodeResponse {
   location: GeoPoint;
   label: string;
 }
+
+// ---------------------------------------------------------------------------
+// Búsqueda de recuerdos con IA (Memory AI)
+// ---------------------------------------------------------------------------
+
+export interface MemorySearchResponse {
+  /** Respuesta corta basada solo en los recuerdos encontrados; null si no hay nada que decir. */
+  answer: string | null;
+  items: MemorySummary[];
+  /** "ai": por significado (Workers AI + Vectorize). "keywords": solo por palabras (la IA no estaba disponible). */
+  mode: "ai" | "keywords";
+  /** Recuerdos que todavía no se pudieron preparar para la búsqueda por significado. */
+  pendingIndex: number;
+}
