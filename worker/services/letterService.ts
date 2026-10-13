@@ -89,6 +89,12 @@ export async function getLetter(env: Bindings, user: AuthenticatedUser, letterId
   return toDetail(await loadVisible(env, user, letterId, now), user.id, now);
 }
 
+export async function listPendingLetters(env: Bindings, user: AuthenticatedUser, limit: number): Promise<LetterSummary[]> {
+  const now = nowIso();
+  const rows = await createLetterRepository(env.DB).listPending(relationshipOf(user), user.id, now, limit);
+  return rows.map((row) => toSummary(row, user.id, now));
+}
+
 export async function createLetter(env: Bindings, user: AuthenticatedUser, input: LetterInput & { id?: string }): Promise<LetterDetail> {
   const now = nowIso();
   const recipientId = await createRelationshipRepository(env.DB).findPartnerId(relationshipOf(user), user.id);

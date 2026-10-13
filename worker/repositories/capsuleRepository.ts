@@ -84,6 +84,21 @@ export function createCapsuleRepository(db: D1Database) {
       return results;
     },
 
+    /** Pendientes de la otra persona, tanto para quien mira como para ambos. */
+    async listPending(relationshipId: string, userId: string, limit: number): Promise<CapsuleRow[]> {
+      const { results } = await db
+        .prepare(
+          `SELECT ${COLUMNS} FROM future_capsules c JOIN users u ON u.id = c.created_by
+           WHERE c.relationship_id = ?1 AND c.deleted_at IS NULL
+             AND c.created_by <> ?2 AND c.opened_at IS NULL
+           ORDER BY c.unlock_at, c.id
+           LIMIT ?3`,
+        )
+        .bind(relationshipId, userId, limit)
+        .all<CapsuleRow>();
+      return results;
+    },
+
     /** Incluye el contenido: el servicio decide si se puede devolver. */
     findWithContents(relationshipId: string, capsuleId: string): Promise<CapsuleRowWithContents | null> {
       return db

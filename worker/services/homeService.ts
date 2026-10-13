@@ -5,8 +5,8 @@ import type { Bindings } from "../env";
 import { createHomeRepository } from "../repositories/homeRepository";
 import { createImportantDateRepository } from "../repositories/importantDateRepository";
 import { toImportantDate } from "./importantDateService";
-import { listCapsules } from "./capsuleService";
-import { countUnopenedLetters, listLetters } from "./letterService";
+import { listPendingCapsules } from "./capsuleService";
+import { countUnopenedLetters, listPendingLetters } from "./letterService";
 import { createPlanRepository } from "../repositories/planRepository";
 import { PLAN_TYPE_INFO } from "@shared/plans";
 import { createRelationshipRepository } from "../repositories/relationshipRepository";
@@ -67,8 +67,8 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
     createImportantDateRepository(env.DB).list(user.relationshipId),
     homeRepository.findHighlightedMemory(user.relationshipId),
     countUnopenedLetters(env, user),
-    listLetters(env, user, "received"),
-    listCapsules(env, user),
+    listPendingLetters(env, user, PENDING_LIMIT),
+    listPendingCapsules(env, user, PENDING_LIMIT),
   ]);
   if (!relationship) throw notFound("Relación no encontrada");
 
@@ -114,6 +114,6 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
     nextMoment: candidates[0] ?? null,
     highlightedMemory,
     unopenedLetters,
-    pending: pendingItems(received.items, capsules.items),
+    pending: pendingItems(received, capsules),
   };
 }

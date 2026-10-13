@@ -113,6 +113,12 @@ export async function listCapsules(env: Bindings, user: AuthenticatedUser): Prom
   return { items: rows.map((row) => toSummary(row, user.id, now)) };
 }
 
+export async function listPendingCapsules(env: Bindings, user: AuthenticatedUser, limit: number): Promise<CapsuleSummary[]> {
+  const now = nowIso();
+  const rows = await createCapsuleRepository(env.DB).listPending(relationshipOf(user), user.id, limit);
+  return rows.map((row) => toSummary(row, user.id, now));
+}
+
 export async function getCapsule(env: Bindings, user: AuthenticatedUser, capsuleId: string): Promise<CapsuleDetail> {
   const now = nowIso();
   const row = await load(env, user, capsuleId);

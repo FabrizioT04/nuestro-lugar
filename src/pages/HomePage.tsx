@@ -213,8 +213,8 @@ function writeFlag(key: string) {
 /** Recordatorio de lo que la otra persona dejó y todavía no abren: cartas y cápsulas. */
 function PendingSection({ data }: { data: HomeResponse }) {
   // Una copia antigua guardada sin conexión puede no traer este campo.
-  const items = data.pending ?? [];
-  const ready = items.filter((item) => !item.isLocked).length;
+  const items = data.pending;
+  const ready = items?.filter((item) => !item.isLocked).length ?? data.unopenedLetters;
 
   return (
     <section aria-labelledby="pending-title" className="animate-fade-up [animation-delay:220ms]">
@@ -229,7 +229,26 @@ function PendingSection({ data }: { data: HomeResponse }) {
         )}
       </div>
 
-      {items.length === 0 ? (
+      {items == null ? (
+        data.unopenedLetters > 0 ? (
+          <Link to="/cartas" className="block">
+            <Card className="flex items-center gap-3.5 !bg-lavender-100 !p-4">
+              <Mail size={22} className="shrink-0 text-lavender-500" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-ink">
+                  {data.unopenedLetters === 1 ? "Tienes una carta sin abrir" : `Tienes ${plural(data.unopenedLetters, "carta")} sin abrir`}
+                </p>
+                <p className="text-sm text-ink-soft">Conéctate para actualizar las cartas y cápsulas pendientes.</p>
+              </div>
+              <ChevronRight size={20} className="shrink-0 text-ink-soft" aria-hidden />
+            </Card>
+          </Link>
+        ) : (
+          <Card className="!p-4">
+            <p className="text-sm text-ink-soft">Conéctate para actualizar las cartas y cápsulas pendientes.</p>
+          </Card>
+        )
+      ) : items.length === 0 ? (
         <Card className="flex items-center gap-3.5 !p-4">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sage-100 text-sage-700" aria-hidden>
             <Heart size={20} strokeWidth={1.75} />
