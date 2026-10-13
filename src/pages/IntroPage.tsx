@@ -22,7 +22,7 @@ const SLIDES: Slide[] = [
     ),
   },
   { text: "Así que hice un lugar para guardarlos." },
-  { text: "Un lugar solo para nosotros. ❤️" },
+  { text: "Un lugar solo para nosotros. ♡" },
 ];
 
 const SWIPE_THRESHOLD_PX = 50;

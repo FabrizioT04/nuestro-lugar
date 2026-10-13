@@ -15,7 +15,7 @@ export function capsuleStatus(capsule: CapsuleSummary, timezone: string): { box:
     const daysUntil = daysBetween(todayIn(timezone), utcToZoned(capsule.unlockAt, timezone).date);
     return {
       box: "locked",
-      label: `Disponible el ${formatShortDateIn(capsule.unlockAt, timezone)} ❤`,
+      label: `Disponible el ${formatShortDateIn(capsule.unlockAt, timezone)} ♡`,
       countdown: daysUntil > 0 ? formatCountdown(daysUntil) : "Hoy",
     };
   }

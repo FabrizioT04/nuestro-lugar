@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
 import { usApi } from "@/services/api/us";
 import { formatDayMonth, formatLongDate } from "@/utils/format";
+import { IconTile } from "@/components/icons/EmojiIcon";
 
 interface YearGroup {
   year: string;
@@ -103,12 +104,7 @@ function EventCard({ event }: { event: TimelineEvent }) {
       {event.cover ? (
         <MemoryPhoto photo={event.cover} className="h-16 w-16 shrink-0 rounded-xl" />
       ) : (
-        <span
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-2xl ${milestone ? "bg-paper" : "bg-lavender-100"}`}
-          aria-hidden
-        >
-          {event.emoji}
-        </span>
+        <IconTile emoji={event.emoji} size="lg" tone={milestone ? "blush" : undefined} className={milestone ? "!bg-paper" : ""} />
       )}
       <div className="min-w-0 flex-1">
         <p className={`font-semibold ${milestone ? "font-display text-lg" : "truncate"}`}>{event.title}</p>

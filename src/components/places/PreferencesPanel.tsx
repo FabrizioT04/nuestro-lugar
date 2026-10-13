@@ -15,6 +15,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
 import { placesApi } from "@/services/api/places";
 import { chipClass } from "./chips";
+import { InlineIcon } from "@/components/icons/EmojiIcon";
+import { ThumbsDown, ThumbsUp } from "lucide-react";
 
 type Taste = "like" | "dislike" | null;
 
@@ -84,7 +86,7 @@ export function PreferencesPanel() {
       <Card className="animate-fade-up space-y-5">
         <div>
           <h2 className="font-display text-xl">Lo que me gusta</h2>
-          <p className="mt-1 text-sm text-ink-soft">Toca una vez para 👍, otra para 👎 y otra para quitarlo.</p>
+          <p className="mt-1 text-sm text-ink-soft">Toca una vez si te gusta, otra si no tanto y otra para quitarlo.</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {PLACE_CATEGORIES.map((category) => {
               const taste = tasteOf(current, category);
@@ -97,8 +99,9 @@ export function PreferencesPanel() {
                     taste === "like" ? "bg-blush-100 text-blush-700" : taste === "dislike" ? "bg-ink/10 text-ink-soft line-through" : "bg-cream text-ink-soft"
                   }`}
                 >
-                  <span aria-hidden>{PLACE_CATEGORY_INFO[category].emoji}</span> {PLACE_CATEGORY_INFO[category].label}
-                  {taste && <span aria-label={taste === "like" ? "me gusta" : "no me gusta"}>{taste === "like" ? "👍" : "👎"}</span>}
+                  <InlineIcon emoji={PLACE_CATEGORY_INFO[category].emoji} /> {PLACE_CATEGORY_INFO[category].label}
+                  {taste === "like" && <ThumbsUp size={14} aria-label="me gusta" />}
+                  {taste === "dislike" && <ThumbsDown size={14} aria-label="no me gusta" />}
                 </button>
               );
             })}
@@ -172,7 +175,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function PartnerSummary({ prefs }: { prefs: PlacePreferences }) {
-  const label = (category: PlaceCategory) => `${PLACE_CATEGORY_INFO[category].emoji} ${PLACE_CATEGORY_INFO[category].label}`;
+  const label = (category: PlaceCategory) => PLACE_CATEGORY_INFO[category].label;
   const rows = [
     ["Le gusta", prefs.likedCategories.map(label).join(", ")],
     ["No tanto", prefs.dislikedCategories.map(label).join(", ")],

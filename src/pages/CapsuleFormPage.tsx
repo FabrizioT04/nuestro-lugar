@@ -91,7 +91,7 @@ export function CapsuleFormPage() {
   const anniversary = nextYearlyOccurrence(relationship.startedOn, tomorrow);
   const quickDates = [
     { label: "En un año", date: addYears(today, 1) },
-    { label: `💞 Aniversario · ${formatDayMonth(anniversary.date)}`, date: anniversary.date },
+    { label: `Aniversario · ${formatDayMonth(anniversary.date)}`, date: anniversary.date },
     { label: "En 5 años", date: addYears(today, 5) },
   ];
 

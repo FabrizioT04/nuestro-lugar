@@ -2,14 +2,13 @@ import { Card } from "@/components/ui/Card";
 import { buttonClass } from "@/components/ui/Button";
 import { LOGOUT_URL, signOut } from "@/auth/session";
 import { isNativeApp } from "@/platform/native";
+import { IconTile } from "@/components/icons/EmojiIcon";
 
 export function AccessDeniedPage({ message }: { message: string }) {
   return (
     <main className="mx-auto flex min-h-dvh max-w-lg items-center px-4">
       <Card className="w-full text-center">
-        <p className="text-3xl" aria-hidden>
-          🔒
-        </p>
+        <IconTile emoji="🔒" size="lg" className="mx-auto" />
         <h1 className="mt-2 text-2xl">{message}</h1>
         <p className="mt-2 text-ink-soft">Esta cuenta no tiene acceso. Si te equivocaste de cuenta, cierra sesión y entra con la correcta.</p>
         {isNativeApp ? (

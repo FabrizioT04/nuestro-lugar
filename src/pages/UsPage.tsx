@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
 import { usApi } from "@/services/api/us";
 import { formatCountdown, formatDayMonth, formatDuration, formatLongDate, formatNumber, plural } from "@/utils/format";
+import { IconTile } from "@/components/icons/EmojiIcon";
 
 export function UsPage() {
   const us = useAsync(usApi.get, { cacheKey: "us" });
@@ -178,9 +179,7 @@ interface DateRowProps {
 function DateRow({ emoji, title, detail, daysUntil, to }: DateRowProps) {
   const content = (
     <>
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-lavender-100 text-xl" aria-hidden>
-        {emoji}
-      </span>
+      <IconTile emoji={emoji} size="md" />
       <div className="min-w-0 flex-1">
         <p className="leading-snug font-semibold">{title}</p>
         <p className="text-sm text-ink-soft">

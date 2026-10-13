@@ -13,6 +13,7 @@ import {
 import { Card } from "@/components/ui/Card";
 import { ApiError } from "@/services/api/client";
 import { placesApi } from "@/services/api/places";
+import { IconTile, InlineIcon } from "@/components/icons/EmojiIcon";
 
 /** Los botones que se ven siempre; "No me interesa" va aparte, más discreto. */
 const MAIN_ACTIONS: PlaceInteractionType[] = ["interested", "favorite", "visited", "loved"];
@@ -77,9 +78,7 @@ export function PlaceCard({ placeId, place, category, status, partnerName, reaso
   return (
     <Card className="animate-fade-up">
       <div className="flex items-start gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-lavender-100 text-xl" aria-hidden>
-          {info?.emoji ?? "📍"}
-        </span>
+        <IconTile emoji={info?.emoji ?? "📍"} size="md" />
         <div className="min-w-0 flex-1">
           <h3 className="font-display text-xl leading-tight">{place?.name ?? "Lugar no disponible"}</h3>
           {place ? (
@@ -116,7 +115,7 @@ export function PlaceCard({ placeId, place, category, status, partnerName, reaso
 
       {status.partner.length > 0 && partnerName && (
         <p className="mt-2 text-sm text-ink-soft">
-          {partnerName}: {status.partner.map((type) => `${PLACE_INTERACTION_INFO[type].emoji} ${PLACE_INTERACTION_INFO[type].label}`).join(" · ")}
+          {partnerName}: {status.partner.map((type) => PLACE_INTERACTION_INFO[type].label).join(" · ")}
         </p>
       )}
 
@@ -134,9 +133,7 @@ export function PlaceCard({ placeId, place, category, status, partnerName, reaso
                 active ? "bg-blush-100 text-blush-700" : "bg-cream text-ink-soft hover:text-ink"
               }`}
             >
-              <span className="text-lg" aria-hidden>
-                {PLACE_INTERACTION_INFO[type].emoji}
-              </span>
+              <InlineIcon emoji={PLACE_INTERACTION_INFO[type].emoji} size={19} className={active ? "fill-current" : ""} />
               {PLACE_INTERACTION_INFO[type].label}
             </button>
           );
@@ -167,7 +164,7 @@ export function PlaceCard({ placeId, place, category, status, partnerName, reaso
           aria-pressed={status.mine.includes("not_interested")}
           className="ml-auto text-ink-soft underline-offset-2 hover:underline disabled:opacity-70"
         >
-          {status.mine.includes("not_interested") ? "Volver a mostrar" : `${PLACE_INTERACTION_INFO.not_interested.emoji} No me interesa`}
+          {status.mine.includes("not_interested") ? "Volver a mostrar" : "No me interesa"}
         </button>
       </div>
     </Card>

@@ -178,7 +178,7 @@ function NextMomentCard({ moment }: { moment: UpcomingMoment }) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate font-bold text-ink">
-          {moment.title} <span aria-hidden>{moment.emoji}</span>
+          {moment.title}
         </p>
         <p className="text-sm text-ink-soft">
           {moment.years ? `Cumplen ${plural(moment.years, "año")}` : formatDayMonth(moment.date)}
