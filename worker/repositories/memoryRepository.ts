@@ -191,6 +191,21 @@ export function createMemoryRepository(db: D1Database) {
       return results.map(toSummary);
     },
 
+    /** Resúmenes de estos recuerdos (sin borrados), en el mismo orden que `ids`. */
+    async findSummaries(userId: string, relationshipId: string, ids: string[]): Promise<MemorySummary[]> {
+      if (ids.length === 0) return [];
+      const placeholders = ids.map((_, index) => `?${index + 3}`).join(", ");
+      const { results } = await db
+        .prepare(
+          `SELECT ${SUMMARY_COLUMNS} FROM memories m ${COVER_JOIN}
+           WHERE m.relationship_id = ?2 AND m.deleted_at IS NULL AND m.id IN (${placeholders})`,
+        )
+        .bind(userId, relationshipId, ...ids)
+        .all<SummaryRow>();
+      const byId = new Map(results.map((row) => [row.id, toSummary(row)]));
+      return ids.map((id) => byId.get(id)).filter((item): item is MemorySummary => item !== undefined);
+    },
+
     async exists(relationshipId: string, memoryId: string): Promise<boolean> {
       const row = await db
         .prepare("SELECT 1 AS found FROM memories WHERE id = ?1 AND relationship_id = ?2 AND deleted_at IS NULL")

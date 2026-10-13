@@ -113,6 +113,11 @@ export const memoryListQuerySchema = z.object({
 
 export const favoriteSchema = z.object({ favorite: z.boolean() });
 
+/** Pregunta a la búsqueda de recuerdos con IA ("¿cuándo fuimos por primera vez a la playa?"). */
+export const memorySearchSchema = z.object({
+  question: z.string().trim().min(3, "Escribe un poco más").max(300, "Máximo 300 caracteres"),
+});
+
 export const coverSchema = z.object({ mediaId: uuid.nullable() });
 
 // ---------------------------------------------------------------------------

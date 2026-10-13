@@ -39,10 +39,15 @@
   "ratelimits": [
     { "name": "UPLOAD_LIMITER", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } },
     { "name": "WRITE_LIMITER", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } },
-    { "name": "PLACES_LIMITER", "namespace_id": "1003", "simple": { "limit": 20, "period": 60 } }
-  ]
+    { "name": "PLACES_LIMITER", "namespace_id": "1003", "simple": { "limit": 20, "period": 60 } },
+    { "name": "AI_LIMITER", "namespace_id": "1004", "simple": { "limit": 20, "period": 60 } }
+  ],
 
-  // Fase 11 (IA):
-  // "ai": { "binding": "AI" },
-  // "vectorize": [{ "binding": "MEMORIES_INDEX", "index_name": "nuestro-lugar-memories" }]
+  // Búsqueda de recuerdos con IA (fase 11). Ambos tienen cupo gratis diario; sin pagar,
+  // al pasar el cupo responden con error (no cobran) y la app busca por palabras.
+  // Crear el índice una vez:
+  //   npx wrangler vectorize create nuestro-lugar-memories --dimensions=1024 --metric=cosine
+  //   npx wrangler vectorize create-metadata-index nuestro-lugar-memories --propertyName=relationshipId --type=string
+  "ai": { "binding": "AI" },
+  "vectorize": [{ "binding": "MEMORY_INDEX", "index_name": "nuestro-lugar-memories" }]
 }

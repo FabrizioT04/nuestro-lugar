@@ -144,6 +144,25 @@ En local no hace falta crear nada: `npm run dev` simula R2 dentro de `.wrangler/
    `npx wrangler secret put GOOGLE_PLACES_API_KEY --name app`
 5. Además, el Worker limita a 20 búsquedas por minuto por persona (`PLACES_LIMITER`).
 
+## Pregúntale a sus recuerdos (IA)
+
+- En Recuerdos → "Pregúntale a sus recuerdos": "¿Cuándo fuimos por primera vez a la playa?",
+  "Muéstrame cuando fuimos a comer pizza". Busca por significado y responde en una o dos frases.
+- Cada recuerdo se convierte en un vector con Workers AI (`@cf/baai/bge-m3`, multilingüe) y se guarda en
+  Vectorize con el id de la relación. El texto sigue solo en D1. El índice se pone al día solo antes de
+  cada búsqueda (recuerdos nuevos, editados o borrados; columna `memories.search_indexed_at`).
+- "La primera/última vez" se responde con los datos, sin IA. Las demás preguntas, con
+  `@cf/meta/llama-3.3-70b-instruct-fp8-fast` usando solo los recuerdos encontrados.
+- Costo S/ 0: entra en el cupo gratis diario. Si se acaba o la IA falla, busca por palabras.
+- En `npm run dev` no hay IA (busca por palabras). Para probarla en local: `REMOTE_BINDINGS=1 npm run dev`
+  (usa tu cuenta y su cupo).
+
+**Una sola vez, antes de publicar:**
+```
+npx wrangler vectorize create nuestro-lugar-memories --dimensions=1024 --metric=cosine
+npx wrangler vectorize create-metadata-index nuestro-lugar-memories --propertyName=relationshipId --type=string
+```
+
 ## Variables
 
 | Nombre | Fase | Dónde |

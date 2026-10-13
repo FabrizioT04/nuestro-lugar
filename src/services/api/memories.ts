@@ -1,4 +1,4 @@
-import type { MemoryDetail, MemoryFilters, MemoryListResponse } from "@shared/api";
+import type { MemoryDetail, MemoryFilters, MemoryListResponse, MemorySearchResponse } from "@shared/api";
 import type { MemoryInput } from "@shared/schemas";
 import { actionHeader, apiFetch, apiPost } from "./client";
 
@@ -18,6 +18,8 @@ const json = (method: string, body: unknown, clientActionId?: string): RequestIn
 });
 
 export const memoriesApi = {
+  /** Búsqueda con IA: "¿cuándo fuimos por primera vez a la playa?". */
+  ask: (question: string) => apiPost<MemorySearchResponse>("/memories/search", { question }),
   list(params: MemoryListParams = {}) {
     const search = new URLSearchParams();
     if (params.q) search.set("q", params.q);

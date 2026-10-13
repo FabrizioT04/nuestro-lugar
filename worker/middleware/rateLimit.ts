@@ -19,3 +19,10 @@ export const limitPlaces = createMiddleware<AppEnv>(async (c, next) => {
   if (!success) throw rateLimited("Muchas búsquedas seguidas. Espera un minuto.");
   await next();
 });
+
+/** Límite de búsquedas con IA por persona: cuida el cupo gratis diario de Workers AI. */
+export const limitAi = createMiddleware<AppEnv>(async (c, next) => {
+  const { success } = await c.env.AI_LIMITER.limit({ key: c.get("user").id });
+  if (!success) throw rateLimited("Muchas búsquedas seguidas. Espera un minuto.");
+  await next();
+});
