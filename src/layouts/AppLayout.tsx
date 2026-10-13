@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import { WifiOff } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
@@ -9,6 +9,7 @@ import { pushSupport, refreshPushSubscription } from "@/pwa/push";
 /** Estructura de las pantallas principales: contenido en una columna móvil + navegación inferior. */
 export function AppLayout() {
   const online = useOnlineStatus();
+  const { pathname } = useLocation();
 
   // Si este dispositivo tiene los avisos activados, se lo recuerda al Worker una vez por apertura.
   useEffect(() => {
@@ -26,7 +27,10 @@ export function AppLayout() {
       <SyncIndicator />
 
       <main className="flex-1 px-5 pt-safe pb-32">
-        <Outlet />
+        {/* La clave cambia con la ruta: cada pantalla nueva entra con un fundido suave. */}
+        <div key={pathname} className="animate-page-in">
+          <Outlet />
+        </div>
       </main>
 
       <BottomNav />

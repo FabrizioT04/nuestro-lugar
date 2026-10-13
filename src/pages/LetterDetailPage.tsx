@@ -4,6 +4,7 @@ import { ArrowLeft, Lock, Pencil, Trash2 } from "lucide-react";
 import type { LetterDetail } from "@shared/api";
 import { daysBetween, todayIn, utcToZoned } from "@shared/dates";
 import { useMe } from "@/auth/AuthContext";
+import { HeartBurst } from "@/components/fx/HeartBurst";
 import { Envelope } from "@/components/letters/Envelope";
 import { LETTER_TYPE_LABELS, letterStatus } from "@/components/letters/letterStatus";
 import { Button } from "@/components/ui/Button";
@@ -122,6 +123,7 @@ function LockedView({ letter, timezone }: { letter: LetterDetail; timezone: stri
 function LetterPaper({ letter, timezone, animate }: { letter: LetterDetail; timezone: string; animate?: boolean }) {
   return (
     <article className={animate ? "animate-fade-up" : ""}>
+      {animate && <HeartBurst seed={letter.title.length + 3} />}
       {animate && <Envelope state="opened" className="mx-auto -mb-6 h-28 w-40 animate-fade-in" />}
       <Card className="relative px-6 py-8">
         {letter.openWhenLabel && letter.title !== `Ábreme cuando ${letter.openWhenLabel}` && (

@@ -52,6 +52,10 @@
   --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-fade-in: fade-in 0.8s ease-out both;
   --animate-float: float 6s ease-in-out infinite;
+  --animate-page-in: page-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pop-in: pop-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-heart-fall: heart-fall 3s cubic-bezier(0.33, 0, 0.67, 1) both;
+  --animate-heart-rise: heart-rise 9s ease-in infinite;
 
   @keyframes fade-up {
     from {
@@ -69,6 +73,61 @@
     }
     to {
       opacity: 1;
+    }
+  }
+  /* Al cambiar de pantalla: aparece con un fundido (sin mover nada, para no desplazar el botón "+" fijo). */
+  @keyframes page-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  /* Algo que aparece con un pequeño rebote (la sección activa de la barra). */
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.85);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  /* Lluvia de corazones: caen de arriba abajo girando y desviándose un poco. */
+  @keyframes heart-fall {
+    0% {
+      opacity: 0;
+      transform: translate(0, 0) rotate(0deg) scale(0.6);
+    }
+    10% {
+      opacity: 1;
+      transform: translate(0, 8vh) rotate(0deg) scale(1);
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--drift, 0px), 105vh) rotate(var(--spin, 0deg)) scale(0.9);
+    }
+  }
+  /* Corazones de Inicio: suben despacio y se desvanecen. */
+  @keyframes heart-rise {
+    0% {
+      opacity: 0;
+      transform: translate(0, 0) rotate(0deg);
+    }
+    15% {
+      opacity: 0.75;
+    }
+    70% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--drift, 0px), -26rem) rotate(var(--spin, 0deg));
     }
   }
   @keyframes float {
