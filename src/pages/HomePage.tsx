@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { ChevronRight, Gift, Heart, Lock, Mail, Sparkles } from "lucide-react";
+import { ChevronRight, Droplet, Gift, Heart, Lock, Mail, Sparkles } from "lucide-react";
 import type { HomeBadges, HomeResponse, PendingItem, UpcomingMoment } from "@shared/api";
 import { daysBetween, utcToZoned } from "@shared/dates";
 import { HeartBurst } from "@/components/fx/HeartBurst";
@@ -36,19 +36,19 @@ export function HomePage() {
       {/* Accesos rápidos: compactos, para que el recordatorio de arriba sea lo principal. */}
       <nav aria-label="Nuestros rincones" className="animate-fade-up [animation-delay:280ms]">
         <h2 className="mb-3 text-base">Nuestros rincones</h2>
-        <ul className="grid grid-cols-3 gap-2.5">
+        <ul className="grid grid-cols-4 gap-2">
           {MODULES.map(({ to, label, icon: Icon, badge }) => {
             const count = badge && home.status === "success" ? badgeCount(home.data, badge) : 0;
             return (
               <li key={to}>
                 <Link
                   to={to}
-                  aria-label={count > 0 ? `${label}, ${plural(count, "novedad", "novedades")}` : undefined}
-                  className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border border-blush-200 bg-paper px-2 py-3 text-xs font-medium text-ink transition hover:bg-blush-50 active:scale-[0.98]"
+                  aria-label={count > 0 ? badgeLabel(label, badge!, count) : undefined}
+                  className="flex min-h-22 flex-col items-center justify-center gap-2 rounded-2xl border border-blush-200 bg-paper px-1 py-3 text-xs font-medium text-ink transition hover:bg-blush-50 active:scale-[0.98]"
                 >
                   <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-blush-50 text-blush-500">
                     <Icon size={21} strokeWidth={1.75} aria-hidden />
-                    {count > 0 && <CountBadge count={count} />}
+                    {count > 0 && (badge === "plant" ? <WaterBadge /> : <CountBadge count={count} />)}
                   </span>
                   {label}
                 </Link>
@@ -65,6 +65,24 @@ export function HomePage() {
 export function badgeCount(data: HomeResponse, badge: keyof HomeBadges): number {
   if (data.badges) return data.badges[badge];
   return badge === "letters" ? data.unopenedLetters : 0;
+}
+
+function badgeLabel(label: string, badge: keyof HomeBadges, count: number): string {
+  if (badge === "plant") return `${label}, hoy falta regarla`;
+  return `${label}, ${plural(count, "novedad", "novedades")}`;
+}
+
+/** La plantita no tiene novedades: avisa con una gota que hoy falta regarla. */
+function WaterBadge() {
+  return (
+    <span
+      aria-hidden
+      data-testid="water-badge"
+      className="animate-pop-in absolute -top-2 -right-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#5b9fcf] text-white ring-2 ring-paper"
+    >
+      <Droplet size={11} strokeWidth={2.5} fill="currentColor" />
+    </span>
+  );
 }
 
 /** Globito con el número de novedades, como en las redes sociales. */

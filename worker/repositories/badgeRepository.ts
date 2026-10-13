@@ -6,15 +6,16 @@ export interface BadgeCounts {
   us: number;
   capsules: number;
   drawings: number;
+  plant: number;
 }
 
 export function createBadgeRepository(db: D1Database) {
   return {
     /**
      * Novedades de la otra persona: recuerdos, planes, fechas y dibujos creados después de la última visita
-     * a cada sección, y cápsulas que ya se pueden abrir y nadie abrió.
+     * a cada sección, cápsulas que ya se pueden abrir y nadie abrió, y 1 si hoy falta regar la plantita.
      */
-    async counts(relationshipId: string, userId: string, now: string): Promise<BadgeCounts> {
+    async counts(relationshipId: string, userId: string, now: string, today: string): Promise<BadgeCounts> {
       const seen = (section: SeenSection) =>
         `COALESCE((SELECT seen_at FROM section_visits WHERE user_id = ?2 AND section = '${section}'), '')`;
       const row = await db
@@ -29,11 +30,12 @@ export function createBadgeRepository(db: D1Database) {
              (SELECT COUNT(*) FROM future_capsules WHERE relationship_id = ?1 AND deleted_at IS NULL
                 AND created_by <> ?2 AND opened_at IS NULL AND unlock_at <= ?3) AS capsules,
              (SELECT COUNT(*) FROM drawings WHERE relationship_id = ?1 AND deleted_at IS NULL
-                AND author_id <> ?2 AND created_at > ${seen("drawings")}) AS drawings`,
+                AND author_id <> ?2 AND created_at > ${seen("drawings")}) AS drawings,
+             (SELECT COUNT(*) = 0 FROM plant_waterings WHERE relationship_id = ?1 AND user_id = ?2 AND day = ?4) AS plant`,
         )
-        .bind(relationshipId, userId, now)
+        .bind(relationshipId, userId, now, today)
         .first<BadgeCounts>();
-      return { memories: row?.memories ?? 0, plans: row?.plans ?? 0, us: row?.us ?? 0, capsules: row?.capsules ?? 0, drawings: row?.drawings ?? 0 };
+      return { memories: row?.memories ?? 0, plans: row?.plans ?? 0, us: row?.us ?? 0, capsules: row?.capsules ?? 0, drawings: row?.drawings ?? 0, plant: row?.plant ?? 0 };
     },
 
     async markSeen(userId: string, section: SeenSection, now: string): Promise<void> {

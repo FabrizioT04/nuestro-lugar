@@ -420,3 +420,5 @@ export const drawingCaptionSchema = z
   .trim()
   .max(140, "Como mucho 140 caracteres")
   .transform((value) => (value === "" ? null : value));
+
+export const plantNameSchema = z.object({ name: z.string().trim().min(1, "Ponle un nombre").max(40, "Como mucho 40 caracteres") });

@@ -90,6 +90,33 @@
   --animate-pop-in: pop-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-heart-fall: heart-fall 3s cubic-bezier(0.33, 0, 0.67, 1) both;
   --animate-heart-rise: heart-rise 9s ease-in infinite;
+  --animate-plant-sway: plant-sway 5s ease-in-out infinite;
+  --animate-water-drop: water-drop 0.9s cubic-bezier(0.55, 0, 1, 0.45) both;
+
+  /* La plantita se mece suave cuando está feliz. */
+  @keyframes plant-sway {
+    0%,
+    100% {
+      transform: rotate(-1.5deg);
+    }
+    50% {
+      transform: rotate(1.5deg);
+    }
+  }
+  /* Gotas al regarla: caen desde la regadera hasta la tierra. */
+  @keyframes water-drop {
+    from {
+      opacity: 0;
+      transform: translateY(-30px);
+    }
+    20% {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+      transform: translateY(90px);
+    }
+  }
 
   @keyframes fade-up {
     from {

@@ -64,14 +64,13 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
   if (!user.relationshipId) throw notFound("Relación no configurada");
 
   const homeRepository = createHomeRepository(env.DB);
-  const [relationship, importantDates, highlightedMemory, unopenedLetters, received, capsules, counts] = await Promise.all([
+  const [relationship, importantDates, highlightedMemory, unopenedLetters, received, capsules] = await Promise.all([
     createRelationshipRepository(env.DB).findSummary(user.relationshipId),
     createImportantDateRepository(env.DB).list(user.relationshipId),
     homeRepository.findHighlightedMemory(user.relationshipId),
     countUnopenedLetters(env, user),
     listPendingLetters(env, user, PENDING_LIMIT),
     listPendingCapsules(env, user, PENDING_LIMIT),
-    createBadgeRepository(env.DB).counts(user.relationshipId, user.id, new Date().toISOString()),
   ]);
   if (!relationship) throw notFound("Relación no encontrada");
 
@@ -79,7 +78,10 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
   const today = todayIn(relationship.timezone);
   const { years, months } = elapsedParts(relationship.startedOn, today);
 
-  const upcomingPlans = await createPlanRepository(env.DB).listUpcoming(user.relationshipId, today);
+  const [upcomingPlans, counts] = await Promise.all([
+    createPlanRepository(env.DB).listUpcoming(user.relationshipId, today),
+    createBadgeRepository(env.DB).counts(user.relationshipId, user.id, new Date().toISOString(), today),
+  ]);
 
   const candidates: UpcomingMoment[] = [
     anniversaryMoment(relationship, today),
@@ -118,7 +120,7 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
     highlightedMemory,
     unopenedLetters,
     pending: pendingItems(received, capsules),
-    badges: { memories: counts.memories, letters: unopenedLetters, plans: counts.plans, future: counts.capsules, us: counts.us, drawings: counts.drawings },
+    badges: { memories: counts.memories, letters: unopenedLetters, plans: counts.plans, future: counts.capsules, us: counts.us, drawings: counts.drawings, plant: counts.plant },
   };
 }
 

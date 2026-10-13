@@ -15,7 +15,7 @@ const home: HomeResponse = {
   },
   today: "2026-10-13", together: { days: 650, years: 1, months: 9 },
   nextMoment: null, highlightedMemory: null, unopenedLetters: 0, pending: [],
-  badges: { memories: 0, letters: 0, plans: 0, future: 0, us: 0, drawings: 0 },
+  badges: { memories: 0, letters: 0, plans: 0, future: 0, us: 0, drawings: 0, plant: 0 },
 };
 
 function renderHome(data: Omit<HomeResponse, "pending" | "badges"> & Partial<Pick<HomeResponse, "pending" | "badges">>) {
@@ -56,7 +56,7 @@ describe("pendientes de Inicio con copias antiguas", () => {
 
 describe("globitos de novedades en los rincones", () => {
   it("pone el número encima de cada rincón con novedades", () => {
-    const html = renderHome({ ...home, badges: { memories: 2, letters: 1, plans: 0, future: 12, us: 0, drawings: 0 } });
+    const html = renderHome({ ...home, badges: { memories: 2, letters: 1, plans: 0, future: 12, us: 0, drawings: 0, plant: 0 } });
     expect(html.match(/data-testid="count-badge"/g)).toHaveLength(3);
     expect(html).toContain('aria-label="Recuerdos, 2 novedades"');
     expect(html).toContain('aria-label="Cartas, 1 novedad"');
@@ -73,5 +73,14 @@ describe("globitos de novedades en los rincones", () => {
     const html = renderHome({ ...legacy, unopenedLetters: 2 });
     expect(html.match(/data-testid="count-badge"/g)).toHaveLength(1);
     expect(html).toContain('aria-label="Cartas, 2 novedades"');
+  });
+});
+
+describe("gota de la plantita", () => {
+  it("avisa con una gota si hoy falta regarla", () => {
+    const html = renderHome({ ...home, badges: { ...home.badges, plant: 1 } });
+    expect(html).toContain('data-testid="water-badge"');
+    expect(html).toContain('aria-label="Plantita, hoy falta regarla"');
+    expect(html).not.toContain("count-badge");
   });
 });

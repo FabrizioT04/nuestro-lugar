@@ -112,6 +112,25 @@ export interface HomeBadges {
   us: number;
   /** Dibujos que dejó la otra persona desde la última visita. */
   drawings: number;
+  /** 1 si quien mira todavía no regó la plantita hoy. */
+  plant: number;
+}
+
+export interface PlantResponse {
+  name: string;
+  plantedOn: string;
+  today: string;
+  /** Días distintos en que alguien la regó. */
+  careDays: number;
+  stage: { index: number; name: string };
+  /** Días de cuidado que faltan para la siguiente etapa; null si ya está en flor. */
+  daysToNextStage: number | null;
+  flowers: number;
+  mood: "happy" | "thirsty" | "very_thirsty";
+  /** Días desde el último riego de cualquiera; null si nunca la regaron. */
+  daysSinceWater: number | null;
+  wateredToday: { me: boolean; partner: boolean };
+  partnerName: string;
 }
 
 export interface Drawing {
