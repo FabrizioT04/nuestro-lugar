@@ -14,6 +14,7 @@ import { writeCache } from "@/offline/cache";
 import { submitAction } from "@/offline/sync";
 import { plansApi } from "@/services/api/plans";
 import { formatLongDate, formatMoney, formatRelativeDays } from "@/utils/format";
+import { IconTile } from "@/components/icons/EmojiIcon";
 
 const STATUS_STYLES: Record<PlanStatusName, string> = {
   pending: "bg-lavender-100 text-lavender-500",
@@ -101,9 +102,7 @@ function PlanContent({ initial }: { initial: PlanDetail }) {
     <article className="space-y-4">
       <Card className="animate-fade-up">
         <div className="flex items-start gap-4">
-          <span className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-lavender-100 text-3xl ${plan.status === "cancelled" ? "grayscale" : ""}`} aria-hidden>
-            {info.emoji}
-          </span>
+          <IconTile emoji={info.emoji} size="xl" muted={plan.status === "cancelled"} />
           <div className="min-w-0">
             <p className="text-xs font-semibold tracking-wide text-ink-soft uppercase">{info.label}</p>
             <h1 className="text-2xl leading-tight">{plan.title}</h1>

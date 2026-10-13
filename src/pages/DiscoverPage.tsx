@@ -23,6 +23,7 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { getCurrentPosition, LocationError } from "@/platform/geolocation";
 import { ApiError } from "@/services/api/client";
 import { placesApi } from "@/services/api/places";
+import { InlineIcon } from "@/components/icons/EmojiIcon";
 
 const TABS = [
   { param: null, label: "Buscar" },
@@ -287,7 +288,7 @@ function SearchView({ location, onLocation }: { location: Located | null; onLoca
                     className={chipClass(filters.categories.includes(category))}
                     onClick={() => setFilters({ ...filters, categories: toggleIn(filters.categories, category, 4) })}
                   >
-                    <span aria-hidden>{PLACE_CATEGORY_INFO[category].emoji}</span> {PLACE_CATEGORY_INFO[category].label}
+                    <InlineIcon emoji={PLACE_CATEGORY_INFO[category].emoji} /> {PLACE_CATEGORY_INFO[category].label}
                   </button>
                 ))}
               </FilterRow>
@@ -410,7 +411,7 @@ function FilterRow({ label, children }: { label: string; children: React.ReactNo
 /** "Entendí: …" para que se vea qué se buscó y se pueda corregir con los filtros. */
 function Understood({ intent }: { intent: PlaceIntent }) {
   const parts = [
-    ...intent.categories.map((category) => `${PLACE_CATEGORY_INFO[category].emoji} ${PLACE_CATEGORY_INFO[category].label}`),
+    ...intent.categories.map((category) => PLACE_CATEGORY_INFO[category].label),
     ...(intent.food ? [intent.food] : []),
     ...intent.ambience,
     ...(intent.budget ? [`hasta ${BUDGET_LABELS[intent.budget as 1 | 2 | 3 | 4]}`] : []),
@@ -467,7 +468,7 @@ function SavedView({ location }: { location: Located | null }) {
     return (
       <Card className="px-6 py-10 text-center">
         <p className="font-display text-xl">Todavía nada guardado</p>
-        <p className="mx-auto mt-2 max-w-xs text-ink-soft">Lo que marquen con 👀, ⭐, 📍 o 💖 aparece aquí.</p>
+        <p className="mx-auto mt-2 max-w-xs text-ink-soft">Lo que marquen como "Me interesa", "Favorito", "Fuimos aquí" o "Nos encantó" aparece aquí.</p>
       </Card>
     );
   }

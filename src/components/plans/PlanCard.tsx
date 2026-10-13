@@ -5,6 +5,7 @@ import { PLAN_TYPE_INFO } from "@shared/plans";
 import { daysBetween } from "@shared/dates";
 import { MemoryPhoto } from "@/components/memories/MemoryPhoto";
 import { formatLongDate, formatMoney, formatRelativeDays } from "@/utils/format";
+import { IconTile } from "@/components/icons/EmojiIcon";
 
 interface Props {
   plan: PlanSummary;
@@ -21,9 +22,7 @@ export function PlanCard({ plan, today }: Props) {
       {plan.cover ? (
         <MemoryPhoto photo={plan.cover} className="h-16 w-16 shrink-0 rounded-2xl" />
       ) : (
-        <span className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-3xl ${plan.status === "cancelled" ? "bg-cream grayscale" : "bg-lavender-100"}`} aria-hidden>
-          {info.emoji}
-        </span>
+        <IconTile emoji={info.emoji} size="xl" muted={plan.status === "cancelled"} />
       )}
       <div className="min-w-0 flex-1">
         <p className="text-xs font-semibold tracking-wide text-ink-soft uppercase">{info.label}</p>

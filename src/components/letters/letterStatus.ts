@@ -26,7 +26,7 @@ export function letterStatus(letter: LetterSummary, timezone: string): { envelop
     return { envelope: letter.type === "open_when" ? "open-when" : "sealed", label: "Todavía sin abrir" };
   }
 
-  if (letter.isLocked) return { envelope: "locked", label: `Disponible el ${unlockDate} ❤️` };
+  if (letter.isLocked) return { envelope: "locked", label: `Disponible el ${unlockDate} ♡` };
   if (letter.openedAt) return { envelope: "opened", label: `Abierta el ${openedDate}` };
   if (letter.type === "open_when") return { envelope: "open-when", label: "Ábrela cuando lo necesites" };
   return { envelope: "sealed", label: "Lista para abrir" };

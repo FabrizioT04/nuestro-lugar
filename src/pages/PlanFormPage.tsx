@@ -12,6 +12,7 @@ import { usePhotoUploads } from "@/hooks/usePhotoUploads";
 import { submitAction } from "@/offline/sync";
 import { plansApi, type PlanPayload } from "@/services/api/plans";
 import type { PlanDetail } from "@shared/api";
+import { IconTile } from "@/components/icons/EmojiIcon";
 
 const inputClass =
   "mt-1 w-full rounded-2xl border border-blush-100 bg-cream px-4 py-3 text-ink outline-none focus:border-blush-300 focus:ring-2 focus:ring-blush-100";
@@ -170,9 +171,7 @@ export function PlanFormPage() {
                   }`}
                 >
                   <input type="radio" name="type" value={value} checked={active} onChange={() => set("type", value)} className="sr-only" />
-                  <span className="text-2xl" aria-hidden>
-                    {PLAN_TYPE_INFO[value].emoji}
-                  </span>
+                  <IconTile emoji={PLAN_TYPE_INFO[value].emoji} size="md" />
                   <span className="text-[11px] leading-tight font-semibold">{PLAN_TYPE_INFO[value].label}</span>
                 </label>
               );

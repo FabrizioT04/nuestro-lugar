@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
 import { useOutbox } from "@/hooks/useOutbox";
 import { plansApi } from "@/services/api/plans";
+import { InlineIcon } from "@/components/icons/EmojiIcon";
 
 const TABS: { status: PlanStatusName; label: string; param: string | null }[] = [
   { status: "pending", label: "Pendientes", param: null },
@@ -112,7 +113,7 @@ function PlanList({ items, status, type, today, hasPending, onType }: ListProps)
           </button>
           {types.map((value) => (
             <button key={value} type="button" className={chipClass(type === value)} onClick={() => onType(type === value ? null : value)}>
-              <span aria-hidden>{PLAN_TYPE_INFO[value].emoji}</span> {PLAN_TYPE_INFO[value].label}
+              <InlineIcon emoji={PLAN_TYPE_INFO[value].emoji} /> {PLAN_TYPE_INFO[value].label}
             </button>
           ))}
         </div>

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { importantDatesApi } from "@/services/api/us";
+import { InlineIcon } from "@/components/icons/EmojiIcon";
 
 const inputClass =
   "mt-1 w-full rounded-2xl border border-blush-100 bg-cream px-4 py-3 text-ink outline-none focus:border-blush-300 focus:ring-2 focus:ring-blush-100";
@@ -125,9 +126,7 @@ export function ImportantDateFormPage() {
                   }`}
                 >
                   <input type="radio" name="type" value={value} checked={active} onChange={() => chooseType(value)} className="sr-only" />
-                  <span className="text-xl" aria-hidden>
-                    {IMPORTANT_DATE_TYPE_INFO[value].emoji}
-                  </span>
+                  <InlineIcon emoji={IMPORTANT_DATE_TYPE_INFO[value].emoji} size={18} className="text-blush-500" />
                   <span className="text-sm font-semibold">{IMPORTANT_DATE_TYPE_INFO[value].label}</span>
                 </label>
               );
@@ -152,13 +151,13 @@ export function ImportantDateFormPage() {
                 onChange={(e) => set("emoji", e.target.value)}
                 maxLength={16}
                 className={`${inputClass} min-w-0 px-3 text-center text-xl`}
-                placeholder={IMPORTANT_DATE_TYPE_INFO[form.type].emoji}
+                placeholder="—"
                 aria-describedby="emoji-help"
               />
             </label>
           </div>
           <p id="emoji-help" className="-mt-2 text-xs text-ink-soft">
-            Si no eliges emoji se usa {IMPORTANT_DATE_TYPE_INFO[form.type].emoji}.
+            Opcional. Si no eliges uno, se muestra el ícono del tipo de fecha.
           </p>
           <label className="flex items-center justify-between gap-4 rounded-2xl bg-cream px-4 py-3">
             <span>
