@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { isNativeApp } from "@/platform/native";
 
 // Instalar la app en la pantalla de inicio.
 // Android/Chrome avisan con "beforeinstallprompt" (hay que guardarlo al arrancar para usarlo después).
@@ -36,7 +37,7 @@ export function isIos(): boolean {
 export type InstallState = "installed" | "available" | "ios" | "unavailable";
 
 function getState(): InstallState {
-  if (isStandalone()) return "installed";
+  if (isNativeApp || isStandalone()) return "installed";
   if (deferred) return "available";
   if (isIos()) return "ios";
   return "unavailable";

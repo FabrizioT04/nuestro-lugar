@@ -12,6 +12,12 @@ Modo local: con `ENVIRONMENT=development`, `DEV_USER_EMAIL` y una petición a `l
 se usa ese correo en lugar del JWT. Las tres condiciones deben cumplirse; en producción
 `ENVIRONMENT` es `production` y `.dev.vars` no se despliega.
 
-Fase 12 (app móvil): se añadirá una segunda vía de entrada con tokens propios emitidos tras
-OAuth Authorization Code + PKCE con Google. `requireUser` aceptará cualquiera de las dos y el
-resto del Worker no cambia, porque solo lee `c.var.user`.
+Fase 12 (app de Android): segunda puerta, solo en el Worker `app-movil` (`AUTH_MODE=mobile`):
+
+- `googleOAuth.ts`: OAuth 2.0 Authorization Code + PKCE con Google y verificación del ID token.
+- `mobileTokens.ts`: tokens propios firmados con `MOBILE_TOKEN_SECRET` (acceso 15 min, fotos
+  semanal) y utilidades de PKCE.
+- `../services/mobileAuthService.ts`: el flujo completo (ver el comentario de arriba del archivo).
+- `requireUser` en ese Worker acepta solo `Authorization: Bearer` (o `?mt=` para ver fotos y
+  audios) y comprueba en cada petición que la sesión siga abierta y el correo siga en la lista.
+  El Worker web (`app`) nunca acepta esos tokens. El resto del Worker no cambia: solo lee `c.var.user`.

@@ -122,8 +122,9 @@ Más adelante:
    - Web/PWA: JWT de Access (Fase 2).
    - Móvil (Fase 12): Authorization Code + PKCE con Google en el navegador del sistema, regreso por deep
      link, el Worker valida el ID token de Google, aplica la whitelist y emite su propio token de corta
-     duración + refresh token guardado en almacenamiento seguro. La ruta de API de la app se excluye de
-     Access y la protege el Worker.
+     duración + refresh token guardado en almacenamiento seguro. La app habla con un segundo Worker
+     (`app-movil`, mismo código y misma base de datos) que no está detrás de Access y solo acepta esos
+     tokens (implementado así en la Fase 12, ver docs/app-android.md).
    Nunca Service Tokens en el APK, como pediste.
 
 4. **PWA detrás de Access.** El navegador pide `manifest.webmanifest` sin cookies, Access lo redirige al

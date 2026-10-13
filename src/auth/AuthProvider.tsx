@@ -3,7 +3,9 @@ import type { MeResponse } from "@shared/api";
 import { bindOwner, readCache, writeCache } from "@/offline/cache";
 import { ApiError } from "@/services/api/client";
 import { meApi } from "@/services/api/me";
+import { isNativeApp } from "@/platform/native";
 import { AuthContext, type AuthState } from "./AuthContext";
+import { onMobileSessionChange } from "./mobileSession";
 import { reloadForLogin } from "./session";
 
 const ME_CACHE_KEY = "me";
@@ -28,7 +30,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else if (!(err instanceof ApiError)) {
         setState({ status: "error", message: "Algo salió mal" });
       } else if (err.code === "session_expired" || err.code === "unauthorized") {
-        if (!reloadForLogin()) setState({ status: "signed-out" });
+        // En la app no hay Access que recargar: se muestra la pantalla para entrar con Google.
+        if (isNativeApp || !reloadForLogin()) setState({ status: "signed-out" });
       } else if (err.code === "forbidden") {
         setState({ status: "denied", message: err.message });
       } else {
@@ -40,6 +43,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  // App: al entrar o salir (o si falla el inicio de sesión) se vuelve a preguntar quién es.
+  useEffect(() => (isNativeApp ? onMobileSessionChange(() => void refresh()) : undefined), [refresh]);
 
   const value = useMemo(() => ({ state, refresh }), [state, refresh]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

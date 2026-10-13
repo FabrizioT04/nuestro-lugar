@@ -1,6 +1,8 @@
 import { Navigate, Outlet, useLocation } from "react-router";
 import { AccessDeniedPage } from "@/pages/AccessDeniedPage";
 import { AuthStatusPage } from "@/pages/AuthStatusPage";
+import { MobileLoginPage } from "@/pages/MobileLoginPage";
+import { isNativeApp } from "@/platform/native";
 import { useAuth } from "./AuthContext";
 
 export const SETUP_PATH = "/configuracion";
@@ -20,6 +22,7 @@ export function RequireAuth() {
     case "denied":
       return <AccessDeniedPage message={state.message} />;
     case "signed-out":
+      if (isNativeApp) return <MobileLoginPage />;
       return (
         <AuthStatusPage
           title="Tu sesión terminó"

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router";
 import { ArrowLeft, Sparkles, WifiOff } from "lucide-react";
 import type { MemorySearchResponse } from "@shared/api";
@@ -21,6 +21,14 @@ export function MemoryAskPage() {
   const [asking, setAsking] = useState(false);
   const [result, setResult] = useState<MemorySearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Desde la búsqueda rápida ("Preguntarle a la IA") se pregunta sola al abrir, una vez.
+  const autoAsked = useRef(false);
+  useEffect(() => {
+    if (autoAsked.current || params.get("preguntar") !== "1") return;
+    autoAsked.current = true;
+    void ask();
+  }, []); // solo al abrir la pantalla
 
   async function ask(event?: FormEvent, text = question) {
     event?.preventDefault();

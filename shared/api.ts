@@ -417,3 +417,21 @@ export interface MemorySearchResponse {
   /** Recuerdos que todavía no se pudieron preparar para la búsqueda por significado. */
   pendingIndex: number;
 }
+
+// ---------------------------------------------------------------------------
+// Sesión de la app móvil (fase 12)
+// ---------------------------------------------------------------------------
+
+export interface MobileSessionResponse {
+  /** Va en `Authorization: Bearer …`. Dura 15 minutos. */
+  accessToken: string;
+  /** Milisegundos desde 1970 en que vence el token de acceso. */
+  accessTokenExpiresAt: number;
+  /** Se cambia por tokens nuevos en /api/auth/mobile/refresh. Rota en cada uso. Guardar en almacenamiento seguro. */
+  refreshToken: string;
+  /** Solo para ver fotos y audios (`?mt=` en la URL, porque <img> no puede llevar cabeceras). */
+  mediaToken: string;
+}
+
+/** Por qué no se pudo entrar desde la app (llega a la app en el deep link). */
+export type MobileLoginError = "forbidden" | "cancelled" | "expired" | "failed";
