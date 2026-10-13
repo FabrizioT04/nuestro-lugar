@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { ChevronRight, Mail, Sparkles } from "lucide-react";
-import type { HomeResponse, UpcomingMoment } from "@shared/api";
+import { ChevronRight, Gift, Heart, Lock, Mail, Sparkles } from "lucide-react";
+import type { HomeResponse, PendingItem, UpcomingMoment } from "@shared/api";
+import { daysBetween, utcToZoned } from "@shared/dates";
 import { CoverArt } from "@/components/CoverArt";
 import { FloatingHearts, HeartBurst } from "@/components/fx/HeartBurst";
 import { MemoryPhoto } from "@/components/memories/MemoryPhoto";
@@ -45,24 +46,23 @@ export function HomePage() {
       )}
       {home.status === "success" && <HomeContent data={home.data} />}
 
-      <section aria-labelledby="modules-title" className="animate-fade-up [animation-delay:240ms]">
-        <h2 id="modules-title" className="mb-3 font-sans text-lg font-extrabold">
-          Nuestros rincones
-        </h2>
-        <ul className="grid grid-cols-3 gap-2.5">
+      {home.status === "success" && <PendingSection data={home.data} />}
+
+      {/* Accesos rápidos: compactos, para que el recordatorio de arriba sea lo principal. */}
+      <nav aria-label="Nuestros rincones" className="animate-fade-up [animation-delay:280ms]">
+        <ul className="grid grid-cols-6 gap-1">
           {MODULES.map(({ to, label, icon: Icon, tone }) => (
             <li key={to}>
-              <Link
-                to={to}
-                className={`flex flex-col gap-2 rounded-[1.15rem] p-3 text-sm font-bold text-ink transition active:scale-[0.97] ${TONES[tone]}`}
-              >
-                <Icon size={22} strokeWidth={1.75} aria-hidden />
-                <span className="text-ink">{label}</span>
+              <Link to={to} className="flex flex-col items-center gap-1.5 text-[11px] font-bold text-ink-soft transition active:scale-95">
+                <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ${TONES[tone]}`}>
+                  <Icon size={21} strokeWidth={1.75} aria-hidden />
+                </span>
+                {label}
               </Link>
             </li>
           ))}
         </ul>
-      </section>
+      </nav>
     </div>
   );
 }
@@ -117,23 +117,6 @@ function HomeContent({ data }: { data: HomeResponse }) {
 
       {celebrate && <HeartBurst seed={data.together.days} />}
       {data.nextMoment && <NextMomentCard moment={data.nextMoment} />}
-
-      {data.unopenedLetters > 0 && (
-        <Link to="/cartas" className="block animate-fade-up [animation-delay:150ms]">
-          <Card className="flex items-center gap-4 !bg-lavender-100 transition active:scale-[0.99]">
-            <span className="flex h-14 w-14 shrink-0 animate-float items-center justify-center rounded-full bg-paper text-lavender-500">
-              <Mail size={24} strokeWidth={1.75} aria-hidden />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="font-display text-lg">
-                {data.unopenedLetters === 1 ? "Tienes una carta sin abrir" : `Tienes ${plural(data.unopenedLetters, "carta")} sin abrir`}
-              </p>
-              <p className="text-sm text-ink-soft">{data.unopenedLetters === 1 ? "Te está esperando ♡" : "Te están esperando ♡"}</p>
-            </div>
-            <ChevronRight size={20} className="text-ink-soft" aria-hidden />
-          </Card>
-        </Link>
-      )}
 
       <Link
         to={data.highlightedMemory ? `/recuerdos/${data.highlightedMemory.id}` : "/recuerdos/nuevo"}
@@ -225,6 +208,108 @@ function writeFlag(key: string) {
   } catch {
     // Sin almacenamiento: no pasa nada.
   }
+}
+
+/** Recordatorio de lo que la otra persona dejó y todavía no abren: cartas y cápsulas. */
+function PendingSection({ data }: { data: HomeResponse }) {
+  // Una copia antigua guardada sin conexión puede no traer este campo.
+  const items = data.pending;
+  const ready = items?.filter((item) => !item.isLocked).length ?? data.unopenedLetters;
+
+  return (
+    <section aria-labelledby="pending-title" className="animate-fade-up [animation-delay:220ms]">
+      <div className="mb-2.5 flex items-baseline justify-between">
+        <h2 id="pending-title" className="font-sans text-lg font-extrabold">
+          Por abrir
+        </h2>
+        {ready > 0 && (
+          <span className="rounded-full bg-blush-100 px-2.5 py-1 text-xs font-extrabold text-blush-700">
+            {ready === 1 ? "1 te espera" : `${ready} te esperan`}
+          </span>
+        )}
+      </div>
+
+      {items == null ? (
+        data.unopenedLetters > 0 ? (
+          <Link to="/cartas" className="block">
+            <Card className="flex items-center gap-3.5 !bg-lavender-100 !p-4">
+              <Mail size={22} className="shrink-0 text-lavender-500" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-ink">
+                  {data.unopenedLetters === 1 ? "Tienes una carta sin abrir" : `Tienes ${plural(data.unopenedLetters, "carta")} sin abrir`}
+                </p>
+                <p className="text-sm text-ink-soft">Conéctate para actualizar las cartas y cápsulas pendientes.</p>
+              </div>
+              <ChevronRight size={20} className="shrink-0 text-ink-soft" aria-hidden />
+            </Card>
+          </Link>
+        ) : (
+          <Card className="!p-4">
+            <p className="text-sm text-ink-soft">Conéctate para actualizar las cartas y cápsulas pendientes.</p>
+          </Card>
+        )
+      ) : items.length === 0 ? (
+        <Card className="flex items-center gap-3.5 !p-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sage-100 text-sage-700" aria-hidden>
+            <Heart size={20} strokeWidth={1.75} />
+          </span>
+          <div>
+            <p className="font-bold text-ink">Todo abierto ♡</p>
+            <p className="text-sm text-ink-soft">No tienen cartas ni cápsulas pendientes.</p>
+          </div>
+        </Card>
+      ) : (
+        <ul className="space-y-2.5">
+          {items.map((item) => (
+            <li key={`${item.kind}-${item.id}`}>
+              <PendingRow item={item} today={data.today} timezone={data.relationship.timezone} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function PendingRow({ item, today, timezone }: { item: PendingItem; today: string; timezone: string }) {
+  const isLetter = item.kind === "letter";
+  const Icon = isLetter ? Mail : Gift;
+  const unlockDate = item.unlockAt ? utcToZoned(item.unlockAt, timezone).date : null;
+  const days = unlockDate ? daysBetween(today, unlockDate) : 0;
+
+  return (
+    <Link
+      to={isLetter ? `/cartas/${item.id}` : `/futuro/${item.id}`}
+      className={`flex items-center gap-3.5 rounded-[1.4rem] border p-3.5 shadow-soft transition active:scale-[0.99] ${
+        item.isLocked ? "border-blush-100/80 bg-paper" : "border-blush-200 bg-gradient-to-r from-blush-50 to-lavender-100/70"
+      }`}
+    >
+      <span
+        className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
+          item.isLocked ? "bg-cream text-ink-soft/70" : isLetter ? "bg-paper text-blush-500" : "bg-paper text-lavender-500"
+        }`}
+        aria-hidden
+      >
+        <Icon size={22} strokeWidth={1.75} className={item.isLocked ? "" : "animate-float"} />
+        {!item.isLocked && <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-paper bg-blush-500" />}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-bold text-ink">{item.title}</p>
+        <p className="truncate text-sm text-ink-soft">
+          {isLetter ? "Carta" : "Cápsula"} de {item.from}
+          {item.isLocked && unlockDate ? ` · ${formatDayMonth(unlockDate)}` : ""}
+        </p>
+      </div>
+      {item.isLocked ? (
+        <span className="flex shrink-0 items-center gap-1 rounded-full bg-cream px-2.5 py-1.5 text-xs font-bold text-ink-soft">
+          <Lock size={12} aria-hidden />
+          {days <= 0 ? "Hoy" : days === 1 ? "Mañana" : `En ${plural(days, "día")}`}
+        </span>
+      ) : (
+        <span className="shrink-0 rounded-full bg-pastel px-3 py-1.5 text-xs font-extrabold text-ink">Abrir</span>
+      )}
+    </Link>
+  );
 }
 
 function HomeSkeleton() {

@@ -1,11 +1,12 @@
-import type { HomeResponse, RelationshipSummary, UpcomingMoment } from "@shared/api";
+import type { CapsuleSummary, HomeResponse, LetterSummary, PendingItem, RelationshipSummary, UpcomingMoment } from "@shared/api";
 import { daysBetween, elapsedParts, nextYearlyOccurrence, todayIn } from "@shared/dates";
 import type { AuthenticatedUser } from "../auth/types";
 import type { Bindings } from "../env";
 import { createHomeRepository } from "../repositories/homeRepository";
 import { createImportantDateRepository } from "../repositories/importantDateRepository";
 import { toImportantDate } from "./importantDateService";
-import { countUnopenedLetters } from "./letterService";
+import { listPendingCapsules } from "./capsuleService";
+import { countUnopenedLetters, listPendingLetters } from "./letterService";
 import { createPlanRepository } from "../repositories/planRepository";
 import { PLAN_TYPE_INFO } from "@shared/plans";
 import { createRelationshipRepository } from "../repositories/relationshipRepository";
@@ -23,16 +24,51 @@ export function anniversaryMoment(relationship: RelationshipSummary, today: stri
   };
 }
 
+const PENDING_LIMIT = 6;
+
+/**
+ * Lo que la otra persona dejó para quien mira y que todavía no abrió: primero lo que ya se
+ * puede abrir, después lo bloqueado por fecha (lo más cercano antes). Función pura para probarla.
+ */
+export function pendingItems(letters: LetterSummary[], capsules: CapsuleSummary[]): PendingItem[] {
+  const items: PendingItem[] = [
+    ...letters
+      .filter((letter) => !letter.isMine && letter.openedAt === null)
+      .map((letter): PendingItem => ({
+        kind: "letter",
+        id: letter.id,
+        title: letter.title,
+        from: letter.author.displayName,
+        isLocked: letter.isLocked,
+        unlockAt: letter.unlockAt,
+      })),
+    ...capsules
+      .filter((capsule) => !capsule.isMine && capsule.openedAt === null)
+      .map((capsule): PendingItem => ({
+        kind: "capsule",
+        id: capsule.id,
+        title: capsule.title,
+        from: capsule.author.displayName,
+        isLocked: capsule.isLocked,
+        unlockAt: capsule.unlockAt,
+      })),
+  ];
+  items.sort((a, b) => Number(a.isLocked) - Number(b.isLocked) || (a.unlockAt ?? "").localeCompare(b.unlockAt ?? ""));
+  return items.slice(0, PENDING_LIMIT);
+}
+
 export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<HomeResponse> {
   // requireRelationship garantiza que existe; la comprobación es por si se usa sin ese middleware.
   if (!user.relationshipId) throw notFound("Relación no configurada");
 
   const homeRepository = createHomeRepository(env.DB);
-  const [relationship, importantDates, highlightedMemory, unopenedLetters] = await Promise.all([
+  const [relationship, importantDates, highlightedMemory, unopenedLetters, received, capsules] = await Promise.all([
     createRelationshipRepository(env.DB).findSummary(user.relationshipId),
     createImportantDateRepository(env.DB).list(user.relationshipId),
     homeRepository.findHighlightedMemory(user.relationshipId),
     countUnopenedLetters(env, user),
+    listPendingLetters(env, user, PENDING_LIMIT),
+    listPendingCapsules(env, user, PENDING_LIMIT),
   ]);
   if (!relationship) throw notFound("Relación no encontrada");
 
@@ -78,5 +114,6 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
     nextMoment: candidates[0] ?? null,
     highlightedMemory,
     unopenedLetters,
+    pending: pendingItems(received, capsules),
   };
 }

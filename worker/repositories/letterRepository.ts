@@ -60,6 +60,23 @@ export function createLetterRepository(db: D1Database) {
       return results;
     },
 
+    /** Pendientes visibles para Inicio: filtrar y ordenar antes de limitar. Nunca incluye el cuerpo. */
+    async listPending(relationshipId: string, userId: string, now: string, limit: number): Promise<LetterRow[]> {
+      const { results } = await db
+        .prepare(
+          `SELECT ${COLUMNS} FROM letters l ${JOINS}
+           WHERE l.relationship_id = ?1 AND l.deleted_at IS NULL
+             AND l.recipient_id = ?2 AND l.author_id <> ?2 AND l.opened_at IS NULL
+             AND NOT (l.letter_type = 'surprise' AND l.unlock_at > ?3)
+           ORDER BY CASE WHEN l.unlock_at > ?3 THEN 1 ELSE 0 END,
+             COALESCE(l.unlock_at, ''), l.created_at DESC, l.id DESC
+           LIMIT ?4`,
+        )
+        .bind(relationshipId, userId, now, limit)
+        .all<LetterRow>();
+      return results;
+    },
+
     /** Incluye el cuerpo: el servicio decide si se puede devolver. */
     findWithBody(relationshipId: string, letterId: string): Promise<LetterRowWithBody | null> {
       return db

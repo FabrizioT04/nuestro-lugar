@@ -92,6 +92,20 @@ export interface HomeResponse {
   highlightedMemory: HighlightedMemory | null;
   /** Cartas recibidas que ya se pueden abrir y todavía no se abrieron. */
   unopenedLetters: number;
+  /** Recordatorio: cartas y cápsulas para quien mira que todavía no abrió (las listas primero). */
+  pending: PendingItem[];
+}
+
+export interface PendingItem {
+  kind: "letter" | "capsule";
+  id: string;
+  title: string;
+  /** Quién la escribió o guardó. */
+  from: string;
+  /** true si todavía no llega su fecha. */
+  isLocked: boolean;
+  /** Instante UTC desde el que se puede abrir; null = ya. */
+  unlockAt: string | null;
 }
 
 export interface PhotoRef {
