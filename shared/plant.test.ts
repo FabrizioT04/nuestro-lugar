@@ -3,7 +3,7 @@ import { daysToNextStage, flowerCount, MAX_FLOWERS, plantMood, plantStage } from
 
 describe("crecimiento de la plantita", () => {
   it("empieza como semilla y brota con el primer riego", () => {
-    expect(plantStage(0).name).toBe("Semilla");
+    expect(plantStage(0).name).toBe("Bulbo");
     expect(plantStage(1).name).toBe("Brote");
     expect(daysToNextStage(1)).toBe(3);
   });
@@ -11,7 +11,7 @@ describe("crecimiento de la plantita", () => {
   it("tarda semanas en florecer, como una planta de verdad", () => {
     expect(plantStage(34).name).toBe("Con botón");
     expect(flowerCount(34)).toBe(0);
-    expect(plantStage(35).name).toBe("Primera flor");
+    expect(plantStage(35).name).toBe("Primer lirio");
     expect(flowerCount(35)).toBe(1);
     expect(plantStage(50).name).toBe("En flor");
     expect(daysToNextStage(50)).toBeNull();

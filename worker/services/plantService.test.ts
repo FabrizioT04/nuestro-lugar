@@ -37,7 +37,7 @@ describe("la plantita", () => {
   it("se siembra la primera vez que alguien la mira", async () => {
     const plant = await getPlant(env, zuleyka);
     expect(plant).toMatchObject({
-      name: "Nuestra plantita", plantedOn: "2026-10-13", careDays: 0, stage: { name: "Semilla" },
+      name: "Nuestro lirio", plantedOn: "2026-10-13", careDays: 0, stage: { name: "Bulbo" },
       mood: "happy", wateredToday: { me: false, partner: false }, partnerName: "Fabrizio",
     });
   });

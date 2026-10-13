@@ -1,4 +1,4 @@
-// La plantita de los dos: crece un poquito por cada día que alguien la riega,
+// La plantita de los dos (un lirio): crece un poquito por cada día que alguien la riega,
 // a un ritmo parecido al de una planta de verdad (unos dos meses hasta florecer del todo).
 // Solo funciones puras: las usan el Worker y React.
 
@@ -11,12 +11,12 @@ export interface PlantStage {
 }
 
 export const PLANT_STAGES: PlantStage[] = [
-  { index: 0, name: "Semilla", from: 0 },
+  { index: 0, name: "Bulbo", from: 0 },
   { index: 1, name: "Brote", from: 1 },
   { index: 2, name: "Plantita", from: 4 },
   { index: 3, name: "Creciendo", from: 10 },
   { index: 4, name: "Con botón", from: 21 },
-  { index: 5, name: "Primera flor", from: 35 },
+  { index: 5, name: "Primer lirio", from: 35 },
   { index: 6, name: "En flor", from: 50 },
 ];
 
