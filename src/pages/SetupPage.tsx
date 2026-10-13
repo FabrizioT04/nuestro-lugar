@@ -82,7 +82,7 @@ export function SetupPage() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full rounded-full bg-blush-300 px-6 py-3 font-semibold text-ink transition hover:bg-blush-200 disabled:opacity-60"
+            className="w-full rounded-full bg-pastel px-6 py-3 font-bold text-ink transition hover:brightness-105 disabled:opacity-60"
           >
             {saving ? "Guardando…" : "Crear nuestro lugar"}
           </button>

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { PhotoRef } from "@shared/api";
 import { CoverArt } from "@/components/CoverArt";
 import { photoUrl } from "@/services/api/media";
@@ -8,11 +9,12 @@ interface Props {
   alt?: string;
   className?: string;
   eager?: boolean;
+  style?: CSSProperties;
 }
 
 /** Foto servida por el Worker; sin foto muestra la ilustración de la casa. */
-export function MemoryPhoto({ photo, size = "thumb", alt = "", className = "", eager = false }: Props) {
-  if (!photo) return <CoverArt className={className} />;
+export function MemoryPhoto({ photo, size = "thumb", alt = "", className = "", eager = false, style }: Props) {
+  if (!photo) return <CoverArt className={className} style={style} />;
   return (
     <img
       src={photoUrl(photo, size)}
@@ -21,6 +23,7 @@ export function MemoryPhoto({ photo, size = "thumb", alt = "", className = "", e
       height={photo.height ?? undefined}
       loading={eager ? "eager" : "lazy"}
       decoding="async"
+      style={style}
       className={`bg-blush-50 object-cover ${className}`}
     />
   );

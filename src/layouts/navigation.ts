@@ -16,15 +16,15 @@ export const BOTTOM_NAV: NavItem[] = [
 ];
 
 export interface ModuleItem extends NavItem {
-  tone: "blush" | "lavender" | "cream";
+  tone: "blush" | "lavender" | "mint";
 }
 
 /** Accesos rápidos del Home. */
 export const MODULES: ModuleItem[] = [
   { to: "/recuerdos", label: "Recuerdos", icon: Camera, tone: "blush" },
   { to: "/cartas", label: "Cartas", icon: Mail, tone: "lavender" },
-  { to: "/planes", label: "Planes", icon: CalendarHeart, tone: "cream" },
-  { to: "/descubrir", label: "Descubrir", icon: Compass, tone: "lavender" },
-  { to: "/futuro", label: "Futuro", icon: Gift, tone: "cream" },
+  { to: "/planes", label: "Planes", icon: CalendarHeart, tone: "mint" },
+  { to: "/descubrir", label: "Descubrir", icon: Compass, tone: "mint" },
+  { to: "/futuro", label: "Futuro", icon: Gift, tone: "lavender" },
   { to: "/nosotros", label: "Nosotros", icon: Heart, tone: "blush" },
 ];

@@ -20,7 +20,7 @@ export function AuthStatusPage({ title, description, action }: Props) {
           <button
             type="button"
             onClick={action.onClick}
-            className="mt-5 rounded-full bg-blush-300 px-6 py-3 font-semibold text-ink transition hover:bg-blush-200"
+            className="mt-5 rounded-full bg-pastel px-6 py-3 font-bold text-ink transition hover:brightness-105"
           >
             {action.label}
           </button>

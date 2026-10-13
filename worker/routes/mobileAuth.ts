@@ -46,7 +46,7 @@ async function returnPage(link: string, message: string): Promise<{ html: string
   const html = `<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nuestro Lugar</title>
-<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fbf6f1;color:#3d2c2e;font:16px system-ui,sans-serif;text-align:center}
+<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fff7f9;color:#3d2c2e;font:16px system-ui,sans-serif;text-align:center}
 main{max-width:22rem;padding:2rem}a{display:inline-block;margin-top:1.25rem;padding:.8rem 1.4rem;border-radius:999px;background:#eaa5b4;color:#3d2c2e;font-weight:600;text-decoration:none}</style>
 </head><body><main><p>${escapeHtml(message)}</p><a id="volver" href="${escapeHtml(link)}">Volver a la app</a></main>
 <script>${REDIRECT_SCRIPT}</script></body></html>`;

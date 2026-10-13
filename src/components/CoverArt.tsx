@@ -1,15 +1,17 @@
+import type { CSSProperties } from "react";
+
 /**
  * Ilustración suave que ocupa el lugar de la foto de la pareja hasta que puedan subirla (Fase 4).
  * Solo decorativa.
  */
-export function CoverArt({ className = "" }: { className?: string }) {
+export function CoverArt({ className = "", style }: { className?: string; style?: CSSProperties }) {
   return (
-    <svg viewBox="0 0 400 300" className={className} aria-hidden preserveAspectRatio="xMidYMid slice">
+    <svg viewBox="0 0 400 300" className={className} style={style} aria-hidden preserveAspectRatio="xMidYMid slice">
       <defs>
         <linearGradient id="cover-bg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#fdf3f5" />
-          <stop offset="0.55" stopColor="#fae4e9" />
-          <stop offset="1" stopColor="#efeaf8" />
+          <stop offset="0" stopColor="#fff0f4" />
+          <stop offset="0.55" stopColor="#ffe3ec" />
+          <stop offset="1" stopColor="#ece6ff" />
         </linearGradient>
         <radialGradient id="cover-glow" cx="0.7" cy="0.25" r="0.6">
           <stop offset="0" stopColor="#ffffff" stopOpacity="0.9" />

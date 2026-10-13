@@ -110,7 +110,7 @@ function UsContent({ data }: { data: UsResponse }) {
           <ul className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none]">
             {data.favorites.map((memory) => (
               <li key={memory.id} className="w-36 shrink-0">
-                <Link to={`/recuerdos/${memory.id}`} className="block overflow-hidden rounded-card bg-paper shadow-soft">
+                <Link to={`/recuerdos/${memory.id}`} className="block overflow-hidden rounded-card border border-blush-100/80 bg-paper shadow-soft">
                   <MemoryPhoto photo={memory.cover} className="aspect-square w-full" />
                   <p className="truncate px-3 pt-2 text-sm font-semibold">{memory.title}</p>
                   <p className="px-3 pb-3 text-xs text-ink-soft">{formatLongDate(memory.happenedOn)}</p>

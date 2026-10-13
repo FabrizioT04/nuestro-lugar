@@ -13,7 +13,7 @@ import { useOutbox } from "@/hooks/useOutbox";
 import { lettersApi, type LetterBox } from "@/services/api/letters";
 
 const tabClass = (active: boolean) =>
-  `flex-1 rounded-full px-4 py-2 text-sm font-semibold transition ${active ? "bg-blush-300 text-ink" : "text-ink-soft hover:text-ink"}`;
+  `flex-1 rounded-full px-4 py-2 text-sm font-semibold transition ${active ? "bg-blush-100 text-blush-700" : "text-ink-soft hover:text-ink"}`;
 
 export function LettersPage() {
   const me = useMe();
@@ -30,7 +30,7 @@ export function LettersPage() {
     <section>
       <header className="mb-4 flex animate-fade-up items-center justify-between gap-3">
         <h1 className="text-3xl">Cartas</h1>
-        <Link to="/cartas/nueva" className="inline-flex items-center gap-2 rounded-full bg-blush-300 px-4 py-2.5 text-sm font-semibold text-ink shadow-soft transition hover:bg-blush-200 active:scale-95">
+        <Link to="/cartas/nueva" className="inline-flex items-center gap-2 rounded-full bg-pastel px-4 py-2.5 text-sm font-bold text-ink shadow-soft transition hover:brightness-105 active:scale-95">
           <PenLine size={16} aria-hidden /> Escribir
         </Link>
       </header>
@@ -123,7 +123,7 @@ function EmptyBox({ box, partner }: { box: LetterBox; partner: string }) {
           : `Una carta para hoy, una para abrir cuando ${partner} te extrañe o una sorpresa para una fecha especial.`}
       </p>
       {box === "sent" && (
-        <Link to="/cartas/nueva" className="mt-5 inline-flex items-center gap-2 rounded-full bg-blush-300 px-6 py-3 font-semibold text-ink">
+        <Link to="/cartas/nueva" className="mt-5 inline-flex items-center gap-2 rounded-full bg-pastel px-6 py-3 font-bold text-ink">
           <PenLine size={18} aria-hidden /> Escribir carta
         </Link>
       )}

@@ -94,7 +94,7 @@ export function PreferencesPanel() {
                   type="button"
                   onClick={() => cycle(category)}
                   className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold transition ${
-                    taste === "like" ? "bg-blush-300 text-ink" : taste === "dislike" ? "bg-ink/10 text-ink-soft line-through" : "bg-cream text-ink-soft"
+                    taste === "like" ? "bg-blush-100 text-blush-700" : taste === "dislike" ? "bg-ink/10 text-ink-soft line-through" : "bg-cream text-ink-soft"
                   }`}
                 >
                   <span aria-hidden>{PLACE_CATEGORY_INFO[category].emoji}</span> {PLACE_CATEGORY_INFO[category].label}

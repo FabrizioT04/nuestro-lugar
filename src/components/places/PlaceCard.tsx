@@ -131,7 +131,7 @@ export function PlaceCard({ placeId, place, category, status, partnerName, reaso
               disabled={busy !== null}
               onClick={() => void toggle(type)}
               className={`flex flex-col items-center gap-0.5 rounded-2xl px-1 py-2 text-[11px] leading-tight font-semibold transition active:scale-95 disabled:opacity-70 ${
-                active ? "bg-blush-300 text-ink" : "bg-cream text-ink-soft hover:text-ink"
+                active ? "bg-blush-100 text-blush-700" : "bg-cream text-ink-soft hover:text-ink"
               }`}
             >
               <span className="text-lg" aria-hidden>
