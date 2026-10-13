@@ -11,7 +11,8 @@
 //   - /api/capsules/*: el contenido de una cápsula nunca debe quedar en el dispositivo antes de tiempo.
 //   - Nada que no sea una respuesta 200 propia (ni redirecciones al login de Cloudflare Access).
 
-const VERSION = "v1";
+// v2: limpia copias de /assets que en realidad eran index.html (ver assetOk).
+const VERSION = "v2";
 const SHELL_CACHE = `nl-shell-${VERSION}`;
 const MEDIA_CACHE = "nl-media";
 const FONT_CACHE = "nl-fonts";
@@ -67,6 +68,13 @@ self.addEventListener("fetch", (event) => {
 /** Respuesta propia y completa: ni redirecciones (login de Access), ni errores, ni respuestas parciales. */
 const cacheable = (response) => response.ok && response.status === 200 && response.type === "basic" && !response.redirected;
 
+/**
+ * Un archivo de /assets debe ser eso y no una página. Durante un deploy, una versión anterior del
+ * Worker puede no tener el archivo nuevo y responder index.html con 200 (fallback de la SPA):
+ * si se guardara, la app quedaría sin estilos o sin código hasta borrar los datos del sitio.
+ */
+const assetOk = (response) => cacheable(response) && !(response.headers.get("content-type") ?? "").includes("text/html");
+
 /** Descarga index.html y los archivos que usa, y quita del caché los de versiones anteriores. */
 async function refreshShell(response) {
   const shell = response ?? (await fetch(SHELL_URL, { credentials: "include", cache: "no-store" }));
@@ -79,7 +87,7 @@ async function refreshShell(response) {
     assets.map(async (asset) => {
       if (await cache.match(asset)) return;
       const res = await fetch(asset, { credentials: "include" });
-      if (cacheable(res)) await cache.put(asset, res);
+      if (assetOk(res)) await cache.put(asset, res);
     }),
   );
   await cache.put(SHELL_URL, shell);
@@ -109,9 +117,10 @@ async function navigation(request) {
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
-  if (cached) return cached;
+  if (cached && assetOk(cached)) return cached;
+  if (cached) await cache.delete(request);
   const response = await fetch(request);
-  if (cacheable(response)) await cache.put(request, response.clone());
+  if (assetOk(response)) await cache.put(request, response.clone());
   return response;
 }
 
