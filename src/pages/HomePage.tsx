@@ -1,12 +1,15 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { ChevronRight, Mail, Sparkles } from "lucide-react";
 import type { HomeResponse, UpcomingMoment } from "@shared/api";
 import { CoverArt } from "@/components/CoverArt";
+import { FloatingHearts, HeartBurst } from "@/components/fx/HeartBurst";
 import { MemoryPhoto } from "@/components/memories/MemoryPhoto";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
+import { useCountUp } from "@/hooks/useCountUp";
 import { MODULES, type ModuleItem } from "@/layouts/navigation";
 import { homeApi } from "@/services/api/home";
 import { photoUrl } from "@/services/api/media";
@@ -67,6 +70,13 @@ export function HomePage() {
 function HomeContent({ data }: { data: HomeResponse }) {
   const names = data.relationship.members.map((member) => member.displayName).join(" & ");
   const duration = formatDuration(data.together);
+  const days = useCountUp(data.together.days);
+  // El día de un aniversario o fecha especial se celebra con una lluvia de corazones, una vez por día.
+  const celebrationKey = data.nextMoment?.daysUntil === 0 ? `nl:celebrado:${data.today}:${data.nextMoment.title}` : null;
+  const [celebrate] = useState(() => celebrationKey !== null && !readFlag(celebrationKey));
+  useEffect(() => {
+    if (celebrationKey) writeFlag(celebrationKey);
+  }, [celebrationKey]);
 
   return (
     <>
@@ -82,6 +92,7 @@ function HomeContent({ data }: { data: HomeResponse }) {
           <CoverArt className="absolute inset-0 h-full w-full" />
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-40% to-blush-50 to-92%" aria-hidden />
+        <FloatingHearts />
         <p className="absolute top-[max(1rem,env(safe-area-inset-top))] left-5 rounded-full border border-white/40 bg-white/35 px-3.5 py-2 text-[13px] font-bold text-ink backdrop-blur-md">
           Nuestro Lugar <span className="text-blush-500">♡</span>
         </p>
@@ -95,7 +106,7 @@ function HomeContent({ data }: { data: HomeResponse }) {
             ))}
           </h1>
           <p className="mt-3 flex items-baseline gap-2">
-            <span className="text-6xl font-extrabold tracking-tighter text-blush-500">{formatNumber(data.together.days)}</span>
+            <span className="text-6xl font-extrabold tracking-tighter text-blush-500">{formatNumber(days)}</span>
             <span className="text-lg font-semibold text-ink">{data.together.days === 1 ? "día juntos" : "días juntos"}</span>
           </p>
           <p className="mt-1 text-sm text-ink-soft">
@@ -104,6 +115,7 @@ function HomeContent({ data }: { data: HomeResponse }) {
         </div>
       </div>
 
+      {celebrate && <HeartBurst seed={data.together.days} />}
       {data.nextMoment && <NextMomentCard moment={data.nextMoment} />}
 
       {data.unopenedLetters > 0 && (
@@ -196,6 +208,23 @@ function NextMomentCard({ moment }: { moment: UpcomingMoment }) {
       )}
     </section>
   );
+}
+
+/** Marcas en este dispositivo (si el almacenamiento falla, se celebra igual). */
+function readFlag(key: string): boolean {
+  try {
+    return localStorage.getItem(key) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function writeFlag(key: string) {
+  try {
+    localStorage.setItem(key, "1");
+  } catch {
+    // Sin almacenamiento: no pasa nada.
+  }
 }
 
 function HomeSkeleton() {

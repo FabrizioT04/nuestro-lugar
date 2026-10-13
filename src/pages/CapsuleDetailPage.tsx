@@ -5,6 +5,7 @@ import type { CapsuleDetail } from "@shared/api";
 import { utcToZoned } from "@shared/dates";
 import { useMe } from "@/auth/AuthContext";
 import { CapsuleBox } from "@/components/capsules/CapsuleBox";
+import { HeartBurst } from "@/components/fx/HeartBurst";
 import { capsulePeople, capsuleStatus } from "@/components/capsules/capsuleStatus";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -128,6 +129,7 @@ function OpenedCapsule({ capsule, animate }: { capsule: CapsuleDetail; animate?:
   const contents = capsule.contents!;
   return (
     <article className={`space-y-4 ${animate ? "animate-fade-up" : ""}`}>
+      {animate && <HeartBurst seed={9} />}
       {animate && <CapsuleBox state="opened" className="mx-auto -mb-2 h-28 w-28 animate-fade-in" />}
       <Card className="px-6 py-6">
         <p className="text-xs font-semibold tracking-wide text-ink-soft uppercase">

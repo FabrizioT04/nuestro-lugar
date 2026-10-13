@@ -17,14 +17,14 @@ export function BottomNav() {
               aria-label={label}
               className={({ isActive }) =>
                 `flex h-11 items-center justify-center gap-1.5 rounded-full text-[13px] font-extrabold transition-all ${
-                  isActive ? "bg-blush-100 px-4 text-blush-700" : "w-12 text-ink-soft/70 hover:text-ink"
+                  isActive ? "animate-pop-in bg-blush-100 px-4 text-blush-700" : "w-12 text-ink-soft/70 hover:text-ink"
                 }`
               }
             >
               {({ isActive }) => (
                 <>
                   <Icon size={20} strokeWidth={isActive ? 2.25 : 1.75} aria-hidden />
-                  {isActive && <span>{label}</span>}
+                  {isActive && <span className="animate-pop-in">{label}</span>}
                 </>
               )}
             </NavLink>
