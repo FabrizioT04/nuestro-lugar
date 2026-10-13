@@ -1,32 +1,32 @@
 @import "tailwindcss";
 
-/* Paleta de Nuestro Lugar. Base crema/blanca, rosa como acento (no como fondo de todo)
-   y pequeños detalles lavanda. Se usan como clases: bg-cream, text-ink, bg-rose-300... */
+/* Paleta de Nuestro Lugar: todo en pastel. Fondo rosado muy claro, tarjetas blancas,
+   rosa como acento y detalles lavanda y menta. Se usan como clases: bg-cream, text-ink, bg-blush-300... */
 @theme {
-  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", ui-serif, Georgia, serif;
 
-  --color-cream: #fbf6f1;
-  --color-paper: #fffdfb;
-  --color-ink: #3d2f35;
-  --color-ink-soft: #7a6870;
+  --color-cream: #fff7f9;
+  --color-paper: #ffffff;
+  --color-ink: #4a3640;
+  --color-ink-soft: #8a6f7b;
 
-  --color-blush-50: #fdf3f5;
-  --color-blush-100: #fae4e9;
-  --color-blush-200: #f4ccd5;
-  --color-blush-300: #e8a5b4; /* rosa palo: acento principal */
-  --color-blush-500: #c9667e;
-  --color-blush-700: #8f3e53;
+  --color-blush-50: #fff0f4;
+  --color-blush-100: #ffe3ec;
+  --color-blush-200: #ffd0de;
+  --color-blush-300: #f6a8c0; /* rosa pastel: acento principal */
+  --color-blush-500: #d46a8c;
+  --color-blush-700: #b23c63;
 
-  --color-lavender-100: #efeaf8;
-  --color-lavender-300: #c9bce8;
-  --color-lavender-500: #8d7cc4;
+  --color-lavender-100: #ece6ff;
+  --color-lavender-300: #c9b4f2;
+  --color-lavender-500: #7a5fc0;
 
-  --color-sage-100: #e5f1e8; /* ✓ sincronizado */
+  --color-sage-100: #e6f4ee; /* menta: ✓ sincronizado */
   --color-sage-700: #3d7151;
 
   --radius-card: 1.5rem;
-  --shadow-soft: 0 8px 30px -12px rgb(143 62 83 / 0.18);
+  --shadow-soft: 0 10px 28px -14px rgb(212 106 140 / 0.3);
 }
 
 @layer base {
@@ -34,6 +34,8 @@
     background-color: var(--color-cream);
     color: var(--color-ink);
     -webkit-tap-highlight-color: transparent;
+    /* Playfair trae números "antiguos" (1336 con el 3 hacia abajo): se usan los normales. */
+    font-variant-numeric: lining-nums;
   }
   body {
     @apply min-h-dvh font-sans antialiased;
@@ -41,7 +43,7 @@
   h1,
   h2,
   h3 {
-    @apply font-display;
+    @apply font-display font-semibold;
   }
 }
 
@@ -92,4 +94,9 @@
 
 @utility pt-safe {
   padding-top: max(1.5rem, env(safe-area-inset-top));
+}
+
+/* Botón principal y "+" flotante: degradado rosa → lavanda. */
+@utility bg-pastel {
+  background-image: linear-gradient(135deg, var(--color-blush-300), var(--color-lavender-300));
 }

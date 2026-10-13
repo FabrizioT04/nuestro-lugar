@@ -31,7 +31,7 @@ const TABS = [
 ] as const;
 
 const tabClass = (active: boolean) =>
-  `flex-1 rounded-full px-3 py-2 text-sm font-semibold transition ${active ? "bg-lavender-300 text-ink" : "text-ink-soft hover:text-ink"}`;
+  `flex-1 rounded-full px-3 py-2 text-sm font-semibold transition ${active ? "bg-blush-100 text-blush-700" : "text-ink-soft hover:text-ink"}`;
 
 const inputClass =
   "w-full rounded-2xl border border-blush-100 bg-cream px-4 py-3 text-ink outline-none focus:border-blush-300 focus:ring-2 focus:ring-blush-100";

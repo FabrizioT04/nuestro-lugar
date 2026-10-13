@@ -186,7 +186,7 @@ export function LetterFormPage() {
             <button
               type="button"
               onClick={() => setForm((f) => ({ ...f, unlockOn: anniversary.date, unlockTime: "00:00" }))}
-              className={`mt-2 rounded-full px-3 py-1.5 text-sm font-semibold ${form.unlockOn === anniversary.date ? "bg-blush-300 text-ink" : "bg-blush-50 text-blush-700"}`}
+              className={`mt-2 rounded-full px-3 py-1.5 text-sm font-semibold ${form.unlockOn === anniversary.date ? "bg-blush-100 text-blush-700" : "bg-blush-50 text-blush-700"}`}
             >
               💞 Nuestro aniversario · {formatDayMonth(anniversary.date)}
             </button>

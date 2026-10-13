@@ -172,7 +172,7 @@ export function CapsuleFormPage() {
                 key={label}
                 type="button"
                 onClick={() => setForm((f) => ({ ...f, unlockOn: date, unlockTime: "00:00" }))}
-                className={`rounded-full px-3 py-1.5 text-sm font-semibold ${form.unlockOn === date ? "bg-blush-300 text-ink" : "bg-blush-50 text-blush-700"}`}
+                className={`rounded-full px-3 py-1.5 text-sm font-semibold ${form.unlockOn === date ? "bg-blush-100 text-blush-700" : "bg-blush-50 text-blush-700"}`}
               >
                 {label}
               </button>

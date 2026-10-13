@@ -22,7 +22,7 @@ export function FuturePage() {
     <section>
       <header className="mb-2 flex animate-fade-up items-center justify-between gap-3">
         <h1 className="text-3xl">Caja del futuro</h1>
-        <Link to="/futuro/nueva" className="inline-flex items-center gap-2 rounded-full bg-blush-300 px-4 py-2.5 text-sm font-semibold text-ink shadow-soft transition hover:bg-blush-200 active:scale-95">
+        <Link to="/futuro/nueva" className="inline-flex items-center gap-2 rounded-full bg-pastel px-4 py-2.5 text-sm font-bold text-ink shadow-soft transition hover:brightness-105 active:scale-95">
           <Gift size={16} aria-hidden /> Guardar
         </Link>
       </header>
@@ -112,7 +112,7 @@ function EmptyBox({ partner }: { partner: string }) {
       <p className="mx-auto mt-2 max-w-xs text-ink-soft">
         Guarda un mensaje, una foto, una nota de voz o una pequeña carta para que {partner} (o los dos) la abran dentro de un tiempo.
       </p>
-      <Link to="/futuro/nueva" className="mt-5 inline-flex items-center gap-2 rounded-full bg-blush-300 px-6 py-3 font-semibold text-ink">
+      <Link to="/futuro/nueva" className="mt-5 inline-flex items-center gap-2 rounded-full bg-pastel px-6 py-3 font-bold text-ink">
         <Gift size={18} aria-hidden /> Guardar la primera
       </Link>
     </Card>

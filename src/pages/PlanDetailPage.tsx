@@ -192,7 +192,7 @@ function PlanContent({ initial }: { initial: PlanDetail }) {
 
         {plan.status === "done" &&
           (plan.resultingMemoryId ? (
-            <Link to={`/recuerdos/${plan.resultingMemoryId}`} className="flex w-full items-center justify-center gap-2 rounded-full bg-blush-300 px-6 py-3 font-semibold text-ink shadow-soft">
+            <Link to={`/recuerdos/${plan.resultingMemoryId}`} className="flex w-full items-center justify-center gap-2 rounded-full bg-pastel px-6 py-3 font-bold text-ink shadow-soft">
               <BookHeart size={18} aria-hidden /> Ver el recuerdo
             </Link>
           ) : (

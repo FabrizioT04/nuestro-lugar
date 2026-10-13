@@ -20,11 +20,11 @@ const TABS: { status: PlanStatusName; label: string; param: string | null }[] = 
 ];
 
 const tabClass = (active: boolean) =>
-  `flex-1 rounded-full px-3 py-2 text-sm font-semibold transition ${active ? "bg-blush-300 text-ink" : "text-ink-soft hover:text-ink"}`;
+  `flex-1 rounded-full px-3 py-2 text-sm font-semibold transition ${active ? "bg-blush-100 text-blush-700" : "text-ink-soft hover:text-ink"}`;
 
 const chipClass = (active: boolean) =>
-  `flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${
-    active ? "bg-lavender-300 text-ink" : "bg-paper text-ink-soft shadow-soft hover:text-ink"
+  `flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition ${
+    active ? "border-blush-200 bg-blush-200 text-blush-700" : "border-blush-100 bg-paper text-ink-soft hover:text-ink"
   }`;
 
 export function PlansPage() {
@@ -49,7 +49,7 @@ export function PlansPage() {
     <section>
       <header className="mb-4 flex animate-fade-up items-center justify-between gap-3">
         <h1 className="text-3xl">Planes</h1>
-        <Link to="/planes/nuevo" className="inline-flex items-center gap-2 rounded-full bg-blush-300 px-4 py-2.5 text-sm font-semibold text-ink shadow-soft transition hover:bg-blush-200 active:scale-95">
+        <Link to="/planes/nuevo" className="inline-flex items-center gap-2 rounded-full bg-pastel px-4 py-2.5 text-sm font-bold text-ink shadow-soft transition hover:brightness-105 active:scale-95">
           <Plus size={16} aria-hidden /> Nuevo
         </Link>
       </header>
@@ -134,7 +134,7 @@ function PlanList({ items, status, type, today, hasPending, onType }: ListProps)
                 : "Mejor así ♡"}
           </p>
           {status === "pending" && (
-            <Link to="/planes/nuevo" className="mt-5 inline-flex items-center gap-2 rounded-full bg-blush-300 px-6 py-3 font-semibold text-ink">
+            <Link to="/planes/nuevo" className="mt-5 inline-flex items-center gap-2 rounded-full bg-pastel px-6 py-3 font-bold text-ink">
               <Plus size={18} aria-hidden /> Crear plan
             </Link>
           )}
