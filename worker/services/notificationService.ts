@@ -1,4 +1,4 @@
-import type { CapsuleDetail, LetterDetail, MemoryDetail, PushConfigResponse, PushPayload, PushPreferences } from "@shared/api";
+import type { CapsuleDetail, Drawing, LetterDetail, MemoryDetail, PushConfigResponse, PushPayload, PushPreferences } from "@shared/api";
 import type { Context } from "hono";
 import type { AuthenticatedUser } from "../auth/types";
 import type { AppEnv, Bindings } from "../env";
@@ -179,4 +179,19 @@ export async function sendTest(env: Bindings, user: AuthenticatedUser, endpoint:
   const result = await sendPush(subscription, JSON.stringify(payload), keys, { ttl: 300, urgency: "high" }, fetcher);
   if (!result.ok && result.gone) await repository.deleteSubscriptionById(subscription.id);
   return result.ok;
+}
+
+export async function notifyNewDrawing(env: Bindings, author: AuthenticatedUser, drawing: Drawing, fetcher?: typeof fetch): Promise<void> {
+  const partnerId = await createRelationshipRepository(env.DB).findPartnerId(author.relationshipId!, author.id);
+  if (!partnerId) return;
+  await deliver(
+    env,
+    [partnerId],
+    {
+      key: `drawing-new:${drawing.id}`,
+      category: "drawings",
+      payload: { title: `${author.displayName} te dejó un dibujo`, body: drawing.caption ?? "Míralo cuando quieras 🎨", url: "/dibujos", tag: `drawing-${drawing.id}` },
+    },
+    fetcher,
+  );
 }

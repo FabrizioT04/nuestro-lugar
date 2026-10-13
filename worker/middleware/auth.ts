@@ -51,7 +51,7 @@ async function resolveEmail(c: Context<AppEnv>): Promise<string> {
 export const isMobileWorker = (env: AppEnv["Bindings"]) => env.AUTH_MODE === "mobile";
 
 /** Fotos y audios: lo único que acepta el token de fotos (?mt=), porque <img> no manda cabeceras. */
-const MEDIA_PATH = /^\/api\/(media\/[^/]+|capsules\/[^/]+\/media\/[^/]+)$/;
+const MEDIA_PATH = /^\/api\/(media\/[^/]+|capsules\/[^/]+\/media\/[^/]+|drawings\/[^/]+\/image)$/;
 
 /**
  * Puerta de la app móvil: `Authorization: Bearer <token de acceso>` o, solo para ver fotos y audios,

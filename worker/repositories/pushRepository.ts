@@ -14,9 +14,10 @@ interface PreferencesRow {
   capsules: number;
   dates: number;
   plans: number;
+  drawings: number;
 }
 
-export const DEFAULT_PUSH_PREFERENCES: PushPreferences = { letters: true, memories: true, capsules: true, dates: true, plans: true };
+export const DEFAULT_PUSH_PREFERENCES: PushPreferences = { letters: true, memories: true, capsules: true, dates: true, plans: true, drawings: true };
 
 /** Como mucho estos dispositivos por persona; al pasarse se olvida el más antiguo. */
 export const MAX_SUBSCRIPTIONS_PER_USER = 10;
@@ -71,22 +72,22 @@ export function createPushRepository(db: D1Database) {
 
     async getPreferences(userId: string): Promise<PushPreferences> {
       const row = await db
-        .prepare("SELECT letters, memories, capsules, dates, plans FROM push_preferences WHERE user_id = ?1")
+        .prepare("SELECT letters, memories, capsules, dates, plans, drawings FROM push_preferences WHERE user_id = ?1")
         .bind(userId)
         .first<PreferencesRow>();
       if (!row) return { ...DEFAULT_PUSH_PREFERENCES };
-      return { letters: row.letters === 1, memories: row.memories === 1, capsules: row.capsules === 1, dates: row.dates === 1, plans: row.plans === 1 };
+      return { letters: row.letters === 1, memories: row.memories === 1, capsules: row.capsules === 1, dates: row.dates === 1, plans: row.plans === 1, drawings: row.drawings === 1 };
     },
 
     async setPreferences(userId: string, prefs: PushPreferences): Promise<void> {
       const b = (value: boolean) => (value ? 1 : 0);
       await db
         .prepare(
-          `INSERT INTO push_preferences (user_id, letters, memories, capsules, dates, plans) VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+          `INSERT INTO push_preferences (user_id, letters, memories, capsules, dates, plans, drawings) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
            ON CONFLICT (user_id) DO UPDATE SET letters = excluded.letters, memories = excluded.memories, capsules = excluded.capsules,
-             dates = excluded.dates, plans = excluded.plans, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')`,
+             dates = excluded.dates, plans = excluded.plans, drawings = excluded.drawings, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')`,
         )
-        .bind(userId, b(prefs.letters), b(prefs.memories), b(prefs.capsules), b(prefs.dates), b(prefs.plans))
+        .bind(userId, b(prefs.letters), b(prefs.memories), b(prefs.capsules), b(prefs.dates), b(prefs.plans), b(prefs.drawings))
         .run();
     },
 
