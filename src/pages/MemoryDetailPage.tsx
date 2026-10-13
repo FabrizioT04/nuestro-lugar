@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { ArrowLeft, Heart, ImageUp, MapPin, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Heart, ImageUp, MapPin, Pencil, Trash2 } from "lucide-react";
 import type { MemoryDetail } from "@shared/api";
 import { useAuth } from "@/auth/AuthContext";
 import { MemoryPhoto } from "@/components/memories/MemoryPhoto";
@@ -47,6 +47,14 @@ function MemoryContent({ initial }: { initial: MemoryDetail }) {
   const { refresh } = useAuth();
   const [memory, setMemory] = useState(initial);
   const [current, setCurrent] = useState(0);
+  const gallery = useRef<HTMLDivElement>(null);
+  // En el teléfono se desliza con el dedo; en la computadora (sin gesto horizontal) con flechas, puntos o teclado.
+  const goTo = (index: number) => {
+    const el = gallery.current;
+    if (!el) return;
+    const target = Math.max(0, Math.min(index, el.children.length - 1));
+    el.scrollTo({ left: target * el.clientWidth, behavior: "smooth" });
+  };
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -99,7 +107,14 @@ function MemoryContent({ initial }: { initial: MemoryDetail }) {
         {memory.photos.length > 0 ? (
           <div className="relative">
             <div
-              className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none]"
+              ref={gallery}
+              tabIndex={memory.photos.length > 1 ? 0 : undefined}
+              aria-label={memory.photos.length > 1 ? "Fotos: desliza o usa las flechas" : undefined}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowRight") goTo(current + 1);
+                if (event.key === "ArrowLeft") goTo(current - 1);
+              }}
+              className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               onScroll={(event) => {
                 const el = event.currentTarget;
                 setCurrent(Math.round(el.scrollLeft / el.clientWidth));
@@ -117,11 +132,43 @@ function MemoryContent({ initial }: { initial: MemoryDetail }) {
               ))}
             </div>
             {memory.photos.length > 1 && (
-              <ol className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5" aria-label={`Foto ${current + 1} de ${memory.photos.length}`}>
-                {memory.photos.map((photo, index) => (
-                  <li key={photo.id} className={`h-1.5 rounded-full transition-all ${index === current ? "w-5 bg-paper" : "w-1.5 bg-paper/60"}`} />
-                ))}
-              </ol>
+              <>
+                {current > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => goTo(current - 1)}
+                    aria-label="Foto anterior"
+                    className="absolute top-1/2 left-3 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-paper/85 text-ink shadow-soft backdrop-blur transition active:scale-90"
+                  >
+                    <ChevronLeft size={22} aria-hidden />
+                  </button>
+                )}
+                {current < memory.photos.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={() => goTo(current + 1)}
+                    aria-label="Foto siguiente"
+                    className="absolute top-1/2 right-3 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-paper/85 text-ink shadow-soft backdrop-blur transition active:scale-90"
+                  >
+                    <ChevronRight size={22} aria-hidden />
+                  </button>
+                )}
+                <ol className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5" aria-label={`Foto ${current + 1} de ${memory.photos.length}`}>
+                  {memory.photos.map((photo, index) => (
+                    <li key={photo.id}>
+                      <button
+                        type="button"
+                        onClick={() => goTo(index)}
+                        aria-label={`Ver foto ${index + 1}`}
+                        aria-current={index === current}
+                        className="flex h-6 items-center"
+                      >
+                        <span className={`block h-1.5 rounded-full transition-all ${index === current ? "w-5 bg-paper" : "w-1.5 bg-paper/60"}`} />
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              </>
             )}
           </div>
         ) : (
