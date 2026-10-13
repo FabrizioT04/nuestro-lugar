@@ -16,3 +16,7 @@ DEV_USER_EMAIL=tu-correo@gmail.com
 
 # Fase 10 (recomendaciones):
 # GOOGLE_PLACES_API_KEY=
+
+# Fase 13 (notificaciones push): genera las dos con `npm run push:claves` y cópialas de .push-claves.json.
+# VAPID_PUBLIC_KEY=
+# VAPID_PRIVATE_KEY=

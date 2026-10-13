@@ -54,6 +54,7 @@ curl http://localhost:5173/api/no-existe   # 404 en JSON
 | `npm run deploy:web` / `deploy:movil` | Publica solo uno de los dos |
 | `npm run android` | Build + copia la app al proyecto de Android (`cap sync android`) |
 | `npm run android:abrir` | Abre el proyecto en Android Studio |
+| `npm run push:claves` | Genera las claves VAPID de los avisos en `.push-claves.json` (ignorado por git) |
 | `npm run cf-typegen` | Regenera los tipos de bindings tras cambiar `wrangler.jsonc` |
 | `npm run db:migrate:local` / `:remote` | Aplica migraciones a D1 local / en Cloudflare |
 | `npm run db:new-migration -- nombre` | Crea una nueva migración vacía |
@@ -178,10 +179,23 @@ npx wrangler vectorize create-metadata-index nuestro-lugar-memories --propertyNa
 - Deep links: `nuestrolugar://recuerdos`, `nuestrolugar://planes/<id>`, etc. (y `nuestrolugar://auth`
   para volver del inicio de sesión). El botón "atrás" de Android vuelve a la pantalla anterior.
 - GPS con `@capacitor/geolocation`; las fotos se toman con la cámara del teléfono (selector de archivos).
-- Notificaciones push: no incluidas. En Android exigen Firebase Cloud Messaging, y el proyecto no usa Firebase.
+- Notificaciones push: solo en la web/PWA (ver abajo). En el APK exigirían Firebase Cloud Messaging, y el proyecto no usa Firebase.
 - Si cambias algo del frontend, vuelve a generar el APK. Los cambios del Worker llegan solos con `npm run deploy`.
 
 Paso a paso (Google Cloud, secretos, Android Studio): [docs/app-android.md](./docs/app-android.md).
+
+## Notificaciones push
+
+- Web Push estándar con claves VAPID: sin Firebase, sin cuentas nuevas y gratis. Funciona en la web
+  instalada (Chrome/Edge en Android, Firefox, y Safari en iPhone 16.4+ si la app está en la pantalla de inicio).
+- Se activan en **Perfil → Avisos en este teléfono**, con un interruptor por tipo (valen para todos tus dispositivos).
+- Al instante: carta nueva (las sorpresas no se anuncian), recuerdo nuevo y cápsula nueva de la otra persona.
+- Programados (Cron Trigger del Worker `app` cada 15 min): carta o cápsula que llegó a su fecha; y entre
+  las 9:00 y las 21:59 de la pareja, aniversario, mesiversario, fechas importantes (hoy y mañana) y planes de hoy.
+- Cada aviso se envía una sola vez (tabla `push_sent`). El contenido va cifrado y nunca incluye el texto de
+  una carta o cápsula, solo quién y qué. Solo se envía a servicios de push conocidos (Google, Mozilla, Apple, Microsoft).
+
+Paso a paso para activarlas: [docs/notificaciones.md](./docs/notificaciones.md).
 
 ## Variables
 
@@ -195,6 +209,8 @@ Paso a paso (Google Cloud, secretos, Android Studio): [docs/app-android.md](./do
 | `AUTH_MODE` | 12 | `wrangler.movil.jsonc` (`mobile`). La web no lo usa |
 | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | 12 | `wrangler secret put … -c wrangler.movil.jsonc` |
 | `MOBILE_TOKEN_SECRET` | 12 | `wrangler secret put … -c wrangler.movil.jsonc` (48 bytes aleatorios) |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | 13 | `npm run push:claves` y `wrangler secret bulk` en los dos Workers |
+| `VAPID_SUBJECT` | 13 | Opcional. Contacto para los servicios de push; por defecto la URL de la app |
 | `VITE_MOBILE_API_ORIGIN` | 12 | Opcional, solo para pruebas. Por defecto `https://app-movil.nuestro-lugar.workers.dev` (no es secreto) |
 
 Ningún secreto va en el frontend ni en el repositorio.

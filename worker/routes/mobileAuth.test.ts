@@ -3,7 +3,7 @@ import type { MobileSessionResponse } from "@shared/api";
 import type { Bindings } from "../env";
 import { pkceChallenge } from "../auth/mobileTokens";
 import { createFakeD1 } from "../testing/fakeD1";
-import app from "../index";
+import { app } from "../index";
 
 // Flujo completo de la app móvil contra el Worker real (Hono + D1 de mentira).
 // Solo Google es de mentira: devuelve el correo que diga la prueba.

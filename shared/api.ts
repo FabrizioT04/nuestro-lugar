@@ -435,3 +435,39 @@ export interface MobileSessionResponse {
 
 /** Por qué no se pudo entrar desde la app (llega a la app en el deep link). */
 export type MobileLoginError = "forbidden" | "cancelled" | "expired" | "failed";
+
+// ---------------------------------------------------------------------------
+// Notificaciones push (fase 13)
+// ---------------------------------------------------------------------------
+
+/** Qué avisos quiere recibir cada persona (en todos sus dispositivos). */
+export interface PushPreferences {
+  /** Carta nueva y carta programada que ya se puede abrir. */
+  letters: boolean;
+  /** La otra persona guardó un recuerdo. */
+  memories: boolean;
+  /** Cápsula nueva y cápsula que ya se puede abrir. */
+  capsules: boolean;
+  /** Aniversario, mesiversario y fechas importantes (hoy y mañana). */
+  dates: boolean;
+  /** Planes con fecha de hoy. */
+  plans: boolean;
+}
+
+export interface PushConfigResponse {
+  /** false si el servidor todavía no tiene las claves VAPID. */
+  enabled: boolean;
+  /** Clave pública VAPID (base64url) para `pushManager.subscribe`. No es secreta. */
+  publicKey: string | null;
+  preferences: PushPreferences;
+}
+
+/** Lo que llega al service worker dentro del aviso (cifrado). */
+export interface PushPayload {
+  title: string;
+  body: string;
+  /** Ruta de la app que se abre al tocar el aviso (siempre empieza con "/"). */
+  url: string;
+  /** Avisos con el mismo tag se reemplazan en el teléfono en vez de acumularse. */
+  tag: string;
+}

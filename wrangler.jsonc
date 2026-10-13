@@ -17,6 +17,10 @@
     "run_worker_first": ["/api/*"]
   },
 
+  // Avisos programados (fase 13): cartas y cápsulas que llegan a su fecha, aniversarios, fechas y planes.
+  // Cada 15 minutos = 96 ejecuciones al día, muy dentro del plan gratuito. Solo este Worker tiene cron.
+  "triggers": { "crons": ["*/15 * * * *"] },
+
   "vars": {
     "ENVIRONMENT": "production"
   },

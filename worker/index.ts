@@ -15,8 +15,11 @@ import { memoryRoutes } from "./routes/memories";
 import { mobileAuthRoutes } from "./routes/mobileAuth";
 import { placeRoutes } from "./routes/places";
 import { planRoutes } from "./routes/plans";
+import { pushRoutes } from "./routes/push";
 import { importantDateRoutes, usRoutes } from "./routes/us";
 import { relationshipRoutes } from "./routes/relationship";
+import { runReminders } from "./services/reminderService";
+import type { Bindings } from "./env";
 
 // Punto de entrada del Worker. Solo recibe /api/* (ver `run_worker_first` en wrangler.jsonc);
 // el resto de rutas las sirve Cloudflare directamente desde los assets de React.
@@ -31,7 +34,7 @@ import { relationshipRoutes } from "./routes/relationship";
 //   - `app` (wrangler.jsonc): web/PWA detrás de Cloudflare Access.
 //   - `app-movil` (wrangler.movil.jsonc, AUTH_MODE=mobile): la app de Android. Sin Access delante,
 //     así que solo acepta los tokens propios de la app y agrega CORS y /api/auth/mobile.
-const app = new Hono<AppEnv>().basePath("/api");
+export const app = new Hono<AppEnv>().basePath("/api");
 
 app.use("*", requestId);
 app.use("*", (c, next) => (isMobileWorker(c.env) ? mobileCors(c, next) : next()));
@@ -54,8 +57,15 @@ app.route("/us", usRoutes);
 app.route("/important-dates", importantDateRoutes);
 app.route("/media", mediaRoutes);
 app.route("/relationship", relationshipRoutes);
+app.route("/push", pushRoutes);
 
 app.notFound(notFoundHandler);
 app.onError(errorHandler);
 
-export default app satisfies ExportedHandler<Env>;
+// Avisos programados (fase 13): el Cron Trigger de wrangler.jsonc llama aquí cada 15 minutos.
+// Solo el Worker `app` tiene el cron; `app-movil` comparte la base de datos y no lo necesita.
+async function scheduled(_controller: ScheduledController, env: Bindings, ctx: ExecutionContext): Promise<void> {
+  ctx.waitUntil(runReminders(env).then((sent) => (sent > 0 ? console.log(`push: ${sent} avisos programados enviados`) : undefined)));
+}
+
+export default { fetch: app.fetch, scheduled } satisfies ExportedHandler<Bindings>;

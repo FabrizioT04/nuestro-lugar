@@ -380,3 +380,29 @@ export const mobileTokenSchema = z.object({
 export const mobileStartQuerySchema = z.object({ challenge: pkceValue });
 
 export const mobileRefreshSchema = z.object({ refreshToken: z.string().min(20).max(200) });
+
+// ---------------------------------------------------------------------------
+// Notificaciones push
+// ---------------------------------------------------------------------------
+
+const base64urlKey = (min: number, max: number) => z.string().regex(/^[A-Za-z0-9_-]+$/, "Clave inválida").min(min).max(max);
+
+/** Lo que entrega `PushSubscription.toJSON()` en el navegador (solo lo que usa el Worker). */
+export const pushSubscribeSchema = z.object({
+  endpoint: z.string().url().max(1000),
+  keys: z.object({
+    // 65 bytes en base64url = 87 caracteres; 16 bytes = 22.
+    p256dh: base64urlKey(80, 100),
+    auth: base64urlKey(20, 30),
+  }),
+});
+
+export const pushUnsubscribeSchema = z.object({ endpoint: z.string().url().max(1000) });
+
+export const pushPreferencesSchema = z.object({
+  letters: z.boolean(),
+  memories: z.boolean(),
+  capsules: z.boolean(),
+  dates: z.boolean(),
+  plans: z.boolean(),
+});

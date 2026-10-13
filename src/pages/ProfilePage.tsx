@@ -4,10 +4,12 @@ import { ChevronRight, LogOut, Sparkles } from "lucide-react";
 import { useMe } from "@/auth/AuthContext";
 import { signOut } from "@/auth/session";
 import { InstallCard } from "@/components/InstallCard";
+import { NotificationsCard } from "@/components/NotificationsCard";
 import { PageHeader } from "@/components/PageHeader";
 import { SyncSection } from "@/components/sync/SyncSection";
 import { useOutbox } from "@/hooks/useOutbox";
 import { clearOfflineData } from "@/offline/cache";
+import { disablePush } from "@/pwa/push";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatLongDate } from "@/utils/format";
@@ -24,6 +26,8 @@ export function ProfilePage() {
       setConfirmLogout(true);
       return;
     }
+    // Este dispositivo deja de recibir avisos de esta cuenta.
+    await disablePush().catch(() => undefined);
     await clearOfflineData().catch(() => undefined);
     await signOut();
   }
@@ -71,6 +75,8 @@ export function ProfilePage() {
           <ChevronRight size={20} className="text-ink-soft" aria-hidden />
         </Card>
       </Link>
+
+      <NotificationsCard />
 
       <SyncSection />
 
