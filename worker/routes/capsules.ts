@@ -12,6 +12,7 @@ import {
   serveCapsuleMedia,
   updateCapsule,
 } from "../services/capsuleService";
+import { inBackground, notifyNewCapsule } from "../services/notificationService";
 import { parseIdParam, parseJsonBody } from "../utils/validation";
 
 export const capsuleRoutes = new Hono<AppEnv>()
@@ -19,7 +20,9 @@ export const capsuleRoutes = new Hono<AppEnv>()
   .get("/", async (c) => c.json(await listCapsules(c.env, c.get("user"))))
   .post("/", async (c) => {
     const input = await parseJsonBody(c, capsuleCreateSchema);
-    return c.json(await createCapsule(c.env, c.get("user"), input), 201);
+    const created = await createCapsule(c.env, c.get("user"), input);
+    inBackground(c, notifyNewCapsule(c.env, c.get("user"), created));
+    return c.json(created, 201);
   })
   .get("/:id", async (c) => c.json(await getCapsule(c.env, c.get("user"), parseIdParam(c))))
   .put("/:id", async (c) => {

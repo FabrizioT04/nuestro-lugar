@@ -1,12 +1,19 @@
+import { useEffect } from "react";
 import { Outlet } from "react-router";
 import { WifiOff } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { pushSupport, refreshPushSubscription } from "@/pwa/push";
 
 /** Estructura de las pantallas principales: contenido en una columna móvil + navegación inferior. */
 export function AppLayout() {
   const online = useOnlineStatus();
+
+  // Si este dispositivo tiene los avisos activados, se lo recuerda al Worker una vez por apertura.
+  useEffect(() => {
+    if (pushSupport() === "supported") void refreshPushSubscription();
+  }, []);
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-lg flex-col">

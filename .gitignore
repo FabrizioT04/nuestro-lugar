@@ -9,3 +9,6 @@ dist/
 !.env.example
 *.log
 .DS_Store
+
+# Claves VAPID generadas con `npm run push:claves` (secretas)
+.push-claves.json

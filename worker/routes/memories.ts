@@ -14,6 +14,7 @@ import {
   updateMemory,
 } from "../services/memoryService";
 import { searchMemories } from "../services/memorySearchService";
+import { inBackground, notifyNewMemory } from "../services/notificationService";
 import { parseIdParam, parseJsonBody, parseQuery } from "../utils/validation";
 
 export const memoryRoutes = new Hono<AppEnv>()
@@ -27,7 +28,9 @@ export const memoryRoutes = new Hono<AppEnv>()
   .get("/filters", async (c) => c.json(await getMemoryFilters(c.env, c.get("user"))))
   .post("/", async (c) => {
     const input = await parseJsonBody(c, memoryCreateSchema);
-    return c.json(await createMemory(c.env, c.get("user"), input), 201);
+    const created = await createMemory(c.env, c.get("user"), input);
+    inBackground(c, notifyNewMemory(c.env, c.get("user"), created));
+    return c.json(created, 201);
   })
   .get("/:id", async (c) => c.json(await getMemory(c.env, c.get("user"), parseIdParam(c))))
   .put("/:id", async (c) => {

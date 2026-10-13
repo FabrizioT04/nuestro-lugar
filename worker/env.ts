@@ -26,6 +26,14 @@ export interface AppSecrets {
   MOBILE_TOKEN_SECRET?: string;
   /** Límite de intentos de inicio de sesión por IP (solo en el Worker móvil). */
   AUTH_LIMITER?: RateLimit;
+  /**
+   * Claves VAPID de las notificaciones push (fase 13), en base64url. Generar con `npm run push:claves`.
+   * La pública se entrega al navegador; la privada nunca sale del Worker. Sin ellas no se envían avisos.
+   */
+  VAPID_PUBLIC_KEY?: string;
+  VAPID_PRIVATE_KEY?: string;
+  /** Contacto para los servicios de push ("mailto:..." o https). Opcional. */
+  VAPID_SUBJECT?: string;
   /** Solo desarrollo local: correo con el que se simula la sesión. */
   DEV_USER_EMAIL?: string;
 }

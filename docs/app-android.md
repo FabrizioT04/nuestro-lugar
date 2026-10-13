@@ -67,6 +67,7 @@ npx wrangler secret put MOBILE_TOKEN_SECRET -c wrangler.movil.jsonc
 - `GOOGLE_OAUTH_CLIENT_ID` y `GOOGLE_OAUTH_CLIENT_SECRET`: los del paso 2.
 - `MOBILE_TOKEN_SECRET`: la clave que generaste. Si algún día la cambias, se cierran las sesiones de la app.
 - Cuando actives Google Places: `npx wrangler secret put GOOGLE_PLACES_API_KEY -c wrangler.movil.jsonc`.
+- Avisos push (fase 13): las claves VAPID también van aquí; ver [notificaciones.md](./notificaciones.md).
 
 Comprobación rápida en el navegador:
 - `https://app-movil.nuestro-lugar.workers.dev/api/health` → `{"status":"ok",...}`

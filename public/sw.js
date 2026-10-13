@@ -76,6 +76,71 @@ const cacheable = (response) => response.ok && response.status === 200 && respon
 const assetOk = (response) => cacheable(response) && !(response.headers.get("content-type") ?? "").includes("text/html");
 
 /** Descarga index.html y los archivos que usa, y quita del caché los de versiones anteriores. */
+// ---------------------------------------------------------------------------
+// Notificaciones push (fase 13). El Worker manda el aviso cifrado; el navegador lo descifra y
+// lo entrega aquí. Aunque la app esté cerrada, el aviso se muestra.
+// ---------------------------------------------------------------------------
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    // Contenido inesperado: se muestra un aviso genérico.
+  }
+  const title = typeof data.title === "string" && data.title ? data.title : "Nuestro Lugar";
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: typeof data.body === "string" ? data.body : "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/badge-96.png",
+      tag: typeof data.tag === "string" ? data.tag : undefined,
+      data: { url: safePath(data.url) },
+      lang: "es",
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL(safePath(event.notification.data?.url), self.location.origin).href;
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      const open = windows.find((client) => new URL(client.url).origin === self.location.origin);
+      if (open) {
+        await open.focus().catch(() => undefined);
+        // navigate() solo funciona en pestañas que controla este service worker.
+        const moved = "navigate" in open ? await open.navigate(url).catch(() => null) : null;
+        if (moved) return;
+      }
+      await self.clients.openWindow(url);
+    })(),
+  );
+});
+
+// El navegador cambió la suscripción (p. ej. al renovar sus claves): se avisa al Worker.
+self.addEventListener("pushsubscriptionchange", (event) => {
+  event.waitUntil(
+    (async () => {
+      const options = event.oldSubscription?.options;
+      const subscription = event.newSubscription ?? (options ? await self.registration.pushManager.subscribe(options) : null);
+      if (!subscription) return;
+      await fetch("/api/push/subscriptions", {
+        method: "POST",
+        credentials: "include",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(subscription.toJSON()),
+      }).catch(() => undefined);
+    })(),
+  );
+});
+
+/** Solo rutas de la propia app ("/cartas/…"): un aviso nunca abre otro sitio. */
+function safePath(value) {
+  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\") ? value : "/";
+}
+
 async function refreshShell(response) {
   const shell = response ?? (await fetch(SHELL_URL, { credentials: "include", cache: "no-store" }));
   if (!cacheable(shell)) return;
