@@ -1,6 +1,6 @@
 import type { PhotoRef, UploadedAudio, UploadedMedia } from "@shared/api";
 import type { PreparedImage } from "@/utils/image";
-import { actionHeader, apiFetch } from "./client";
+import { actionHeader, apiFetch, mediaSrc } from "./client";
 
 export type PhotoPurpose = "memory" | "plan" | "cover" | "capsule";
 
@@ -26,8 +26,8 @@ export const mediaApi = {
   },
 };
 
-/** URL de una foto servida por el Worker (misma sesión, mismo dominio). */
+/** URL de una foto servida por el Worker (el Worker comprueba la sesión en cada petición). */
 export function photoUrl(photo: Pick<PhotoRef, "id"> | string, size: "full" | "thumb" = "full"): string {
   const id = typeof photo === "string" ? photo : photo.id;
-  return `/api/media/${id}${size === "thumb" ? "?size=thumb" : ""}`;
+  return mediaSrc(`/media/${id}${size === "thumb" ? "?size=thumb" : ""}`);
 }

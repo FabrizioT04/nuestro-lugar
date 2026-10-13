@@ -1,6 +1,6 @@
 import type { CapsuleDetail, CapsuleListResponse } from "@shared/api";
 import type { CapsulePayload } from "@shared/schemas";
-import { apiFetch, apiPost } from "./client";
+import { apiFetch, apiPost, mediaSrc } from "./client";
 
 export const capsulesApi = {
   list: () => apiFetch<CapsuleListResponse>("/capsules"),
@@ -19,5 +19,5 @@ export const capsulesApi = {
 
 /** URL de una foto o audio de una cápsula: el Worker comprueba la fecha en cada petición. */
 export function capsuleMediaUrl(capsuleId: string, mediaId: string, size: "full" | "thumb" = "full"): string {
-  return `/api/capsules/${capsuleId}/media/${mediaId}${size === "thumb" ? "?size=thumb" : ""}`;
+  return mediaSrc(`/capsules/${capsuleId}/media/${mediaId}${size === "thumb" ? "?size=thumb" : ""}`);
 }

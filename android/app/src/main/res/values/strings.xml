@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Nuestro Lugar</string>
+    <string name="title_activity_main">Nuestro Lugar</string>
+    <string name="package_name">com.nuestrolugar.app</string>
+    <string name="custom_url_scheme">com.nuestrolugar.app</string>
+</resources>

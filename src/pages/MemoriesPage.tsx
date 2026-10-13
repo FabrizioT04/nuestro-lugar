@@ -160,6 +160,15 @@ export function MemoriesPage() {
           <p className="mx-auto mt-2 max-w-xs text-ink-soft">
             {anyFilter ? "Prueba con otra búsqueda o quita los filtros." : "Guarden aquí ese momento que no quieren olvidar."}
           </p>
+          {/* Una frase ("qué hicimos en…") no aparece escrita tal cual: la búsqueda con IA sí la entiende. */}
+          {anyFilter && debouncedQuery.length >= 3 && (
+            <Link
+              to={`/recuerdos/preguntar?p=${encodeURIComponent(debouncedQuery)}&preguntar=1`}
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-lavender-100 px-5 py-3 text-sm font-semibold text-ink"
+            >
+              <Sparkles size={16} className="text-lavender-500" aria-hidden /> Preguntarle a la IA
+            </Link>
+          )}
           {!anyFilter && (
             <Link to="/recuerdos/nuevo" className="mt-5 inline-flex items-center gap-2 rounded-full bg-blush-300 px-6 py-3 font-semibold text-ink">
               <Plus size={18} aria-hidden /> Crear recuerdo

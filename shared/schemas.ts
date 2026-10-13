@@ -364,3 +364,19 @@ export const geocodeQuerySchema = z.object({ q: z.string().trim().min(2, "Escrib
 
 /** Place ID de Google: letras, números, "_" y "-". */
 export const GOOGLE_PLACE_ID = /^[A-Za-z0-9_-]{10,300}$/;
+
+// ---------------------------------------------------------------------------
+// Sesión de la app móvil
+// ---------------------------------------------------------------------------
+
+const pkceValue = z.string().regex(/^[A-Za-z0-9\-._~]{43,128}$/, "Valor PKCE inválido");
+
+/** La app cambia el código de un solo uso (deep link) por sus tokens, probando que inició el login. */
+export const mobileTokenSchema = z.object({
+  code: z.string().min(20).max(200),
+  verifier: pkceValue,
+});
+
+export const mobileStartQuerySchema = z.object({ challenge: pkceValue });
+
+export const mobileRefreshSchema = z.object({ refreshToken: z.string().min(20).max(200) });

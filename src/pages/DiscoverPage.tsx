@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { getCurrentPosition, LocationError } from "@/platform/geolocation";
 import { ApiError } from "@/services/api/client";
 import { placesApi } from "@/services/api/places";
 
@@ -99,29 +100,28 @@ function LocationBar({ location, onLocation }: { location: Located | null; onLoc
   const [zone, setZone] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  function locate() {
-    if (!("geolocation" in navigator)) {
-      setManual(true);
-      setError("Este dispositivo no comparte su ubicación. Escribe una zona.");
-      return;
-    }
+  async function locate() {
     setLocating(true);
     setError(null);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocating(false);
-        setManual(false);
-        // ~10 m de precisión es suficiente y no envía la ubicación exacta.
-        const round = (value: number) => Math.round(value * 10000) / 10000;
-        onLocation({ point: { lat: round(position.coords.latitude), lng: round(position.coords.longitude) }, label: "Tu ubicación" });
-      },
-      (err) => {
-        setLocating(false);
-        setManual(true);
-        setError(err.code === err.PERMISSION_DENIED ? "No diste permiso de ubicación. Escribe una zona." : "No pudimos ubicarte. Escribe una zona.");
-      },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60 * 1000 },
-    );
+    try {
+      const position = await getCurrentPosition();
+      setManual(false);
+      // ~10 m de precisión es suficiente y no envía la ubicación exacta.
+      const round = (value: number) => Math.round(value * 10000) / 10000;
+      onLocation({ point: { lat: round(position.lat), lng: round(position.lng) }, label: "Tu ubicación" });
+    } catch (err) {
+      const reason = err instanceof LocationError ? err.reason : "unavailable";
+      setManual(true);
+      setError(
+        reason === "unsupported"
+          ? "Este dispositivo no comparte su ubicación. Escribe una zona."
+          : reason === "denied"
+            ? "No diste permiso de ubicación. Escribe una zona."
+            : "No pudimos ubicarte. Escribe una zona.",
+      );
+    } finally {
+      setLocating(false);
+    }
   }
 
   async function searchZone(event: FormEvent) {
@@ -145,7 +145,7 @@ function LocationBar({ location, onLocation }: { location: Located | null; onLoc
       <div className="flex items-center gap-3">
         <MapPin size={20} className="shrink-0 text-blush-500" aria-hidden />
         <p className="min-w-0 flex-1 truncate font-semibold">{location ? location.label : "¿Dónde están?"}</p>
-        <button type="button" onClick={locate} disabled={locating} className="inline-flex items-center gap-1 text-sm font-semibold text-lavender-500 disabled:opacity-60">
+        <button type="button" onClick={() => void locate()} disabled={locating} className="inline-flex items-center gap-1 text-sm font-semibold text-lavender-500 disabled:opacity-60">
           <LocateFixed size={16} aria-hidden /> {locating ? "Buscando…" : location ? "Actualizar" : "Usar mi ubicación"}
         </button>
       </div>

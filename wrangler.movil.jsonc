@@ -1,0 +1,46 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Worker de la app de Android (fase 12). Mismo código y misma base de datos que `app`,
+  // pero publicado aparte en https://app-movil.nuestro-lugar.workers.dev SIN Cloudflare Access:
+  // dentro de la app no existen las cookies de Access, así que entra con Google + tokens propios
+  // (ver worker/services/mobileAuthService.ts). Con AUTH_MODE=mobile el Worker solo acepta esos tokens.
+  //
+  // Publicar:  npx wrangler deploy -c wrangler.movil.jsonc   (o `npm run deploy:movil`)
+  // Secretos:  npx wrangler secret put <NOMBRE> -c wrangler.movil.jsonc
+  //   ALLOWED_EMAILS, GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, MOBILE_TOKEN_SECRET
+//   y, cuando lo actives, GOOGLE_PLACES_API_KEY.
+  "name": "app-movil",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "tsconfig": "tsconfig.worker.json",
+  "minify": true,
+  "observability": { "enabled": true },
+  "workers_dev": true,
+  "preview_urls": false,
+
+  "vars": {
+    "ENVIRONMENT": "production",
+    "AUTH_MODE": "mobile"
+  },
+
+  // Los mismos recursos que `app` (wrangler.jsonc). Si cambias uno allá, cámbialo aquí también.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "nuestro-lugar-db",
+      "database_id": "5aded9d2-32a4-4c79-88b7-4917ea5924b3",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "nuestro-lugar-media" }],
+  "ratelimits": [
+    { "name": "UPLOAD_LIMITER", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } },
+    { "name": "WRITE_LIMITER", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } },
+    { "name": "PLACES_LIMITER", "namespace_id": "1003", "simple": { "limit": 20, "period": 60 } },
+    { "name": "AI_LIMITER", "namespace_id": "1004", "simple": { "limit": 20, "period": 60 } },
+    // Intentos de inicio de sesión por IP: el Worker móvil es público.
+    { "name": "AUTH_LIMITER", "namespace_id": "1005", "simple": { "limit": 10, "period": 60 } }
+  ],
+  "ai": { "binding": "AI" },
+  "vectorize": [{ "binding": "MEMORY_INDEX", "index_name": "nuestro-lugar-memories" }]
+}

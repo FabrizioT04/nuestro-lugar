@@ -29,8 +29,8 @@ class Statement {
   }
 
   async run() {
-    this.db.prepare(this.sql).run(...this.params);
-    return { success: true };
+    const { changes } = this.db.prepare(this.sql).run(...this.params);
+    return { success: true, meta: { changes: Number(changes) } };
   }
 }
 

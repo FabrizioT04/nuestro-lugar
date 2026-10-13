@@ -1,12 +1,14 @@
 # src/platform
 
-Abstracciones sobre capacidades del dispositivo (Fase 12, Capacitor).
+Capacidades del dispositivo (Fase 12, Capacitor). Cada una tiene la versión web y la de la app de
+Android detrás de la misma función, así nada básico depende de APIs exclusivas del navegador:
 
-Cada capacidad tendrá una interfaz y dos implementaciones: web y nativa. El resto de la app
-solo importa la interfaz, así nada básico depende de APIs exclusivas del navegador:
-
-- `geolocation.ts` → `navigator.geolocation` / `@capacitor/geolocation`
-- `camera.ts` → `<input type="file" capture>` / `@capacitor/camera`
-- `storage.ts` → IndexedDB / `@capacitor/preferences`
-- `notifications.ts` → Web Push / `@capacitor/push-notifications`
-- `deepLinks.ts` → URLs / `@capacitor/app` (`appUrlOpen`), p. ej. abrir "Nuestra Granjita"
+- `native.ts` → `isNativeApp` y la dirección del Worker de la app (`app-movil`).
+- `geolocation.ts` → `navigator.geolocation` en la web / `@capacitor/geolocation` en la app.
+- `nativeApp.ts` → arranque de la app: sesión guardada, deep links (`nuestrolugar://…`, p. ej. para
+  abrir una pantalla desde la futura "Nuestra Granjita") y el botón "atrás" de Android.
+- Cámara: `<input type="file">` funciona igual en la web y en la app (abre la cámara del teléfono),
+  así que no hace falta un plugin.
+- Almacenamiento: IndexedDB funciona igual en la app. Los tokens de la sesión van al Keystore de
+  Android (`src/auth/mobileSession.ts`).
+- Notificaciones push: pendientes. En Android requieren Firebase Cloud Messaging, que el proyecto no usa.

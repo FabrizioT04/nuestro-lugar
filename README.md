@@ -50,7 +50,10 @@ curl http://localhost:5173/api/no-existe   # 404 en JSON
 | `npm run typecheck` | Solo verificación de tipos |
 | `npm test` | Pruebas unitarias (JWT de Access, whitelist, validaciones) |
 | `npm run preview` | Build + servidor que imita producción |
-| `npm run deploy` | Build + `wrangler deploy` |
+| `npm run deploy` | Build + publica los dos Workers: `app` (web) y `app-movil` (app de Android) |
+| `npm run deploy:web` / `deploy:movil` | Publica solo uno de los dos |
+| `npm run android` | Build + copia la app al proyecto de Android (`cap sync android`) |
+| `npm run android:abrir` | Abre el proyecto en Android Studio |
 | `npm run cf-typegen` | Regenera los tipos de bindings tras cambiar `wrangler.jsonc` |
 | `npm run db:migrate:local` / `:remote` | Aplica migraciones a D1 local / en Cloudflare |
 | `npm run db:new-migration -- nombre` | Crea una nueva migración vacía |
@@ -163,6 +166,23 @@ npx wrangler vectorize create nuestro-lugar-memories --dimensions=1024 --metric=
 npx wrangler vectorize create-metadata-index nuestro-lugar-memories --propertyName=relationshipId --type=string
 ```
 
+## App de Android (Capacitor)
+
+- El APK lleva dentro la misma app de React (`dist/client`): abre al instante y funciona sin conexión.
+- Dentro de la app no existen las cookies de Cloudflare Access, así que habla con un segundo Worker,
+  `app-movil` (`wrangler.movil.jsonc`, mismo código, misma D1/R2/IA), que no está detrás de Access y
+  solo acepta los tokens propios de la app.
+- Se entra con Google en el navegador del teléfono (OAuth + PKCE). El Worker valida el correo con la
+  misma lista `ALLOWED_EMAILS` y entrega: token de acceso (15 min), token de fotos y refresh token
+  (90 días, rota en cada uso, guardado en el Keystore de Android). La app no lleva ningún secreto.
+- Deep links: `nuestrolugar://recuerdos`, `nuestrolugar://planes/<id>`, etc. (y `nuestrolugar://auth`
+  para volver del inicio de sesión). El botón "atrás" de Android vuelve a la pantalla anterior.
+- GPS con `@capacitor/geolocation`; las fotos se toman con la cámara del teléfono (selector de archivos).
+- Notificaciones push: no incluidas. En Android exigen Firebase Cloud Messaging, y el proyecto no usa Firebase.
+- Si cambias algo del frontend, vuelve a generar el APK. Los cambios del Worker llegan solos con `npm run deploy`.
+
+Paso a paso (Google Cloud, secretos, Android Studio): [docs/app-android.md](./docs/app-android.md).
+
 ## Variables
 
 | Nombre | Fase | Dónde |
@@ -171,6 +191,10 @@ npx wrangler vectorize create-metadata-index nuestro-lugar-memories --propertyNa
 | `ALLOWED_EMAILS` | 2 | `.dev.vars` y `wrangler secret put` |
 | `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD` | 2 | `wrangler secret put` (no hacen falta en local) |
 | `DEV_USER_EMAIL` | 2 | Solo `.dev.vars` (nunca en producción) |
-| `GOOGLE_PLACES_API_KEY` | 10 | `wrangler secret put` |
+| `GOOGLE_PLACES_API_KEY` | 10 | `wrangler secret put` (y en `app-movil` con `-c wrangler.movil.jsonc`) |
+| `AUTH_MODE` | 12 | `wrangler.movil.jsonc` (`mobile`). La web no lo usa |
+| `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | 12 | `wrangler secret put … -c wrangler.movil.jsonc` |
+| `MOBILE_TOKEN_SECRET` | 12 | `wrangler secret put … -c wrangler.movil.jsonc` (48 bytes aleatorios) |
+| `VITE_MOBILE_API_ORIGIN` | 12 | Opcional, solo para pruebas. Por defecto `https://app-movil.nuestro-lugar.workers.dev` (no es secreto) |
 
 Ningún secreto va en el frontend ni en el repositorio.

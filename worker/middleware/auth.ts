@@ -4,6 +4,7 @@ import type { AppEnv } from "../env";
 import { AccessTokenError, normalizeTeamDomain, verifyAccessJwt } from "../auth/accessJwt";
 import { isAllowedEmail, parseAllowedEmails } from "../auth/allowedEmails";
 import { createUserRepository } from "../repositories/userRepository";
+import { authenticateMobile } from "../services/mobileAuthService";
 import { conflict, forbidden, misconfigured, unauthorized } from "../utils/errors";
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
@@ -47,8 +48,36 @@ async function resolveEmail(c: Context<AppEnv>): Promise<string> {
   }
 }
 
+export const isMobileWorker = (env: AppEnv["Bindings"]) => env.AUTH_MODE === "mobile";
+
+/** Fotos y audios: lo único que acepta el token de fotos (?mt=), porque <img> no manda cabeceras. */
+const MEDIA_PATH = /^\/api\/(media\/[^/]+|capsules\/[^/]+\/media\/[^/]+)$/;
+
+/**
+ * Puerta de la app móvil: `Authorization: Bearer <token de acceso>` o, solo para ver fotos y audios,
+ * `?mt=<token de fotos>`. Devuelve null si la petición no trae ninguno.
+ */
+async function mobileUser(c: Context<AppEnv>) {
+  const header = c.req.header("authorization");
+  if (header?.startsWith("Bearer ")) return authenticateMobile(c.env, header.slice(7).trim(), "api");
+  const mediaToken = c.req.query("mt");
+  if (mediaToken && c.req.method === "GET" && MEDIA_PATH.test(new URL(c.req.url).pathname)) {
+    return authenticateMobile(c.env, mediaToken, "media");
+  }
+  return null;
+}
+
 /** Autenticación + whitelist. Deja el usuario en c.var.user. */
 export const requireUser = createMiddleware<AppEnv>(async (c, next) => {
+  // El Worker móvil no está detrás de Access: solo acepta sus propios tokens (y el atajo de desarrollo).
+  if (isMobileWorker(c.env) && !devBypassEmail(c)) {
+    const result = await mobileUser(c);
+    if (!result) throw unauthorized();
+    c.set("user", result.user);
+    c.set("mobileSessionId", result.sessionId);
+    return next();
+  }
+
   const email = await resolveEmail(c);
 
   const allowed = parseAllowedEmails(c.env.ALLOWED_EMAILS);

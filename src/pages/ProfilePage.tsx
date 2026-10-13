@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { ChevronRight, LogOut, Sparkles } from "lucide-react";
 import { useMe } from "@/auth/AuthContext";
-import { LOGOUT_URL } from "@/auth/session";
+import { signOut } from "@/auth/session";
 import { InstallCard } from "@/components/InstallCard";
 import { PageHeader } from "@/components/PageHeader";
 import { SyncSection } from "@/components/sync/SyncSection";
@@ -25,7 +25,7 @@ export function ProfilePage() {
       return;
     }
     await clearOfflineData().catch(() => undefined);
-    window.location.href = LOGOUT_URL;
+    await signOut();
   }
 
   return (
