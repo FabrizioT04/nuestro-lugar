@@ -406,3 +406,8 @@ export const pushPreferencesSchema = z.object({
   dates: z.boolean(),
   plans: z.boolean(),
 });
+
+/** Secciones que guardan "visto por última vez" para los globitos del inicio. */
+export const SEEN_SECTIONS = ["memories", "plans", "us"] as const;
+export const sectionSeenSchema = z.object({ section: z.enum(SEEN_SECTIONS) });
+export type SeenSection = (typeof SEEN_SECTIONS)[number];

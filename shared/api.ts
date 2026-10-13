@@ -94,6 +94,22 @@ export interface HomeResponse {
   unopenedLetters: number;
   /** Recordatorio: cartas y cápsulas para quien mira que todavía no abrió (las listas primero). */
   pending: PendingItem[];
+  /** Globitos de novedades en los rincones del inicio. */
+  badges: HomeBadges;
+}
+
+/** Cuántas novedades hay en cada rincón para quien mira (0 = sin globito). */
+export interface HomeBadges {
+  /** Recuerdos que agregó la otra persona desde la última visita. */
+  memories: number;
+  /** Cartas recibidas que ya se pueden abrir y no se abrieron. */
+  letters: number;
+  /** Planes que creó la otra persona desde la última visita. */
+  plans: number;
+  /** Cápsulas de la otra persona que ya se pueden abrir y nadie abrió. */
+  future: number;
+  /** Fechas importantes que agregó la otra persona desde la última visita. */
+  us: number;
 }
 
 export interface PendingItem {

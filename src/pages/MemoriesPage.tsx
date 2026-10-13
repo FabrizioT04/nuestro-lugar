@@ -8,6 +8,7 @@ import { PendingList } from "@/components/sync/PendingList";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useMarkSeen } from "@/hooks/useMarkSeen";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useMemoryList } from "@/hooks/useMemoryList";
 import { useOutbox } from "@/hooks/useOutbox";
@@ -22,6 +23,7 @@ const chipClass = (active: boolean) =>
   }`;
 
 export function MemoriesPage() {
+  useMarkSeen("memories");
   // Los filtros viven en la URL: el botón "atrás" y los enlaces a una etiqueta funcionan solos.
   const [params, setParams] = useSearchParams();
   const view: View = params.get("vista") === "linea" ? "linea" : "tarjetas";

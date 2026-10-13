@@ -3,7 +3,7 @@ import type { CapsuleSummary, LetterSummary } from "@shared/api";
 import type { AuthenticatedUser } from "../auth/types";
 import type { Bindings } from "../env";
 import { createFakeD1 } from "../testing/fakeD1";
-import { getHome, pendingItems } from "./homeService";
+import { getHome, markSectionSeen, pendingItems } from "./homeService";
 
 const person = (displayName: string) => ({ id: displayName.toLowerCase(), displayName });
 
@@ -154,5 +154,70 @@ describe("pendientes de Inicio con la base de datos", () => {
     `);
     const home = await getHome(env, user);
     expect(home.pending.map((item) => item.id)).toEqual(["ready", "soon", "capsule-1", "capsule-2", "capsule-3", "capsule-4"]);
+  });
+});
+
+describe("globitos de novedades del inicio", () => {
+  let db: D1Database;
+  let env: Bindings;
+  const user: AuthenticatedUser = {
+    id: "viewer", email: "viewer@example.com", displayName: "Zuleyka", introSeenAt: null, relationshipId: "r1",
+  };
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-13T12:00:00.000Z"));
+    db = createFakeD1();
+    env = { DB: db } as Bindings;
+    await db.exec(`
+      INSERT INTO users (id, email, display_name) VALUES
+        ('viewer', 'viewer@example.com', 'Zuleyka'), ('partner', 'partner@example.com', 'Fabrizio');
+      INSERT INTO relationships (id, started_on, timezone) VALUES
+        ('r1', '2025-01-01', 'America/Lima'), ('other', '2025-01-01', 'America/Lima');
+      INSERT INTO relationship_members (relationship_id, user_id) VALUES ('r1', 'viewer'), ('r1', 'partner');
+      INSERT INTO section_visits (user_id, section, seen_at) VALUES
+        ('viewer', 'memories', '2026-10-10T00:00:00.000Z'), ('viewer', 'plans', '2026-10-10T00:00:00.000Z'),
+        ('viewer', 'us', '2026-10-10T00:00:00.000Z');
+      INSERT INTO memories (id, relationship_id, author_id, title, happened_on, created_at, deleted_at) VALUES
+        ('m-new', 'r1', 'partner', 'Nuevo', '2026-10-11', '2026-10-11T00:00:00.000Z', NULL),
+        ('m-new2', 'r1', 'partner', 'Nuevo 2', '2026-10-12', '2026-10-12T00:00:00.000Z', NULL),
+        ('m-old', 'r1', 'partner', 'Visto', '2026-10-01', '2026-10-01T00:00:00.000Z', NULL),
+        ('m-mine', 'r1', 'viewer', 'Mío', '2026-10-12', '2026-10-12T00:00:00.000Z', NULL),
+        ('m-deleted', 'r1', 'partner', 'Borrado', '2026-10-12', '2026-10-12T00:00:00.000Z', '2026-10-12T01:00:00.000Z'),
+        ('m-other', 'other', 'partner', 'Otra relación', '2026-10-12', '2026-10-12T00:00:00.000Z', NULL);
+      INSERT INTO plans (id, relationship_id, created_by, title, created_at) VALUES
+        ('p-new', 'r1', 'partner', 'Cine', '2026-10-12T00:00:00.000Z'),
+        ('p-mine', 'r1', 'viewer', 'Playa', '2026-10-12T00:00:00.000Z');
+      INSERT INTO important_dates (id, relationship_id, created_by, title, event_date, created_at) VALUES
+        ('d-new', 'r1', 'partner', 'Cumple', '2026-12-01', '2026-10-12T00:00:00.000Z');
+      INSERT INTO letters (id, relationship_id, author_id, recipient_id, title, body, unlock_at) VALUES
+        ('l-ready', 'r1', 'partner', 'viewer', 'Lista', 'Privado', NULL),
+        ('l-locked', 'r1', 'partner', 'viewer', 'Bloqueada', 'Privado', '2026-11-01T00:00:00.000Z');
+      INSERT INTO future_capsules (id, relationship_id, created_by, title, unlock_at, opened_at) VALUES
+        ('c-ready', 'r1', 'partner', 'Lista', '2026-10-01T00:00:00.000Z', NULL),
+        ('c-opened', 'r1', 'partner', 'Abierta', '2026-10-01T00:00:00.000Z', '2026-10-02T00:00:00.000Z'),
+        ('c-locked', 'r1', 'partner', 'Bloqueada', '2026-11-01T00:00:00.000Z', NULL),
+        ('c-mine', 'r1', 'viewer', 'Mía', '2026-10-01T00:00:00.000Z', NULL);
+    `);
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  it("cuenta solo lo nuevo de la otra persona en esta relación", async () => {
+    const home = await getHome(env, user);
+    expect(home.badges).toEqual({ memories: 2, letters: 1, plans: 1, future: 1, us: 1 });
+  });
+
+  it("apaga el globito de una sección al visitarla, sin tocar las demás", async () => {
+    await markSectionSeen(env, user, "memories");
+    await markSectionSeen(env, user, "memories");
+    const home = await getHome(env, user);
+    expect(home.badges).toEqual({ memories: 0, letters: 1, plans: 1, future: 1, us: 1 });
+  });
+
+  it("sin visita guardada, todo lo de la otra persona cuenta como nuevo", async () => {
+    await db.exec(`DELETE FROM section_visits`);
+    const home = await getHome(env, user);
+    expect(home.badges.memories).toBe(3);
   });
 });

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAsync } from "@/hooks/useAsync";
+import { useMarkSeen } from "@/hooks/useMarkSeen";
 import { useOutbox } from "@/hooks/useOutbox";
 import { plansApi } from "@/services/api/plans";
 import { InlineIcon } from "@/components/icons/EmojiIcon";
@@ -26,6 +27,7 @@ const chipClass = (active: boolean) =>
   }`;
 
 export function PlansPage() {
+  useMarkSeen("plans");
   const me = useMe();
   const today = todayIn(me.relationship?.timezone ?? "UTC");
   const plans = useAsync(plansApi.list, { cacheKey: "plans" });

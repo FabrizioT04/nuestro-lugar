@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { ChevronRight, Gift, Heart, Lock, Mail, Sparkles } from "lucide-react";
-import type { HomeResponse, PendingItem, UpcomingMoment } from "@shared/api";
+import type { HomeBadges, HomeResponse, PendingItem, UpcomingMoment } from "@shared/api";
 import { daysBetween, utcToZoned } from "@shared/dates";
 import { HeartBurst } from "@/components/fx/HeartBurst";
 import { MemoryPhoto } from "@/components/memories/MemoryPhoto";
@@ -37,19 +37,46 @@ export function HomePage() {
       <nav aria-label="Nuestros rincones" className="animate-fade-up [animation-delay:280ms]">
         <h2 className="mb-3 text-base">Nuestros rincones</h2>
         <ul className="grid grid-cols-3 gap-2.5">
-          {MODULES.map(({ to, label, icon: Icon }) => (
-            <li key={to}>
-              <Link to={to} className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border border-blush-200 bg-paper px-2 py-3 text-xs font-medium text-ink transition hover:bg-blush-50 active:scale-[0.98]">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blush-50 text-blush-500">
-                  <Icon size={21} strokeWidth={1.75} aria-hidden />
-                </span>
-                {label}
-              </Link>
-            </li>
-          ))}
+          {MODULES.map(({ to, label, icon: Icon, badge }) => {
+            const count = badge && home.status === "success" ? badgeCount(home.data, badge) : 0;
+            return (
+              <li key={to}>
+                <Link
+                  to={to}
+                  aria-label={count > 0 ? `${label}, ${plural(count, "novedad", "novedades")}` : undefined}
+                  className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border border-blush-200 bg-paper px-2 py-3 text-xs font-medium text-ink transition hover:bg-blush-50 active:scale-[0.98]"
+                >
+                  <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-blush-50 text-blush-500">
+                    <Icon size={21} strokeWidth={1.75} aria-hidden />
+                    {count > 0 && <CountBadge count={count} />}
+                  </span>
+                  {label}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </div>
+  );
+}
+
+/** Las copias guardadas antes de los globitos no traen `badges`: entonces solo cuentan las cartas. */
+export function badgeCount(data: HomeResponse, badge: keyof HomeBadges): number {
+  if (data.badges) return data.badges[badge];
+  return badge === "letters" ? data.unopenedLetters : 0;
+}
+
+/** Globito con el número de novedades, como en las redes sociales. */
+function CountBadge({ count }: { count: number }) {
+  return (
+    <span
+      aria-hidden
+      data-testid="count-badge"
+      className="animate-pop-in absolute -top-2 -right-2.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-blush-500 px-1.5 text-[11px] leading-none font-bold text-white ring-2 ring-paper"
+    >
+      {count > 9 ? "9+" : count}
+    </span>
   );
 }
 
