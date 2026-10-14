@@ -5,6 +5,7 @@ import { useMe } from "@/auth/AuthContext";
 import { BottomNav } from "@/components/BottomNav";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { HAPTICS, isTappable, vibrate } from "@/fx/haptics";
 import { pushSupport, refreshPushSubscription } from "@/pwa/push";
 import { slideDirection, startsInScrollable, swipeTarget } from "./pageTransition";
 
@@ -36,6 +37,15 @@ export function AppLayout() {
     const target = swipeTarget(pathname, point.clientX - start.x, point.clientY - start.y);
     if (target) void navigate(target);
   }
+
+  // Vibración suave al tocar botones y enlaces (solo en teléfonos que la permiten).
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      if (isTappable(event.target)) vibrate(HAPTICS.tap);
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, []);
 
   // Si este dispositivo tiene los avisos activados, se lo recuerda al Worker una vez por apertura.
   useEffect(() => {

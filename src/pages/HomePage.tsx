@@ -5,6 +5,9 @@ import type { HomeBadges, HomeResponse, PendingItem, UpcomingMoment } from "@sha
 import { daysBetween, utcToZoned } from "@shared/dates";
 import { Celebration } from "@/components/fx/Celebration";
 import { FloatingHearts } from "@/components/fx/HeartBurst";
+import { NightSky } from "@/components/fx/NightSky";
+import { QuickAdd } from "@/components/fx/QuickAdd";
+import { isNightAt } from "@/fx/haptics";
 import { MemoryPhoto } from "@/components/memories/MemoryPhoto";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -21,6 +24,7 @@ export function HomePage() {
 
   return (
     <div className="space-y-7">
+      <QuickAdd />
       {home.status === "loading" && <HomeSkeleton />}
       {home.status === "error" && (
         <Card className="text-center">
@@ -110,6 +114,7 @@ function HomeContent({ data }: { data: HomeResponse }) {
           <div aria-hidden className="absolute inset-0 animate-ken-burns bg-[radial-gradient(circle_at_75%_25%,#ffd6a8_0,#ff8aa3_28%,#7b5cc8_70%,#2a1f3d_100%)]" />
         )}
         <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent via-45% to-black/70" />
+        {isNightAt(utcToZoned(new Date().toISOString(), data.relationship.timezone).time) && <NightSky />}
         <FloatingHearts count={8} className="opacity-70" />
         <div className="relative px-5 pb-6">
           <p className="flex flex-wrap items-baseline gap-x-3 leading-none">
