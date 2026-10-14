@@ -221,3 +221,54 @@ describe("globitos de novedades del inicio", () => {
     expect(home.badges.memories).toBe(3);
   });
 });
+
+describe("lo que se asoma en los rincones del inicio", () => {
+  const user: AuthenticatedUser = {
+    id: "viewer", email: "viewer@example.com", displayName: "Zuleyka", introSeenAt: null, relationshipId: "r1",
+  };
+
+  afterEach(() => vi.useRealTimers());
+
+  it("trae las últimas fotos, el último dibujo y la última canción, solo de la pareja", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-13T12:00:00.000Z"));
+    const db = createFakeD1();
+    const env = { DB: db } as Bindings;
+    await db.exec(`
+      INSERT INTO users (id, email, display_name) VALUES
+        ('viewer', 'viewer@example.com', 'Zuleyka'), ('partner', 'partner@example.com', 'Fabrizio');
+      INSERT INTO relationships (id, started_on, timezone) VALUES
+        ('r1', '2025-01-01', 'America/Lima'), ('other', '2025-01-01', 'America/Lima');
+      INSERT INTO relationship_members (relationship_id, user_id) VALUES ('r1', 'viewer'), ('r1', 'partner');
+      INSERT INTO media_objects (id, relationship_id, uploaded_by, r2_key, purpose, content_type, size_bytes, width, height, deleted_at) VALUES
+        ('f-old', 'r1', 'partner', 'k1', 'memory', 'image/jpeg', 1, 10, 10, NULL),
+        ('f-new', 'r1', 'partner', 'k2', 'memory', 'image/jpeg', 1, 20, 10, NULL),
+        ('f-gone', 'r1', 'partner', 'k3', 'memory', 'image/jpeg', 1, 10, 10, '2026-10-01T00:00:00.000Z'),
+        ('f-other', 'other', 'partner', 'k4', 'memory', 'image/jpeg', 1, 10, 10, NULL);
+      INSERT INTO memories (id, relationship_id, author_id, title, happened_on) VALUES
+        ('m-old', 'r1', 'partner', 'Viejo', '2025-03-01'), ('m-new', 'r1', 'partner', 'Nuevo', '2026-09-01'),
+        ('m-gone', 'r1', 'partner', 'Sin foto', '2026-10-01'), ('m-other', 'other', 'partner', 'Otra', '2026-10-05');
+      INSERT INTO memory_photos (memory_id, media_id) VALUES
+        ('m-old', 'f-old'), ('m-new', 'f-new'), ('m-gone', 'f-gone'), ('m-other', 'f-other');
+      INSERT INTO drawings (id, relationship_id, author_id, r2_key, content_type, size_bytes, created_at) VALUES
+        ('d-old', 'r1', 'viewer', 'dk1', 'image/png', 1, '2026-09-01T00:00:00.000Z'),
+        ('d-new', 'r1', 'partner', 'dk2', 'image/png', 1, '2026-10-01T00:00:00.000Z'),
+        ('d-other', 'other', 'partner', 'dk3', 'image/png', 1, '2026-10-10T00:00:00.000Z');
+      INSERT INTO songs (id, relationship_id, author_id, provider, url, title, artist, thumbnail_url, created_at) VALUES
+        ('s1', 'r1', 'partner', 'youtube', 'https://youtu.be/a', 'Te Amo', 'Franco de Vita', 'https://i.ytimg.com/a.jpg', '2026-10-02T00:00:00.000Z');
+      INSERT INTO plans (id, relationship_id, created_by, title, status, planned_for) VALUES
+        ('p-past', 'r1', 'partner', 'Pasado', 'pending', '2026-10-01'),
+        ('p-next', 'r1', 'partner', 'Cine', 'pending', '2026-10-20'),
+        ('p-done', 'r1', 'partner', 'Hecho', 'done', NULL);
+    `);
+
+    const { corners } = await getHome(env, user);
+    expect(corners.memories).toEqual({
+      count: 3,
+      photos: [{ id: "f-new", width: 20, height: 10 }, { id: "f-old", width: 10, height: 10 }],
+    });
+    expect(corners.drawings).toEqual({ count: 2, latestId: "d-new" });
+    expect(corners.songs).toEqual({ count: 1, latest: { title: "Te Amo", artist: "Franco de Vita", thumbnailUrl: "https://i.ytimg.com/a.jpg" } });
+    expect(corners.plans).toEqual({ pending: 2, done: 1, nextOn: "2026-10-20" });
+  });
+});

@@ -79,7 +79,10 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
   const today = todayIn(relationship.timezone);
   const { years, months } = elapsedParts(relationship.startedOn, today);
 
-  const upcomingPlans = await createPlanRepository(env.DB).listUpcoming(user.relationshipId, today);
+  const [upcomingPlans, corners] = await Promise.all([
+    createPlanRepository(env.DB).listUpcoming(user.relationshipId, today),
+    homeRepository.cornerPreviews(user.relationshipId, today),
+  ]);
 
   const candidates: UpcomingMoment[] = [
     anniversaryMoment(relationship, today),
@@ -119,6 +122,7 @@ export async function getHome(env: Bindings, user: AuthenticatedUser): Promise<H
     unopenedLetters,
     pending: pendingItems(received, capsules),
     badges: { memories: counts.memories, letters: unopenedLetters, plans: counts.plans, future: counts.capsules, us: counts.us, drawings: counts.drawings, songs: counts.songs },
+    corners,
   };
 }
 

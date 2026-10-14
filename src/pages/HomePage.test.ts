@@ -16,9 +16,13 @@ const home: HomeResponse = {
   today: "2026-10-13", together: { days: 650, years: 1, months: 9 },
   nextMoment: null, highlightedMemory: null, unopenedLetters: 0, pending: [],
   badges: { memories: 0, letters: 0, plans: 0, future: 0, us: 0, drawings: 0, songs: 0 },
+  corners: {
+    memories: { count: 0, photos: [] }, letters: { count: 0 }, plans: { pending: 0, done: 0, nextOn: null },
+    future: { count: 0 }, us: { count: 0 }, drawings: { count: 0, latestId: null }, songs: { count: 0, latest: null },
+  },
 };
 
-function renderHome(data: Omit<HomeResponse, "pending" | "badges"> & Partial<Pick<HomeResponse, "pending" | "badges">>) {
+function renderHome(data: Omit<HomeResponse, "pending" | "badges" | "corners"> & Partial<Pick<HomeResponse, "pending" | "badges" | "corners">>) {
   vi.mocked(useAsync).mockReturnValue({ status: "success", data, stale: true, reload: vi.fn() });
   return renderToStaticMarkup(createElement(MemoryRouter, null, createElement(HomePage)));
 }
@@ -73,5 +77,44 @@ describe("globitos de novedades en los rincones", () => {
     const html = renderHome({ ...legacy, unopenedLetters: 2 });
     expect(html.match(/data-testid="count-badge"/g)).toHaveLength(1);
     expect(html).toContain('aria-label="Cartas, 2 novedades"');
+  });
+});
+
+describe("lo que se asoma en los rincones", () => {
+  it("muestra sus fotos, su último dibujo y la última canción", () => {
+    const html = renderHome({
+      ...home,
+      corners: {
+        ...home.corners,
+        memories: { count: 14, photos: [{ id: "f1", width: 800, height: 600 }, { id: "f2", width: null, height: null }] },
+        drawings: { count: 3, latestId: "d1" },
+        songs: { count: 2, latest: { title: "Te Amo", artist: "Franco de Vita", thumbnailUrl: "https://i.ytimg.com/vi/x/hqdefault.jpg" } },
+        letters: { count: 8 },
+      },
+    });
+    expect(html).toContain("/media/f1?size=thumb");
+    expect(html).toContain("/media/f2?size=thumb");
+    expect(html).toContain("/drawings/d1/image?size=thumb");
+    expect(html).toContain("https://i.ytimg.com/vi/x/hqdefault.jpg");
+    expect(html).toContain("14 recuerdos");
+    expect(html).toContain("Te Amo · Franco de Vita");
+    expect(html).toContain("8 cartas");
+  });
+
+  it("sin contenido invita a empezar", () => {
+    const html = renderHome(home);
+    expect(html).toContain("Guarden el primero");
+    expect(html).toContain("Recomiéndense una");
+  });
+
+  it("con una copia antigua sin corners no se rompe", () => {
+    const { corners: _corners, ...legacy } = home;
+    expect(renderHome(legacy)).toContain("Nuestros rincones");
+  });
+
+  it("las novedades tienen prioridad sobre la vista previa", () => {
+    const html = renderHome({ ...home, badges: { ...home.badges, letters: 1 }, corners: { ...home.corners, letters: { count: 8 } } });
+    expect(html).toContain("1 novedad");
+    expect(html).not.toContain("8 cartas");
   });
 });
