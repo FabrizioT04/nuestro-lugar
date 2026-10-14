@@ -63,7 +63,7 @@ export function DiscoverPage() {
   return (
     <section>
       <header className="mb-4 animate-fade-up">
-        <h1 className="text-3xl">¿Qué hacemos hoy?</h1>
+        <h1 className="text-4xl tracking-tighter">¿Qué hacemos hoy?</h1>
         <p className="mt-2 text-sm text-ink-soft">Ideas cerca de ustedes, pensadas para los dos.</p>
       </header>
 

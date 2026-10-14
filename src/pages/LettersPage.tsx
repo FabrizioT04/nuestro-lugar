@@ -26,7 +26,7 @@ export function LettersPage() {
   return (
     <section>
       <header className="mb-4 flex animate-fade-up items-center justify-between gap-3">
-        <h1 className="text-3xl">Cartas</h1>
+        <h1 className="text-4xl tracking-tighter">Cartas</h1>
         <Link to="/cartas/nueva" className="nl-action">
           <PenLine size={16} aria-hidden /> Escribir
         </Link>

@@ -48,7 +48,7 @@ export function PlansPage() {
   return (
     <section>
       <header className="mb-4 flex animate-fade-up items-center justify-between gap-3">
-        <h1 className="text-3xl">Planes</h1>
+        <h1 className="text-4xl tracking-tighter">Planes</h1>
         <Link to="/planes/nuevo" className="nl-action">
           <Plus size={16} aria-hidden /> Nuevo
         </Link>

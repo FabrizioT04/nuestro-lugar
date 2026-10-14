@@ -23,7 +23,7 @@ export function FuturePage() {
   return (
     <section>
       <header className="mb-2 flex animate-fade-up items-center justify-between gap-3">
-        <h1 className="text-3xl">Futuro</h1>
+        <h1 className="text-4xl tracking-tighter">Futuro</h1>
         <Link to="/futuro/nueva" className="nl-action">
           <Gift size={16} aria-hidden /> Cápsula
         </Link>

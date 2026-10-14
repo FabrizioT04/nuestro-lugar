@@ -33,24 +33,25 @@ export function HomePage() {
 
       {home.status === "success" && <PendingSection data={home.data} />}
 
-      {/* Accesos rápidos: compactos, para que el recordatorio de arriba sea lo principal. */}
+      {/* Rincones en bloques, cada uno con su globito de novedades. */}
       <nav aria-label="Nuestros rincones" className="animate-fade-up [animation-delay:280ms]">
-        <h2 className="mb-3 text-base">Nuestros rincones</h2>
-        <ul className="grid grid-cols-3 gap-2.5">
-          {MODULES.map(({ to, label, icon: Icon, badge }) => {
+        <h2 className="mb-3 text-lg">Nuestros rincones</h2>
+        <ul className="grid grid-cols-2 gap-2.5">
+          {MODULES.map(({ to, label, icon: Icon, badge, tone }, index) => {
             const count = badge && home.status === "success" ? badgeCount(home.data, badge) : 0;
             return (
-              <li key={to}>
+              <li key={to} className={index === 0 ? "col-span-2" : undefined}>
                 <Link
                   to={to}
                   aria-label={count > 0 ? `${label}, ${plural(count, "novedad", "novedades")}` : undefined}
-                  className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border border-blush-200 bg-paper px-2 py-3 text-xs font-medium text-ink transition hover:bg-blush-50 active:scale-[0.98]"
+                  className={`relative flex min-h-22 flex-col justify-between gap-2.5 rounded-card p-4 text-ink transition active:scale-[0.98] ${TONES[tone]}`}
                 >
-                  <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-blush-50 text-blush-500">
-                    <Icon size={21} strokeWidth={1.75} aria-hidden />
-                    {count > 0 && <CountBadge count={count} />}
+                  <Icon size={22} strokeWidth={1.8} aria-hidden />
+                  <span>
+                    <span className="block text-base font-semibold tracking-tight">{label}</span>
+                    <span className="block text-xs text-ink-soft">{count > 0 ? plural(count, "novedad", "novedades") : "\u00a0"}</span>
                   </span>
-                  {label}
+                  {count > 0 && <CountBadge count={count} />}
                 </Link>
               </li>
             );
@@ -67,13 +68,15 @@ export function badgeCount(data: HomeResponse, badge: keyof HomeBadges): number 
   return badge === "letters" ? data.unopenedLetters : 0;
 }
 
+const TONES = { blush: "bg-blush-100", lavender: "bg-lavender-100", mint: "bg-blush-50" } as const;
+
 /** Globito con el número de novedades, como en las redes sociales. */
 function CountBadge({ count }: { count: number }) {
   return (
     <span
       aria-hidden
       data-testid="count-badge"
-      className="animate-pop-in absolute -top-2 -right-2.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-blush-500 px-1.5 text-[11px] leading-none font-bold text-white ring-2 ring-paper"
+      className="animate-pop-in absolute top-3 right-3 flex h-6 min-w-6 items-center justify-center rounded-full bg-blush-500 px-1.5 text-xs leading-none font-bold text-white"
     >
       {count > 9 ? "9+" : count}
     </span>
@@ -93,34 +96,30 @@ function HomeContent({ data }: { data: HomeResponse }) {
 
   return (
     <>
-      <section aria-label="Nuestra historia juntos" className="animate-fade-up">
-        <p className="text-xs font-medium tracking-[0.16em] text-ink-soft uppercase">Qué bonito coincidir</p>
-        <h1 className="mt-2 text-3xl leading-tight text-ink">
-          {data.relationship.members.map((member, index) => (
-            <span key={member.id}>
-              {index > 0 && <span className="text-blush-500"> &amp; </span>}
-              {member.displayName}
-            </span>
-          ))}
-        </h1>
-        {data.relationship.coverMediaId && (
-          <img
-            src={photoUrl(data.relationship.coverMediaId)}
-            alt={`Foto de ${names}`}
-            className="mt-5 aspect-[16/9] w-full rounded-card object-cover"
-          />
+      <section aria-label="Nuestra historia juntos" className="relative -mx-5 flex h-[26rem] animate-fade-in flex-col justify-end overflow-hidden rounded-b-[2rem] bg-ink text-white">
+        {data.relationship.coverMediaId ? (
+          <img src={photoUrl(data.relationship.coverMediaId)} alt={`Foto de ${names}`} className="absolute inset-0 h-full w-full object-cover" />
+        ) : data.highlightedMemory?.cover ? (
+          <MemoryPhoto photo={data.highlightedMemory.cover} size="full" eager alt={`Foto de ${names}`} className="absolute inset-0 h-full w-full" />
+        ) : (
+          <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_75%_25%,#ffd6a8_0,#ff8aa3_28%,#7b5cc8_70%,#2a1f3d_100%)]" />
         )}
-        <div className="mt-5 rounded-card bg-blush-100 px-5 py-6">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-medium text-blush-700">Nuestra historia, un día a la vez</p>
-            <Heart size={19} strokeWidth={1.5} className="shrink-0 text-blush-500" aria-hidden />
-          </div>
-          <p className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span className="text-6xl font-medium tracking-tighter text-blush-500">{formatNumber(days)}</span>
-            <span className="text-sm text-ink">{data.together.days === 1 ? "día juntos" : "días juntos"}</span>
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent via-45% to-black/70" />
+        <div className="relative px-5 pb-6">
+          <p className="flex flex-wrap items-baseline gap-x-3 leading-none">
+            <span className="text-6xl font-bold tracking-tighter">{formatNumber(days)}</span>
+            <span className="text-2xl font-semibold tracking-tight">{data.together.days === 1 ? "día" : "días"}</span>
           </p>
-          <p className="mt-2 text-xs leading-relaxed text-ink-soft">
-            {duration ? `${duration} · ` : ""}desde el {formatLongDate(data.relationship.startedOn)}
+          <h1 className="mt-3 text-base font-semibold tracking-normal text-white">
+            {data.relationship.members.map((member, index) => (
+              <span key={member.id}>
+                {index > 0 && " y "}
+                {member.displayName}
+              </span>
+            ))}
+          </h1>
+          <p className="mt-0.5 text-sm text-white/80">
+            {duration ? `${duration} juntos · ` : ""}desde el {formatLongDate(data.relationship.startedOn)}
           </p>
         </div>
       </section>
@@ -132,11 +131,11 @@ function HomeContent({ data }: { data: HomeResponse }) {
         to={data.highlightedMemory ? `/recuerdos/${data.highlightedMemory.id}` : "/recuerdos/nuevo"}
         className="block animate-fade-up [animation-delay:180ms]"
       >
-        <Card className="flex items-center gap-4 transition active:scale-[0.99]">
+        <Card className="flex items-center gap-4 !p-3.5 transition active:scale-[0.99]">
           {data.highlightedMemory?.cover ? (
-            <MemoryPhoto photo={data.highlightedMemory.cover} className="h-14 w-14 shrink-0 rounded-2xl" />
+            <MemoryPhoto photo={data.highlightedMemory.cover} className="h-16 w-16 shrink-0 rounded-2xl" />
           ) : (
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blush-50 text-blush-500">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-paper text-blush-500">
               <Sparkles size={24} strokeWidth={1.75} aria-hidden />
             </span>
           )}
@@ -144,7 +143,7 @@ function HomeContent({ data }: { data: HomeResponse }) {
             <p className="text-xs font-semibold tracking-wide text-ink-soft uppercase">Recuerdo destacado</p>
             {data.highlightedMemory ? (
               <>
-                <p className="truncate font-display text-lg">{data.highlightedMemory.title}</p>
+                <p className="truncate text-lg font-semibold tracking-tight">{data.highlightedMemory.title}</p>
                 <p className="text-sm text-ink-soft">{formatLongDate(data.highlightedMemory.happenedOn)}</p>
               </>
             ) : (
@@ -164,31 +163,27 @@ function NextMomentCard({ moment }: { moment: UpcomingMoment }) {
     .format(new Date(Date.UTC(2000, month - 1, 1)))
     .replace(".", "");
   const card = (
-    <Card className="flex items-center gap-3.5 !p-3.5 transition active:scale-[0.99]">
-      <span className="flex h-16 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-blush-50 text-blush-500" aria-hidden>
+    <div className="flex items-center gap-3.5 rounded-card bg-ink p-4 text-white transition active:scale-[0.99]">
+      <span className="flex h-16 w-14 shrink-0 flex-col items-center justify-center rounded-2xl bg-white/10 text-white" aria-hidden>
         <span className="text-2xl leading-none font-extrabold">{day}</span>
         <span className="mt-0.5 text-[11px] font-bold uppercase">{monthShort}</span>
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate font-bold text-ink">
-          {moment.title}
-        </p>
-        <p className="text-sm text-ink-soft">
+        <p className="truncate text-lg font-semibold tracking-tight">{moment.title}</p>
+        <p className="text-sm text-white/65">
           {moment.years ? `Cumplen ${plural(moment.years, "año")}` : formatDayMonth(moment.date)}
         </p>
       </div>
-      <span className="shrink-0 rounded-full bg-blush-100 px-2.5 py-1.5 text-xs font-extrabold text-blush-700">
-        {formatCountdown(moment.daysUntil)}
-      </span>
-    </Card>
+      <span className="shrink-0 rounded-full bg-blush-500 px-3 py-2 text-xs font-bold text-white">{formatCountdown(moment.daysUntil)}</span>
+    </div>
   );
   return (
     <section aria-labelledby="next-title" className="animate-fade-up [animation-delay:120ms]">
       <div className="mb-2.5 flex items-baseline justify-between">
-        <h2 id="next-title" className="font-sans text-lg font-extrabold">
+        <h2 id="next-title" className="text-lg">
           Lo que viene
         </h2>
-        <Link to="/nosotros" className="text-sm font-bold text-blush-500">
+        <Link to="/nosotros" className="text-sm font-semibold text-ink-soft">
           Ver fechas
         </Link>
       </div>
@@ -229,11 +224,11 @@ function PendingSection({ data }: { data: HomeResponse }) {
   return (
     <section aria-labelledby="pending-title" className="animate-fade-up [animation-delay:220ms]">
       <div className="mb-2.5 flex items-baseline justify-between">
-        <h2 id="pending-title" className="font-sans text-lg font-extrabold">
+        <h2 id="pending-title" className="text-lg">
           Por abrir
         </h2>
         {ready > 0 && (
-          <span className="rounded-full bg-blush-100 px-2.5 py-1 text-xs font-extrabold text-blush-700">
+          <span className="rounded-full bg-blush-500 px-2.5 py-1 text-xs font-bold text-white">
             {ready === 1 ? "1 te espera" : `${ready} te esperan`}
           </span>
         )}
@@ -260,7 +255,7 @@ function PendingSection({ data }: { data: HomeResponse }) {
         )
       ) : items.length === 0 ? (
         <Card className="flex items-center gap-3.5 !p-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sage-100 text-sage-700" aria-hidden>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-paper text-sage-700" aria-hidden>
             <Heart size={20} strokeWidth={1.75} />
           </span>
           <div>
@@ -291,12 +286,12 @@ function PendingRow({ item, today, timezone }: { item: PendingItem; today: strin
     <Link
       to={isLetter ? `/cartas/${item.id}` : `/futuro/${item.id}`}
       className={`flex flex-wrap items-center gap-3 rounded-card border p-4 transition active:scale-[0.99] ${
-        item.isLocked ? "border-blush-200 bg-paper" : "border-transparent bg-blush-100"
+        item.isLocked ? "border-transparent bg-blush-50" : "border-transparent bg-blush-100"
       }`}
     >
       <span
         className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
-          item.isLocked ? "bg-cream text-ink-soft/70" : isLetter ? "bg-paper text-blush-500" : "bg-paper text-lavender-500"
+          item.isLocked ? "bg-paper text-ink-soft/70" : isLetter ? "bg-paper text-blush-500" : "bg-paper text-lavender-500"
         }`}
         aria-hidden
       >
@@ -311,12 +306,12 @@ function PendingRow({ item, today, timezone }: { item: PendingItem; today: strin
         </p>
       </div>
       {item.isLocked ? (
-        <span className="flex shrink-0 items-center gap-1 rounded-full bg-cream px-2.5 py-1.5 text-xs font-bold text-ink-soft">
+        <span className="flex shrink-0 items-center gap-1 rounded-full bg-paper px-2.5 py-1.5 text-xs font-bold text-ink-soft">
           <Lock size={12} aria-hidden />
           {days <= 0 ? "Hoy" : days === 1 ? "Mañana" : `En ${plural(days, "día")}`}
         </span>
       ) : (
-        <span className="shrink-0 rounded-xl bg-paper px-3 py-2 text-xs font-medium text-blush-700">Abrir</span>
+        <span className="shrink-0 rounded-full bg-ink px-3.5 py-2 text-xs font-semibold text-white">Abrir</span>
       )}
     </Link>
   );
@@ -325,7 +320,7 @@ function PendingRow({ item, today, timezone }: { item: PendingItem; today: strin
 function HomeSkeleton() {
   return (
     <div className="space-y-5" aria-label="Cargando">
-      <Skeleton className="h-80" />
+      <Skeleton className="-mx-5 h-[26rem] !rounded-t-none" />
       <Skeleton className="h-24" />
       <Skeleton className="h-24" />
     </div>

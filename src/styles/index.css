@@ -1,31 +1,32 @@
 @import "tailwindcss";
 
-/* Rosa minimal: superficies claras, rosa empolvado y estados con contraste. */
+/* Moderno: blanco, tinta casi negra, bloques grises suaves y un rosa vivo de acento. */
 @theme {
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  --color-cream: #fffdfc;
+  --color-cream: #ffffff;
   --color-paper: #ffffff;
-  --color-ink: #382931;
-  --color-ink-soft: #786670;
+  --color-ink: #141113;
+  --color-ink-soft: #6c6569;
 
-  --color-blush-50: #fcf4f6;
-  --color-blush-100: #f9e7ed;
-  --color-blush-200: #eddee4;
-  --color-blush-300: #dfaec0;
-  --color-blush-500: #a84464;
-  --color-blush-700: #8e3654;
+  /* blush-50 es el gris de los bloques; 100 el rosa claro; 500 el acento. */
+  --color-blush-50: #f4f2f3;
+  --color-blush-100: #ffe3ea;
+  --color-blush-200: #ebe7e9;
+  --color-blush-300: #ffb0c1;
+  --color-blush-500: #d42f58;
+  --color-blush-700: #a8173f;
 
-  --color-lavender-100: #f1edf4;
-  --color-lavender-300: #d8cadf;
-  --color-lavender-500: #796583;
+  --color-lavender-100: #ece7ff;
+  --color-lavender-300: #cdc2f7;
+  --color-lavender-500: #5f4bc0;
 
-  --color-sage-100: #e6f4ee; /* menta: ✓ sincronizado */
-  --color-sage-700: #3d7151;
+  --color-sage-100: #e3f5ea; /* menta: ✓ sincronizado */
+  --color-sage-700: #2f6b47;
 
-  --radius-card: 1.25rem;
-  --shadow-soft: 0 2px 8px rgb(56 41 49 / 0.035);
+  --radius-card: 1.375rem;
+  --shadow-soft: 0 2px 10px rgb(20 17 19 / 0.06);
 }
 
 @layer base {
@@ -42,7 +43,7 @@
   h1,
   h2,
   h3 {
-    @apply font-display font-medium tracking-tight;
+    @apply font-display font-bold tracking-tight;
     overflow-wrap: anywhere;
   }
   :focus-visible {
@@ -63,22 +64,22 @@
 
 /* Controles compartidos: las pantallas conservan sus acciones y validaciones. */
 @utility nl-action {
-  @apply inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-blush-100 px-4 py-2.5 text-sm font-medium text-blush-700 transition hover:bg-blush-200 active:scale-[0.98];
+  @apply inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-blush-50 px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-blush-200 active:scale-[0.98];
 }
 @utility nl-tabs {
-  @apply flex gap-1 rounded-2xl bg-blush-50 p-1;
+  @apply flex gap-1 rounded-full bg-blush-50 p-1;
 }
 @utility nl-tab {
-  @apply min-h-11 min-w-0 flex-1 rounded-xl px-2 py-2 text-sm font-medium text-ink-soft transition;
+  @apply min-h-11 min-w-0 flex-1 rounded-full px-2 py-2 text-sm font-semibold text-ink-soft transition;
   &[aria-selected="true"], &[aria-pressed="true"] {
-    @apply bg-paper text-blush-700 shadow-soft;
+    @apply bg-ink text-paper shadow-soft;
   }
 }
 @utility nl-chip {
-  @apply flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition;
+  @apply flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-semibold transition;
 }
 @utility nl-input {
-  @apply mt-1 w-full rounded-xl border border-blush-200 bg-paper px-4 py-3 text-base text-ink placeholder:text-ink-soft focus:border-blush-500 focus:ring-2 focus:ring-blush-100;
+  @apply mt-1 w-full rounded-2xl border border-transparent bg-blush-50 px-4 py-3 text-base text-ink placeholder:text-ink-soft focus:border-ink focus:bg-paper focus:ring-2 focus:ring-blush-200;
 }
 
 /* Animaciones sutiles. Se desactivan si el sistema pide reducir movimiento. */

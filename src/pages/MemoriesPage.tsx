@@ -56,7 +56,7 @@ export function MemoriesPage() {
   return (
     <section>
       <header className="mb-4 flex animate-fade-up items-center justify-between gap-3">
-        <h1 className="text-3xl">Recuerdos</h1>
+        <h1 className="text-4xl tracking-tighter">Recuerdos</h1>
         <Link to="/recuerdos/nuevo" className="nl-action"><Plus size={16} aria-hidden /> Nuevo</Link>
       </header>
       <p className="mb-5 text-sm text-ink-soft">Lo bonito de nuestra historia.</p>

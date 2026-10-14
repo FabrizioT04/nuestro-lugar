@@ -54,7 +54,7 @@ function UsContent({ data }: { data: UsResponse }) {
   return (
     <>
       <header className="animate-fade-up">
-        <h1 className="text-3xl">Nosotros</h1>
+        <h1 className="text-4xl tracking-tighter">Nosotros</h1>
         <p className="mt-2 text-sm text-ink-soft">{names}</p>
       </header>
 
