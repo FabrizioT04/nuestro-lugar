@@ -3,13 +3,13 @@ import type { ButtonHTMLAttributes } from "react";
 type Variant = "primary" | "secondary" | "ghost";
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-blush-500 text-paper hover:bg-blush-700",
-  secondary: "border border-blush-200 bg-paper text-blush-700 hover:bg-blush-50",
+  primary: "bg-ink text-paper hover:bg-ink/85",
+  secondary: "bg-blush-50 text-ink hover:bg-blush-200",
   ghost: "text-ink-soft hover:text-ink",
 };
 
 export const buttonClass = (variant: Variant = "primary", className = "") =>
-  `inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium transition active:scale-[0.98] disabled:opacity-60 ${VARIANTS[variant]} ${className}`;
+  `inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition active:scale-[0.98] disabled:opacity-60 ${VARIANTS[variant]} ${className}`;
 
 export function Button({
   variant = "primary",

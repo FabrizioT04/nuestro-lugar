@@ -48,7 +48,7 @@ export function DrawingsPage() {
   return (
     <section>
       <header className="mb-2 flex animate-fade-up items-center justify-between gap-3">
-        <h1 className="text-3xl">Dibujos</h1>
+        <h1 className="text-4xl tracking-tighter">Dibujos</h1>
         <button type="button" className="nl-action" onClick={() => inputRef.current?.click()} disabled={preparing}>
           <ImagePlus size={16} aria-hidden /> {preparing ? "Abriendo…" : "Subir dibujo"}
         </button>

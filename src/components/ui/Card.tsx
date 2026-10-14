@@ -6,5 +6,5 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
 }
 
 export function Card({ className = "", padded = true, ...props }: Props) {
-  return <div className={`rounded-card border border-blush-200 bg-paper ${padded ? "p-5" : ""} ${className}`} {...props} />;
+  return <div className={`rounded-card bg-blush-50 ${padded ? "p-5" : ""} ${className}`} {...props} />;
 }

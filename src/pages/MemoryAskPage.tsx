@@ -60,7 +60,7 @@ export function MemoryAskPage() {
         <Link to="/recuerdos" className="mb-3 inline-flex items-center gap-1 text-sm font-semibold text-ink-soft">
           <ArrowLeft size={16} aria-hidden /> Recuerdos
         </Link>
-        <h1 className="text-3xl">Pregúntale a sus recuerdos</h1>
+        <h1 className="text-4xl tracking-tighter">Pregúntale a sus recuerdos</h1>
         <p className="mt-1 text-ink-soft">Escribe como lo dirías. Buscamos por lo que significa, no solo por palabras.</p>
       </header>
 
