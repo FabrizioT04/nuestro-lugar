@@ -407,6 +407,7 @@ export const pushPreferencesSchema = z.object({
   plans: z.boolean(),
   // Las versiones anteriores de la app no lo envían.
   drawings: z.boolean().default(true),
+  songs: z.boolean().default(true),
 });
 
 /** Secciones que guardan "visto por última vez" para los globitos del inicio. */
@@ -420,3 +421,17 @@ export const drawingCaptionSchema = z
   .trim()
   .max(140, "Como mucho 140 caracteres")
   .transform((value) => (value === "" ? null : value));
+
+/** Recomendar una canción: el enlace de Spotify o YouTube y unas palabras opcionales. */
+export const songCreateSchema = z.object({
+  url: z.string().trim().min(1, "Pega el enlace de la canción").max(500, "El enlace es demasiado largo"),
+  note: z
+    .string()
+    .trim()
+    .max(280, "Como mucho 280 caracteres")
+    .nullish()
+    .transform((value) => (value ? value : null)),
+});
+export type SongCreatePayload = z.input<typeof songCreateSchema>;
+
+export const songLoveSchema = z.object({ loved: z.boolean() });

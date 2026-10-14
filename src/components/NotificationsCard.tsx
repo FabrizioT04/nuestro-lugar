@@ -14,6 +14,7 @@ const OPTIONS: { key: keyof PushPreferences; label: string; hint: string }[] = [
   { key: "dates", label: "Fechas especiales", hint: "Aniversario, mesiversario, cumpleaños y fechas (hoy y mañana)" },
   { key: "plans", label: "Planes", hint: "La mañana del día de un plan" },
   { key: "drawings", label: "Dibujos", hint: "Cuando la otra persona te deja un dibujo" },
+  { key: "songs", label: "Canciones", hint: "Cuando te recomiendan una canción o les encanta la tuya" },
 ];
 
 const ERRORS: Record<PushError["reason"], string> = {

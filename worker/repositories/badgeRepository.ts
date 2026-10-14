@@ -6,13 +6,14 @@ export interface BadgeCounts {
   us: number;
   capsules: number;
   drawings: number;
+  songs: number;
 }
 
 export function createBadgeRepository(db: D1Database) {
   return {
     /**
      * Novedades de la otra persona: recuerdos, planes, fechas y dibujos creados después de la última visita
-     * a cada sección, y cápsulas que ya se pueden abrir y nadie abrió.
+     * a cada sección, cápsulas que ya se pueden abrir y nadie abrió, y canciones sin escuchar.
      */
     async counts(relationshipId: string, userId: string, now: string): Promise<BadgeCounts> {
       const seen = (section: SeenSection) =>
@@ -29,11 +30,13 @@ export function createBadgeRepository(db: D1Database) {
              (SELECT COUNT(*) FROM future_capsules WHERE relationship_id = ?1 AND deleted_at IS NULL
                 AND created_by <> ?2 AND opened_at IS NULL AND unlock_at <= ?3) AS capsules,
              (SELECT COUNT(*) FROM drawings WHERE relationship_id = ?1 AND deleted_at IS NULL
-                AND author_id <> ?2 AND created_at > ${seen("drawings")}) AS drawings`,
+                AND author_id <> ?2 AND created_at > ${seen("drawings")}) AS drawings,
+             (SELECT COUNT(*) FROM songs WHERE relationship_id = ?1 AND deleted_at IS NULL
+                AND author_id <> ?2 AND listened_at IS NULL) AS songs`,
         )
         .bind(relationshipId, userId, now)
         .first<BadgeCounts>();
-      return { memories: row?.memories ?? 0, plans: row?.plans ?? 0, us: row?.us ?? 0, capsules: row?.capsules ?? 0, drawings: row?.drawings ?? 0 };
+      return { memories: row?.memories ?? 0, plans: row?.plans ?? 0, us: row?.us ?? 0, capsules: row?.capsules ?? 0, drawings: row?.drawings ?? 0, songs: row?.songs ?? 0 };
     },
 
     async markSeen(userId: string, section: SeenSection, now: string): Promise<void> {
