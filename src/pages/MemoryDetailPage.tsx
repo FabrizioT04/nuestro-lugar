@@ -13,6 +13,10 @@ import { submitAction } from "@/offline/sync";
 import { memoriesApi } from "@/services/api/memories";
 import { formatLongDate } from "@/utils/format";
 import { FavoriteBurst } from "@/components/fx/FavoriteBurst";
+import { PhotoLightbox } from "@/components/memories/PhotoLightbox";
+import { HAPTICS, vibrate } from "@/fx/haptics";
+
+const DOUBLE_TAP_MS = 280;
 
 export function MemoryDetailPage() {
   const { id = "" } = useParams();
@@ -59,11 +63,37 @@ function MemoryContent({ initial }: { initial: MemoryDetail }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [likes, setLikes] = useState(0);
+  const [bigHeart, setBigHeart] = useState(0);
+  const [viewer, setViewer] = useState<{ index: number; origin: DOMRect } | null>(null);
+  const lastTap = useRef<{ at: number; timer: number } | null>(null);
+
+  // Un toque abre la foto en grande; dos toques seguidos le dan favorito (como en Instagram).
+  function onPhotoTap(target: HTMLElement, index: number) {
+    const now = Date.now();
+    const previous = lastTap.current;
+    if (previous && now - previous.at < DOUBLE_TAP_MS) {
+      window.clearTimeout(previous.timer);
+      lastTap.current = null;
+      setBigHeart((count) => count + 1);
+      if (!memory.isFavorite) void toggleFavorite();
+      else vibrate(HAPTICS.like);
+      return;
+    }
+    const origin = target.getBoundingClientRect();
+    const timer = window.setTimeout(() => {
+      lastTap.current = null;
+      setViewer({ index, origin });
+    }, DOUBLE_TAP_MS);
+    lastTap.current = { at: now, timer };
+  }
   const [busy, setBusy] = useState(false);
 
   async function toggleFavorite() {
     const next = !memory.isFavorite;
-    if (next) setLikes((count) => count + 1);
+    if (next) {
+      setLikes((count) => count + 1);
+      vibrate(HAPTICS.like);
+    }
     setMemory((m) => ({ ...m, isFavorite: next })); // optimista
     try {
       // Sin conexión queda ⏳ pendiente; se guarda también en la copia local para que no "vuelva atrás".
@@ -106,6 +136,9 @@ function MemoryContent({ initial }: { initial: MemoryDetail }) {
 
   return (
     <article className="space-y-4">
+      {viewer && memory.photos[viewer.index] && (
+        <PhotoLightbox photo={memory.photos[viewer.index]!} origin={viewer.origin} alt={`Foto ${viewer.index + 1} de ${memory.title}`} onClose={() => setViewer(null)} />
+      )}
       <Card padded={false} className="animate-fade-up overflow-hidden">
         {memory.photos.length > 0 ? (
           <div className="relative">
@@ -124,16 +157,23 @@ function MemoryContent({ initial }: { initial: MemoryDetail }) {
               }}
             >
               {memory.photos.map((photo, index) => (
-                <MemoryPhoto
+                <button
                   key={photo.id}
-                  photo={photo}
-                  size="full"
-                  eager={index === 0}
-                  alt={`Foto ${index + 1} de ${memory.title}`}
-                  className="aspect-[4/5] w-full shrink-0 snap-center"
-                />
+                  type="button"
+                  aria-label={`Ver en grande la foto ${index + 1}. Toca dos veces para darle favorito`}
+                  onClick={(event) => onPhotoTap(event.currentTarget, index)}
+                  className="w-full shrink-0 snap-center"
+                >
+                  <MemoryPhoto photo={photo} size="full" eager={index === 0} alt={`Foto ${index + 1} de ${memory.title}`} className="aspect-[4/5] w-full" />
+                </button>
               ))}
             </div>
+            {/* Doble toque: corazón grande en el centro. */}
+            {bigHeart > 0 && (
+              <span key={bigHeart} className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden data-testid="double-tap-heart">
+                <Heart size={96} fill="currentColor" strokeWidth={0} className="animate-like-pop text-white drop-shadow-[0_6px_18px_rgb(212_47_88/0.55)]" />
+              </span>
+            )}
             {memory.photos.length > 1 && (
               <>
                 {current > 0 && (

@@ -102,6 +102,9 @@
   --animate-heart-beat: heart-beat 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   --animate-spark: spark 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   --animate-confetti-fall: confetti-fall 3.4s cubic-bezier(0.25, 0.4, 0.5, 1) both;
+  --animate-like-pop: like-pop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  --animate-fan-in: fan-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  --animate-twinkle: twinkle 3s ease-in-out infinite;
   --animate-banner-in: banner-in 3.6s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 
   @keyframes fade-up {
@@ -288,6 +291,46 @@
     100% {
       opacity: 0;
       transform: translateY(-10px) scale(0.95);
+    }
+  }
+  /* Doble toque en una foto: corazón grande que aparece con rebote y se desvanece. */
+  @keyframes like-pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.2);
+    }
+    25% {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+    40% {
+      transform: scale(0.95);
+    }
+    55% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.05) translateY(-12px);
+    }
+  }
+  /* Opciones del botón "+": salen desde el botón hacia arriba. */
+  @keyframes fan-in {
+    from {
+      opacity: 0;
+      transform: translateY(24px) scale(0.6);
+    }
+  }
+  /* Estrellas de la noche: titilan despacio. */
+  @keyframes twinkle {
+    0%, 100% {
+      opacity: 0.25;
+      transform: scale(0.8);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
     }
   }
   @keyframes float {

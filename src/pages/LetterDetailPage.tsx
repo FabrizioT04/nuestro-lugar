@@ -6,6 +6,7 @@ import { daysBetween, todayIn, utcToZoned } from "@shared/dates";
 import { useMe } from "@/auth/AuthContext";
 import { HeartBurst } from "@/components/fx/HeartBurst";
 import { Envelope } from "@/components/letters/Envelope";
+import { HoldToOpen } from "@/components/letters/HoldToOpen";
 import { OpeningEnvelope } from "@/components/letters/OpeningEnvelope";
 import { prefersReducedMotion } from "@/fx/motion";
 import { LETTER_TYPE_LABELS, letterStatus } from "@/components/letters/letterStatus";
@@ -98,9 +99,7 @@ function SealedView({ letter, onOpened }: { letter: LetterDetail; onOpened: (let
           {error}
         </p>
       )}
-      <Button className="mt-6" onClick={open} disabled={opening}>
-        {opening ? "Abriendo…" : "Abrir carta"}
-      </Button>
+      <HoldToOpen onOpen={() => void open()} disabled={opening} label="Mantén presionado para abrir" />
       {letter.type === "open_when" && <p className="mt-3 text-xs text-ink-soft">Guárdala para cuando la necesites de verdad.</p>}
     </Card>
   );
