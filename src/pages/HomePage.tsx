@@ -8,6 +8,7 @@ import { FloatingHearts } from "@/components/fx/HeartBurst";
 import { NightSky } from "@/components/fx/NightSky";
 import { QuickAdd } from "@/components/fx/QuickAdd";
 import { isNightAt } from "@/fx/haptics";
+import { CornerArt, cornerHasArt, cornerLine } from "@/components/home/CornerPreview";
 import { MemoryPhoto } from "@/components/memories/MemoryPhoto";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -44,17 +45,24 @@ export function HomePage() {
         <ul className="grid grid-cols-2 gap-2.5">
           {MODULES.map(({ to, label, icon: Icon, badge, tone }, index) => {
             const count = badge && home.status === "success" ? badgeCount(home.data, badge) : 0;
+            // Una copia guardada antes de esta versión no trae lo que se asoma en los rincones.
+            const corners = home.status === "success" ? home.data.corners : undefined;
+            const today = home.status === "success" ? home.data.today : "";
+            const hasArt = corners ? cornerHasArt(to, corners) : false;
             return (
               <li key={to} className={`animate-tile-in ${index === 0 || isLoneLast(index) ? "col-span-2" : ""}`} style={{ animationDelay: `${320 + index * 70}ms` }}>
                 <Link
                   to={to}
                   aria-label={count > 0 ? `${label}, ${plural(count, "novedad", "novedades")}` : undefined}
-                  className={`relative flex min-h-22 flex-col justify-between gap-2.5 rounded-card p-4 text-ink transition duration-200 hover:-translate-y-0.5 hover:shadow-soft active:scale-[0.95] active:brightness-95 ${TONES[tone]}`}
+                  className={`relative flex ${hasArt ? "min-h-32" : "min-h-28"} flex-col justify-between gap-2.5 overflow-hidden rounded-card p-4 text-ink transition duration-200 hover:-translate-y-0.5 hover:shadow-soft active:scale-[0.95] active:brightness-95 ${TONES[tone]}`}
                 >
-                  <Icon size={22} strokeWidth={1.8} aria-hidden />
-                  <span>
+                  {corners && <CornerArt to={to} corners={corners} hasBadge={count > 0} />}
+                  <Icon size={22} strokeWidth={1.8} aria-hidden className="relative" />
+                  <span className={`relative ${hasArt ? "max-w-[55%]" : ""}`}>
                     <span className="block text-base font-semibold tracking-tight">{label}</span>
-                    <span className="block text-xs text-ink-soft">{count > 0 ? plural(count, "novedad", "novedades") : "\u00a0"}</span>
+                    <span className={`block truncate text-xs ${count > 0 ? "font-semibold text-blush-700" : "text-ink-soft"}`}>
+                      {count > 0 ? plural(count, "novedad", "novedades") : corners ? cornerLine(to, corners, today) : "\u00a0"}
+                    </span>
                   </span>
                   {count > 0 && <CountBadge count={count} />}
                 </Link>

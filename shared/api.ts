@@ -96,6 +96,20 @@ export interface HomeResponse {
   pending: PendingItem[];
   /** Globitos de novedades en los rincones del inicio. */
   badges: HomeBadges;
+  /** Lo que se asoma en cada rincón (fotos, dibujo, canción, cuántos hay). */
+  corners: HomeCorners;
+}
+
+export interface HomeCorners {
+  /** Las portadas de los últimos recuerdos con foto (máximo 3). */
+  memories: { count: number; photos: PhotoRef[] };
+  letters: { count: number };
+  /** `nextOn`: fecha del próximo plan pendiente con fecha (YYYY-MM-DD). */
+  plans: { pending: number; done: number; nextOn: string | null };
+  future: { count: number };
+  us: { count: number };
+  drawings: { count: number; latestId: string | null };
+  songs: { count: number; latest: { title: string | null; artist: string | null; thumbnailUrl: string | null } | null };
 }
 
 /** Cuántas novedades hay en cada rincón para quien mira (0 = sin globito). */
