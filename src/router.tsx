@@ -24,6 +24,7 @@ import { FuturePage } from "@/pages/FuturePage";
 import { CapsuleDetailPage } from "@/pages/CapsuleDetailPage";
 import { CapsuleFormPage } from "@/pages/CapsuleFormPage";
 import { DrawingsPage } from "@/pages/DrawingsPage";
+import { SongsPage } from "@/pages/SongsPage";
 
 // Las rutas viven en español porque son las que ve la pareja en la barra de direcciones.
 // Todas pasan por RequireAuth: no hay ninguna pantalla pública.
@@ -62,6 +63,7 @@ export const router = createBrowserRouter([
           { path: "futuro/:id", element: <CapsuleDetailPage /> },
           { path: "futuro/:id/editar", element: <CapsuleFormPage /> },
           { path: "dibujos", element: <DrawingsPage /> },
+          { path: "canciones", element: <SongsPage /> },
           { path: "*", element: <NotFoundPage /> },
         ],
       },

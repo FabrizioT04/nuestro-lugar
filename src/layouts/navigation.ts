@@ -1,5 +1,5 @@
 import type { HomeBadges } from "@shared/api";
-import { CalendarHeart, Camera, Compass, Gift, Heart, House, Mail, Palette, UserRound, type LucideIcon } from "lucide-react";
+import { CalendarHeart, Camera, Compass, Gift, Heart, House, Mail, Music, Palette, UserRound, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
   to: string;
@@ -31,4 +31,5 @@ export const MODULES: ModuleItem[] = [
   { to: "/futuro", label: "Futuro", icon: Gift, tone: "lavender", badge: "future" },
   { to: "/nosotros", label: "Nosotros", icon: Heart, tone: "blush", badge: "us" },
   { to: "/dibujos", label: "Dibujos", icon: Palette, tone: "lavender", badge: "drawings" },
+  { to: "/canciones", label: "Canciones", icon: Music, tone: "blush", badge: "songs" },
 ];

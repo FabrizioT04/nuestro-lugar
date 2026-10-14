@@ -41,7 +41,7 @@ export function HomePage() {
           {MODULES.map(({ to, label, icon: Icon, badge, tone }, index) => {
             const count = badge && home.status === "success" ? badgeCount(home.data, badge) : 0;
             return (
-              <li key={to} className={`animate-tile-in ${index === 0 ? "col-span-2" : ""}`} style={{ animationDelay: `${320 + index * 70}ms` }}>
+              <li key={to} className={`animate-tile-in ${index === 0 || isLoneLast(index) ? "col-span-2" : ""}`} style={{ animationDelay: `${320 + index * 70}ms` }}>
                 <Link
                   to={to}
                   aria-label={count > 0 ? `${label}, ${plural(count, "novedad", "novedades")}` : undefined}
@@ -65,9 +65,13 @@ export function HomePage() {
 
 /** Las copias guardadas antes de los globitos no traen `badges`: entonces solo cuentan las cartas. */
 export function badgeCount(data: HomeResponse, badge: keyof HomeBadges): number {
-  if (data.badges) return data.badges[badge];
+  // Una copia guardada antes de un rincón nuevo no trae su número.
+  if (data.badges) return data.badges[badge] ?? 0;
   return badge === "letters" ? data.unopenedLetters : 0;
 }
+
+/** El primer rincón va a lo ancho; si el último quedaría solo en su fila, también. */
+const isLoneLast = (index: number) => index === MODULES.length - 1 && MODULES.length % 2 === 0;
 
 const TONES = { blush: "bg-blush-100", lavender: "bg-lavender-100", mint: "bg-blush-50" } as const;
 

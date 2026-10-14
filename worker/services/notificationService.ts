@@ -1,4 +1,4 @@
-import type { CapsuleDetail, Drawing, LetterDetail, MemoryDetail, PushConfigResponse, PushPayload, PushPreferences } from "@shared/api";
+import type { CapsuleDetail, Drawing, Song, LetterDetail, MemoryDetail, PushConfigResponse, PushPayload, PushPreferences } from "@shared/api";
 import type { Context } from "hono";
 import type { AuthenticatedUser } from "../auth/types";
 import type { AppEnv, Bindings } from "../env";
@@ -191,6 +191,37 @@ export async function notifyNewDrawing(env: Bindings, author: AuthenticatedUser,
       key: `drawing-new:${drawing.id}`,
       category: "drawings",
       payload: { title: `${author.displayName} te dejó un dibujo`, body: drawing.caption ?? "Míralo cuando quieras 🎨", url: "/dibujos", tag: `drawing-${drawing.id}` },
+    },
+    fetcher,
+  );
+}
+
+const songName = (song: Song) => (song.title ? `“${song.title}”` : "una canción");
+
+export async function notifyNewSong(env: Bindings, author: AuthenticatedUser, song: Song, fetcher?: typeof fetch): Promise<void> {
+  const partnerId = await createRelationshipRepository(env.DB).findPartnerId(author.relationshipId!, author.id);
+  if (!partnerId) return;
+  await deliver(
+    env,
+    [partnerId],
+    {
+      key: `song-new:${song.id}`,
+      category: "songs",
+      payload: { title: `${author.displayName} te recomendó ${songName(song)}`, body: song.note ?? "Escúchala cuando puedas 🎧", url: "/canciones", tag: `song-${song.id}` },
+    },
+    fetcher,
+  );
+}
+
+/** La primera vez que a la otra persona le encanta una canción que recomendaste. */
+export async function notifySongLoved(env: Bindings, listener: AuthenticatedUser, song: Song, fetcher?: typeof fetch): Promise<void> {
+  await deliver(
+    env,
+    [song.author.id],
+    {
+      key: `song-loved:${song.id}`,
+      category: "songs",
+      payload: { title: `A ${listener.displayName} le encantó ${songName(song)} ❤️`, body: "La canción que le recomendaste", url: "/canciones", tag: `song-${song.id}` },
     },
     fetcher,
   );

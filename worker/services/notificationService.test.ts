@@ -63,7 +63,7 @@ describe("deliver", () => {
 
   it("respeta los avisos que cada persona apagó", async () => {
     await addDevice("u2");
-    await createPushRepository(env.DB).setPreferences("u2", { letters: true, memories: false, capsules: true, dates: true, plans: true, drawings: true });
+    await createPushRepository(env.DB).setPreferences("u2", { letters: true, memories: false, capsules: true, dates: true, plans: true, drawings: true, songs: true });
     expect(await deliver(env, ["u2"], notice(), fetcher)).toBe(0);
     expect(pushes).toHaveLength(0);
   });

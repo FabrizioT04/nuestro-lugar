@@ -112,6 +112,8 @@ export interface HomeBadges {
   us: number;
   /** Dibujos que dejó la otra persona desde la última visita. */
   drawings: number;
+  /** Canciones que recomendó la otra persona y todavía no se escucharon. */
+  songs: number;
 }
 
 export interface Drawing {
@@ -126,6 +128,31 @@ export interface Drawing {
 
 export interface DrawingListResponse {
   items: Drawing[];
+}
+
+export interface Song {
+  id: string;
+  provider: "spotify" | "youtube";
+  /** Enlace para abrirla en la app de música. */
+  url: string;
+  /** Reproductor para poner dentro de un <iframe>. */
+  embedUrl: string;
+  title: string | null;
+  artist: string | null;
+  thumbnailUrl: string | null;
+  /** Lo que escribió quien la recomienda. */
+  note: string | null;
+  author: { id: string; displayName: string };
+  isMine: boolean;
+  /** Cuándo la escuchó la otra persona (null = todavía no). */
+  listenedAt: string | null;
+  /** A la otra persona le encantó. */
+  loved: boolean;
+  createdAt: string;
+}
+
+export interface SongListResponse {
+  items: Song[];
 }
 
 export interface PendingItem {
@@ -500,6 +527,8 @@ export interface PushPreferences {
   plans: boolean;
   /** La otra persona dejó un dibujo. */
   drawings: boolean;
+  /** La otra persona te recomendó una canción o le encantó la tuya. */
+  songs: boolean;
 }
 
 export interface PushConfigResponse {
