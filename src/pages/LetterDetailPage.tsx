@@ -6,6 +6,8 @@ import { daysBetween, todayIn, utcToZoned } from "@shared/dates";
 import { useMe } from "@/auth/AuthContext";
 import { HeartBurst } from "@/components/fx/HeartBurst";
 import { Envelope } from "@/components/letters/Envelope";
+import { OpeningEnvelope } from "@/components/letters/OpeningEnvelope";
+import { prefersReducedMotion } from "@/fx/motion";
 import { LETTER_TYPE_LABELS, letterStatus } from "@/components/letters/letterStatus";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -74,7 +76,9 @@ function SealedView({ letter, onOpened }: { letter: LetterDetail; onOpened: (let
     setOpening(true);
     setError(null);
     try {
-      onOpened(await lettersApi.open(letter.id));
+      // La carta se abre mientras se ve el sobre abriéndose (sin esperar de más si se pidió menos movimiento).
+      const [opened] = await Promise.all([lettersApi.open(letter.id), wait(prefersReducedMotion() ? 0 : 1250)]);
+      onOpened(opened);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo abrir");
       setOpening(false);
@@ -83,7 +87,7 @@ function SealedView({ letter, onOpened }: { letter: LetterDetail; onOpened: (let
 
   return (
     <Card className="animate-fade-up px-6 py-10 text-center">
-      <Envelope state={letter.type === "open_when" ? "open-when" : "sealed"} className={`mx-auto h-36 w-52 ${opening ? "animate-pulse" : "animate-float"}`} />
+      <OpeningEnvelope opening={opening} className="mx-auto mt-10 h-40 w-52" />
       <p className="mt-6 text-xs font-semibold tracking-wide text-ink-soft uppercase">De {letter.author.displayName}</p>
       {letter.openWhenLabel && letter.title !== `Ábreme cuando ${letter.openWhenLabel}` && (
         <p className="mt-1 font-display text-lg text-lavender-500">Ábreme cuando {letter.openWhenLabel}</p>
@@ -124,7 +128,6 @@ function LetterPaper({ letter, timezone, animate }: { letter: LetterDetail; time
   return (
     <article className={animate ? "animate-fade-up" : ""}>
       {animate && <HeartBurst seed={letter.title.length + 3} />}
-      {animate && <Envelope state="opened" className="mx-auto -mb-6 h-28 w-40 animate-fade-in" />}
       <Card className="relative px-6 py-8">
         {letter.openWhenLabel && letter.title !== `Ábreme cuando ${letter.openWhenLabel}` && (
           <p className="font-display text-lavender-500">Ábreme cuando {letter.openWhenLabel}</p>
@@ -220,3 +223,5 @@ function AuthorView({ letter, timezone }: { letter: LetterDetail; timezone: stri
     </div>
   );
 }
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
