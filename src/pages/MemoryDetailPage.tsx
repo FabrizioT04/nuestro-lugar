@@ -12,6 +12,7 @@ import { writeCache } from "@/offline/cache";
 import { submitAction } from "@/offline/sync";
 import { memoriesApi } from "@/services/api/memories";
 import { formatLongDate } from "@/utils/format";
+import { FavoriteBurst } from "@/components/fx/FavoriteBurst";
 
 export function MemoryDetailPage() {
   const { id = "" } = useParams();
@@ -57,10 +58,12 @@ function MemoryContent({ initial }: { initial: MemoryDetail }) {
   };
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [likes, setLikes] = useState(0);
   const [busy, setBusy] = useState(false);
 
   async function toggleFavorite() {
     const next = !memory.isFavorite;
+    if (next) setLikes((count) => count + 1);
     setMemory((m) => ({ ...m, isFavorite: next })); // optimista
     try {
       // Sin conexión queda ⏳ pendiente; se guarda también en la copia local para que no "vuelva atrás".
@@ -183,9 +186,11 @@ function MemoryContent({ initial }: { initial: MemoryDetail }) {
               onClick={toggleFavorite}
               aria-pressed={memory.isFavorite}
               aria-label={memory.isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blush-50 text-blush-500 transition active:scale-90"
+              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blush-50 text-blush-500 transition active:scale-90"
             >
-              <Heart size={20} fill={memory.isFavorite ? "currentColor" : "none"} aria-hidden />
+              {/* Al marcarlo late y suelta chispitas; la clave reinicia la animación cada vez. */}
+              <Heart key={likes} size={20} fill={memory.isFavorite ? "currentColor" : "none"} className={likes > 0 && memory.isFavorite ? "animate-heart-beat" : undefined} aria-hidden />
+              {likes > 0 && memory.isFavorite && <FavoriteBurst key={`burst-${likes}`} />}
             </button>
           </div>
           <p className="mt-1 flex flex-wrap items-center gap-x-3 text-sm text-ink-soft">

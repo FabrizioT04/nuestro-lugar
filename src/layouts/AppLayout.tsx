@@ -1,11 +1,12 @@
-import { useEffect } from "react";
-import { Link, Outlet, useLocation } from "react-router";
+import { useEffect, useRef, type TouchEvent } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { Heart, WifiOff } from "lucide-react";
 import { useMe } from "@/auth/AuthContext";
 import { BottomNav } from "@/components/BottomNav";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { pushSupport, refreshPushSubscription } from "@/pwa/push";
+import { slideDirection, startsInScrollable, swipeTarget } from "./pageTransition";
 
 /** Estructura de las pantallas principales: contenido en una columna móvil + navegación inferior. */
 export function AppLayout() {
@@ -13,6 +14,28 @@ export function AppLayout() {
   const online = useOnlineStatus();
   const { pathname } = useLocation();
   const home = pathname === "/";
+  const navigate = useNavigate();
+
+  // La pantalla nueva entra deslizándose desde el lado al que vas.
+  // Se calcula solo al cambiar de ruta, para que otro render no repita la animación.
+  const shown = useRef<{ path: string | null; direction: ReturnType<typeof slideDirection> }>({ path: null, direction: "none" });
+  if (shown.current.path !== pathname) shown.current = { path: pathname, direction: slideDirection(shown.current.path, pathname) };
+  const direction = shown.current.direction;
+
+  // Deslizar el dedo a los lados cambia de pestaña, como en Instagram.
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  function onTouchStart(event: TouchEvent) {
+    const point = event.touches[0];
+    touch.current = point && event.touches.length === 1 && !startsInScrollable(event.target) ? { x: point.clientX, y: point.clientY } : null;
+  }
+  function onTouchEnd(event: TouchEvent) {
+    const start = touch.current;
+    const point = event.changedTouches[0];
+    touch.current = null;
+    if (!start || !point) return;
+    const target = swipeTarget(pathname, point.clientX - start.x, point.clientY - start.y);
+    if (target) void navigate(target);
+  }
 
   // Si este dispositivo tiene los avisos activados, se lo recuerda al Worker una vez por apertura.
   useEffect(() => {
@@ -45,9 +68,9 @@ export function AppLayout() {
           </Link>
         </header>
 
-        <main id="main-content" className={`min-w-0 flex-1 px-5 pb-32 ${home ? "pt-0" : "pt-6"}`}>
-          {/* La clave cambia con la ruta: cada pantalla nueva entra con un fundido suave. */}
-          <div key={pathname} className="animate-page-in">
+        <main id="main-content" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className={`min-w-0 flex-1 overflow-x-clip px-5 pb-32 ${home ? "pt-0" : "pt-6"}`}>
+          {/* La clave cambia con la ruta: cada pantalla nueva entra deslizándose o con un fundido. */}
+          <div key={pathname} className={direction === "right" ? "animate-slide-from-right" : direction === "left" ? "animate-slide-from-left" : "animate-page-in"}>
             <Outlet />
           </div>
         </main>

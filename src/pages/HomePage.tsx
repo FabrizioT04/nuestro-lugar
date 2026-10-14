@@ -3,7 +3,8 @@ import { Link } from "react-router";
 import { ChevronRight, Gift, Heart, Lock, Mail, Sparkles } from "lucide-react";
 import type { HomeBadges, HomeResponse, PendingItem, UpcomingMoment } from "@shared/api";
 import { daysBetween, utcToZoned } from "@shared/dates";
-import { HeartBurst } from "@/components/fx/HeartBurst";
+import { Celebration } from "@/components/fx/Celebration";
+import { FloatingHearts } from "@/components/fx/HeartBurst";
 import { MemoryPhoto } from "@/components/memories/MemoryPhoto";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -40,11 +41,11 @@ export function HomePage() {
           {MODULES.map(({ to, label, icon: Icon, badge, tone }, index) => {
             const count = badge && home.status === "success" ? badgeCount(home.data, badge) : 0;
             return (
-              <li key={to} className={index === 0 ? "col-span-2" : undefined}>
+              <li key={to} className={`animate-tile-in ${index === 0 ? "col-span-2" : ""}`} style={{ animationDelay: `${320 + index * 70}ms` }}>
                 <Link
                   to={to}
                   aria-label={count > 0 ? `${label}, ${plural(count, "novedad", "novedades")}` : undefined}
-                  className={`relative flex min-h-22 flex-col justify-between gap-2.5 rounded-card p-4 text-ink transition active:scale-[0.98] ${TONES[tone]}`}
+                  className={`relative flex min-h-22 flex-col justify-between gap-2.5 rounded-card p-4 text-ink transition duration-200 hover:-translate-y-0.5 hover:shadow-soft active:scale-[0.95] active:brightness-95 ${TONES[tone]}`}
                 >
                   <Icon size={22} strokeWidth={1.8} aria-hidden />
                   <span>
@@ -98,13 +99,14 @@ function HomeContent({ data }: { data: HomeResponse }) {
     <>
       <section aria-label="Nuestra historia juntos" className="relative -mx-5 flex h-[26rem] animate-fade-in flex-col justify-end overflow-hidden rounded-b-[2rem] bg-ink text-white">
         {data.relationship.coverMediaId ? (
-          <img src={photoUrl(data.relationship.coverMediaId)} alt={`Foto de ${names}`} className="absolute inset-0 h-full w-full object-cover" />
+          <img src={photoUrl(data.relationship.coverMediaId)} alt={`Foto de ${names}`} className="absolute inset-0 h-full w-full animate-ken-burns object-cover" />
         ) : data.highlightedMemory?.cover ? (
-          <MemoryPhoto photo={data.highlightedMemory.cover} size="full" eager alt={`Foto de ${names}`} className="absolute inset-0 h-full w-full" />
+          <MemoryPhoto photo={data.highlightedMemory.cover} size="full" eager alt={`Foto de ${names}`} className="absolute inset-0 h-full w-full animate-ken-burns" />
         ) : (
-          <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_75%_25%,#ffd6a8_0,#ff8aa3_28%,#7b5cc8_70%,#2a1f3d_100%)]" />
+          <div aria-hidden className="absolute inset-0 animate-ken-burns bg-[radial-gradient(circle_at_75%_25%,#ffd6a8_0,#ff8aa3_28%,#7b5cc8_70%,#2a1f3d_100%)]" />
         )}
         <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent via-45% to-black/70" />
+        <FloatingHearts count={8} className="opacity-70" />
         <div className="relative px-5 pb-6">
           <p className="flex flex-wrap items-baseline gap-x-3 leading-none">
             <span className="text-6xl font-bold tracking-tighter">{formatNumber(days)}</span>
@@ -124,7 +126,7 @@ function HomeContent({ data }: { data: HomeResponse }) {
         </div>
       </section>
 
-      {celebrate && <HeartBurst seed={data.together.days} />}
+      {celebrate && <Celebration seed={data.together.days} title={data.nextMoment?.title ?? ""} />}
       {data.nextMoment && <NextMomentCard moment={data.nextMoment} />}
 
       <Link
