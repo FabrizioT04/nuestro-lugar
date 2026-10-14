@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Check, Droplets, Pencil } from "lucide-react";
+import { Check, Droplet, Droplets, Pencil } from "lucide-react";
 import type { PlantResponse } from "@shared/api";
+import { PLANT_STAGES } from "@shared/plant";
 import { PlantArt } from "@/components/plant/PlantArt";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -60,10 +61,11 @@ function PlantView({ plant, onChange }: { plant: PlantResponse; onChange: (plant
   }
 
   const together = plant.wateredToday.me && plant.wateredToday.partner;
+  const thirsty = plant.mood !== "happy" && plant.careDays > 0;
 
   return (
     <>
-      <header className="mb-1 flex animate-fade-up items-center gap-2">
+      <header className="mb-4 flex animate-fade-up items-center gap-2">
         {editing ? (
           <RenameForm
             name={plant.name}
@@ -81,17 +83,27 @@ function PlantView({ plant, onChange }: { plant: PlantResponse; onChange: (plant
           </>
         )}
       </header>
-      <p className="mb-4 animate-fade-up text-sm text-ink-soft [animation-delay:40ms]">
-        Crece un poquito cada día que alguno de los dos la riega.
-      </p>
 
-      <Card className="animate-fade-up text-center [animation-delay:80ms]">
-        <p className="text-xs font-medium tracking-[0.14em] text-ink-soft uppercase">{plant.stage.name}</p>
-        <PlantArt plant={plant} watering={watering} />
-        <p className="mt-1 text-lg font-medium text-ink">{moodText(plant)}</p>
-        <p className="mt-1 text-sm text-ink-soft">{growthText(plant)}</p>
+      {/* La escena: la maceta en una repisa con luz de ventana. */}
+      <div className="relative animate-fade-up overflow-hidden rounded-[28px] bg-gradient-to-b from-lavender-100 via-blush-50 to-cream [animation-delay:60ms]">
+        <div aria-hidden className="absolute top-10 left-1/2 size-56 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,#fff6e6_0%,#fff6e600_70%)]" />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 h-[13%] bg-gradient-to-b from-[#ecdcd3] to-[#e2cdc2]" />
+        <div className="relative flex items-start justify-between p-4">
+          <span className="rounded-full bg-paper/80 px-3 py-1 text-xs font-medium text-ink shadow-sm backdrop-blur">
+            {plant.stage.name} · {plant.stage.index + 1} de {PLANT_STAGES.length}
+          </span>
+          <span className={`rounded-full px-3 py-1 text-xs font-medium shadow-sm backdrop-blur ${thirsty ? "bg-[#fdf1e4]/90 text-[#9a5a1c]" : "bg-sage-100/90 text-sage-700"}`}>
+            {thirsty ? "Con sed" : plant.careDays === 0 ? "Recién sembrada" : "Feliz"}
+          </span>
+        </div>
+        <div className="relative -mt-8 px-6">
+          <PlantArt plant={plant} watering={watering} />
+        </div>
+      </div>
 
-        <Button className="mt-5 w-full" onClick={() => void water()} disabled={busy || plant.wateredToday.me}>
+      <div className="mt-4 animate-fade-up text-center [animation-delay:100ms]">
+        <p className="text-lg font-medium text-ink">{moodText(plant)}</p>
+        <Button className="mt-4 w-full" onClick={() => void water()} disabled={busy || plant.wateredToday.me}>
           {plant.wateredToday.me ? (
             <>
               <Check size={18} aria-hidden /> Ya la regaste hoy
@@ -103,26 +115,56 @@ function PlantView({ plant, onChange }: { plant: PlantResponse; onChange: (plant
           )}
         </Button>
         {error && <p className="mt-3 text-sm text-blush-700">{error}</p>}
+      </div>
+
+      <Card className="mt-4 animate-fade-up [animation-delay:140ms]">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-base">Hoy</h2>
+          {together && <span className="text-xs font-medium text-blush-700">La regaron los dos 💞</span>}
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <WaterChip done={plant.wateredToday.me} label="Tú" />
+          <WaterChip done={plant.wateredToday.partner} label={plant.partnerName} />
+        </div>
       </Card>
 
-      <Card className="mt-4 animate-fade-up [animation-delay:120ms]">
-        <h2 className="text-base">Hoy</h2>
-        <ul className="mt-3 space-y-2 text-sm">
-          <WaterRow done={plant.wateredToday.me} label="Tú" />
-          <WaterRow done={plant.wateredToday.partner} label={plant.partnerName} />
-        </ul>
-        {together && <p className="mt-3 text-sm text-blush-700">Hoy la regaron los dos 💞</p>}
+      <Card className="mt-4 animate-fade-up [animation-delay:180ms]">
+        <h2 className="text-base">Cómo va creciendo</h2>
+        <StageTrack current={plant.stage.index} />
+        <p className="mt-3 text-sm text-ink-soft">{growthText(plant)}</p>
       </Card>
     </>
   );
 }
 
-function WaterRow({ done, label }: { done: boolean; label: string }) {
+function WaterChip({ done, label }: { done: boolean; label: string }) {
   return (
-    <li className="flex items-center justify-between">
-      <span className="text-ink">{label}</span>
-      <span className={done ? "font-medium text-[#3f7d63]" : "text-ink-soft"}>{done ? "La regó 💧" : "Todavía no"}</span>
-    </li>
+    <div className={`flex items-center gap-3 rounded-2xl border px-3 py-3 ${done ? "border-[#cfe3f2] bg-[#eef6fc]" : "border-blush-200 bg-cream"}`}>
+      <span className={`grid size-9 shrink-0 place-items-center rounded-full ${done ? "bg-[#5b9bd0] text-paper" : "bg-blush-100 text-blush-300"}`}>
+        <Droplet size={16} aria-hidden fill={done ? "currentColor" : "none"} />
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-medium text-ink">{label}</span>
+        <span className="block text-xs text-ink-soft">{done ? "Ya la regó" : "Todavía no"}</span>
+      </span>
+    </div>
+  );
+}
+
+/** Las siete etapas como puntitos en una línea; la actual resaltada. */
+function StageTrack({ current }: { current: number }) {
+  return (
+    <ol className="mt-4 flex items-center" aria-label={`Etapa ${current + 1} de ${PLANT_STAGES.length}`}>
+      {PLANT_STAGES.map((stage) => (
+        <li key={stage.index} className="flex flex-1 items-center last:flex-none" aria-current={stage.index === current ? "step" : undefined}>
+          <span
+            title={stage.name}
+            className={`block shrink-0 rounded-full ${stage.index === current ? "size-4 bg-blush-500 ring-4 ring-blush-100" : stage.index < current ? "size-2.5 bg-blush-300" : "size-2.5 bg-blush-100"}`}
+          />
+          {stage.index < PLANT_STAGES.length - 1 && <span className={`mx-1 h-0.5 flex-1 rounded ${stage.index < current ? "bg-blush-300" : "bg-blush-100"}`} />}
+        </li>
+      ))}
+    </ol>
   );
 }
 
